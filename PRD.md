@@ -1,14 +1,14 @@
 # Planning Guide
 
-A comprehensive real estate appraisal platform for professional appraisers to evaluate properties, generate detailed reports, manage comparable properties, and provide accurate valuations using data-driven insights and advanced analysis tools.
+A comprehensive real estate appraisal platform for professional appraisers to evaluate properties, generate detailed reports, manage comparable properties, and provide accurate valuations using data-driven insights and advanced analysis tools - designed with a futuristic, minimalist interface inspired by Tesla and SpaceX product philosophy.
 
 **Experience Qualities**:
-1. **Professional** - The interface should project authority and expertise, instilling confidence in appraisers using serious typography, structured layouts, and data-rich displays
-2. **Efficient** - Every workflow should minimize clicks and cognitive load, enabling appraisers to complete evaluations quickly with smart defaults and batch operations
-3. **Insightful** - Visual analytics and comparative data should reveal patterns and support decision-making through charts, maps, and intelligent suggestions
+1. **Futuristic & Sophisticated** - Dark, immersive interface with glowing accents, glass morphism effects, and smooth animations that feel like using cutting-edge technology from the future
+2. **Effortlessly Powerful** - Complex functionality presented through clean, minimalist design with every interaction feeling instant and intelligent
+3. **Precision & Trust** - Data-rich displays with monospace typography for numbers, gradient highlights for important values, and visual feedback that instills confidence
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
-This is a professional tool requiring multiple sophisticated features: property database management, comparable property search and analysis, automated valuation models, report generation, document management, client tracking, and data visualization - all working together in a cohesive system.
+This is a professional tool requiring multiple sophisticated features: property database management, comparable property search and analysis, automated valuation models, report generation, document management, client tracking, and data visualization - all presented through an exceptionally polished, futuristic interface that makes complex tasks feel simple.
 
 ## Essential Features
 
@@ -109,103 +109,79 @@ This is a professional tool requiring multiple sophisticated features: property 
 
 ## Design Direction
 
-The design should evoke **confidence, precision, and professionalism** - like a high-end financial terminal meets modern SaaS platform. It should feel sophisticated and data-rich without being overwhelming, using clean layouts, professional typography, and a color scheme that suggests trust and expertise. The interface should celebrate data visualization with charts, maps, and grids that make complex information digestible.
+The design should evoke **futuristic sophistication, precision, and raw power** - like a Tesla Cybertruck meets SpaceX mission control. Dark, immersive interface with glowing accents, glass morphism effects, and gradient highlights. The UI should feel like advanced technology from the future - minimalist yet powerful, with every pixel purposefully placed. Celebrate data with beautiful charts, smooth animations, and intelligent micro-interactions that respond instantly to user intent.
 
 ## Color Selection
 
-A professional blue and slate palette with warm accent for important actions, projecting trust, sophistication, and analytical precision.
+A futuristic dark theme with electric purple/blue gradients and warm amber accents, projecting innovation, precision, and power.
 
-- **Primary Color**: Deep Professional Blue `oklch(0.45 0.15 250)` - Communicates trust, expertise, and authority; used for primary actions and key data points
+- **Background**: Deep Space Dark `oklch(0.12 0.015 265)` - Immersive dark background creating focus and sophistication
+- **Primary Color**: Electric Purple-Blue `oklch(0.65 0.25 265)` - Bold, futuristic color for primary actions and key data, with subtle glow effects
 - **Secondary Colors**: 
-  - Slate Gray `oklch(0.55 0.01 240)` - Supporting color for secondary UI elements and backgrounds
-  - Light Blue Gray `oklch(0.95 0.01 240)` - Subtle backgrounds for cards and panels
-- **Accent Color**: Warm Amber `oklch(0.68 0.16 65)` - Attention-grabbing for CTAs, important values, and success states
+  - Dark Slate `oklch(0.22 0.025 265)` - Supporting surfaces and cards with glass morphism
+  - Muted Slate `oklch(0.19 0.02 265)` - Subtle backgrounds for nested components
+- **Accent Color**: Warm Amber `oklch(0.72 0.20 85)` - High-energy color for CTAs, success states, and important values
+- **Success**: Vibrant Green `oklch(0.68 0.20 155)` - Positive actions and growth indicators
+- **Warning**: Energetic Yellow `oklch(0.75 0.18 75)` - Attention items and analytics highlights
 - **Foreground/Background Pairings**:
-  - Background (White `oklch(0.99 0 0)`): Dark text `oklch(0.25 0.01 240)` - Ratio 13.2:1 ✓
-  - Primary (Deep Blue `oklch(0.45 0.15 250)`): White text `oklch(0.99 0 0)` - Ratio 8.4:1 ✓
-  - Accent (Warm Amber `oklch(0.68 0.16 65)`): Dark text `oklch(0.25 0.01 240)` - Ratio 6.2:1 ✓
-  - Card (Light Gray `oklch(0.97 0.01 240)`): Dark text `oklch(0.25 0.01 240)` - Ratio 12.8:1 ✓
+  - Background (Deep Space `oklch(0.12 0.015 265)`): Light text `oklch(0.96 0.005 265)` - Ratio 14.5:1 ✓
+  - Primary (Electric Purple `oklch(0.65 0.25 265)`): White text `oklch(0.98 0 0)` - Ratio 7.8:1 ✓
+  - Accent (Warm Amber `oklch(0.72 0.20 85)`): Dark text `oklch(0.12 0.015 265)` - Ratio 9.2:1 ✓
+  - Card (Dark Slate `oklch(0.16 0.02 265)`): Light text `oklch(0.96 0.005 265)` - Ratio 12.3:1 ✓
 
 ## Font Selection
 
-Typography should convey analytical precision and modern professionalism, balancing readability for dense data with visual sophistication.
+Typography conveys technical precision and futuristic minimalism through clean sans-serif paired with monospace for data.
 
-- **Primary**: Inter - Clean, professional sans-serif perfect for data-heavy interfaces and UI elements
-- **Accent**: JetBrains Mono - Monospace for numbers, property IDs, and measurements to enhance precision feel
+- **Primary**: Inter - Modern, clean sans-serif with excellent readability for UI elements and content
+- **Data/Numbers**: JetBrains Mono - Technical monospace for all numbers, IDs, measurements, and monetary values
 
 **Typographic Hierarchy**:
-- H1 (Page Title): Inter Bold / 32px / -0.02em letter spacing / 1.2 line height
-- H2 (Section Headers): Inter SemiBold / 24px / -0.01em letter spacing / 1.3 line height
-- H3 (Card Titles): Inter SemiBold / 18px / normal spacing / 1.4 line height
+- H1 (Page Title): Inter Bold / 36px / -0.02em letter spacing / 1.1 line height / gradient text effect
+- H2 (Section Headers): Inter SemiBold / 28px / -0.01em letter spacing / 1.2 line height
+- H3 (Card Titles): Inter SemiBold / 20px / normal spacing / 1.3 line height
 - Body (Content): Inter Regular / 15px / normal spacing / 1.6 line height
 - Small (Labels): Inter Medium / 13px / normal spacing / 1.4 line height
-- Data/Numbers: JetBrains Mono Medium / 15px / normal spacing / 1.5 line height
+- Data/Numbers: JetBrains Mono SemiBold / 16-36px / normal spacing / gradient text for emphasis
 
 ## Animations
 
-Animations should reinforce efficiency and precision - quick, purposeful transitions that guide attention without delay. Use subtle micro-interactions on data updates (numbers counting up, chart animations), smooth page transitions (slide left/right for sequential flows), and satisfying feedback on saves (gentle checkmark bounce). Avoid decorative animations; every motion should serve a functional purpose like indicating state changes or directing focus to new data.
+Animations should feel instant yet fluid - inspired by Tesla UI responsiveness and SpaceX precision. Every motion serves a purpose: card hover lifts (4px translate with scale 1.02), smooth page transitions (300ms with ease-out), number counting animations for stats, gradient shimmer effects on glass cards, micro-interactions on buttons (scale down on press), and satisfying checkmarks on saves. Stagger animations on lists (50ms delay per item) create rhythm. All animations use GPU-accelerated transforms for 60fps smoothness.
 
 ## Component Selection
 
 - **Components**:
-  - Card: Property listings, comparable properties, stats dashboard - with subtle hover lift effect
-  - Tabs: Switch between valuation methods, report sections, different views
-  - Dialog: Add new property, edit details, confirm actions - large sizes for forms
-  - Sheet: Side panel for quick filters, property details preview
-  - Table: Comparable properties grid, adjustment grid - with sortable columns
-  - Form: Property details entry with validation - using react-hook-form
-  - Select: Dropdowns for property type, condition, neighborhoods
-  - Input: Text fields with JetBrains Mono for numbers and measurements
-  - Button: Primary (solid blue), Secondary (outline), Destructive (red)
-  - Badge: Property status (draft, complete, sent), priority indicators
-  - Calendar: Date pickers for sale dates, inspection dates
-  - Tooltip: Explain abbreviations, show full data on hover
-  - Progress: Report generation, data loading states
-  - Separator: Visual division between sections
-  - Avatar: Client photos in client management
-  - Scroll Area: Long lists of comparables, photo galleries
-
-- **Customizations**:
-  - Custom map component using interactive visualization for comparable locations
-  - Property photo gallery with lightbox and annotation overlay
-  - Adjustment grid component with inline editing and calculation
-  - Value range visualizer showing confidence intervals
-  - Market trend chart components using D3 for sophisticated data viz
+  - Card: Glass morphism effect with backdrop blur, subtle borders, gradient overlays on hover - used for all content containers
+  - Tabs: Sleek pills with smooth active indicator, glowing when selected
+  - Dialog: Full-screen overlays with backdrop blur and smooth scale-in animations
+  - Button: Primary (gradient with glow), Secondary (glass outline), sizes respond to importance
+  - Badge: Rounded with colored background/border, used for status indicators with appropriate color coding
+  - Input: Dark with subtle border, focus state glows with ring effect
+  - Progress: Gradient fill with smooth animations
+  - Motion components: Framer Motion for all list items, cards, and page transitions
+  
+- **Visual Effects**:
+  - Glass morphism: backdrop-filter blur(20px) with semi-transparent backgrounds
+  - Gradient borders: Linear gradients from primary to accent
+  - Glow effects: Box shadows with primary/accent colors at 30% opacity
+  - Grid background: Subtle 30px grid pattern in background
+  - Gradient text: Large numbers and headings use gradient clip-path
 
 - **States**:
-  - Buttons: Default (solid), Hover (slight brightness increase + lift), Active (pressed down), Disabled (faded)
-  - Inputs: Default (subtle border), Focus (blue ring + border color change), Error (red border + shake), Success (green border + checkmark icon)
-  - Cards: Default (flat), Hover (subtle shadow + lift), Selected (blue border + background tint)
+  - Buttons: Glow effect on hover, scale(0.98) on press, disabled fades to 50% opacity
+  - Cards: Lift on hover (translateY -4px + scale 1.02), glow on active, gradient overlay fades in
+  - Inputs: Border glows primary color on focus with smooth ring animation
+  
+- **Icon Selection** (Phosphor Icons with duotone weight):
+  - Lightning: Speed/premium actions
+  - Sparkle: AI features  
+  - House: Properties
+  - ChartBar: Analytics
+  - Users: Clients
+  - TrendUp/Down: Market indicators
+  - MapPin: Locations
+  - CheckCircle: Completed items
+  
+- **Spacing**: Generous whitespace with 8px base unit - cards get 24px padding, sections 32px gap, tight inline 8px
 
-- **Icon Selection**:
-  - Plus: Add new property/comparable
-  - MagnifyingGlass: Search for comparables
-  - House: Property type indicators
-  - ChartBar: View analytics and trends
-  - FileText: Generate/view reports
-  - MapPin: Location/neighborhood info
-  - Camera: Photo upload/management
-  - Calendar: Date selection
-  - User: Client management
-  - Calculator: Valuation tools
-  - Download: Export reports
-  - Pencil: Edit property details
-
-- **Spacing**:
-  - Page padding: 8 (32px)
-  - Section gaps: 6 (24px)
-  - Card padding: 6 (24px)
-  - Card gaps in grid: 4 (16px)
-  - Form field gaps: 4 (16px)
-  - Button padding: px-6 py-3
-  - Tight inline spacing: 2 (8px)
-
-- **Mobile**:
-  - Stack navigation tabs vertically
-  - Full-width cards instead of grid
-  - Collapsible filters in sheet drawer
-  - Simplified table view (show only key columns, tap to expand)
-  - Bottom sheet for quick actions
-  - Reduce page padding to 4 (16px)
-  - Larger touch targets (min 44px)
-  - Single column layout for forms
+- **Mobile**: Bottom nav bar, full-width cards, collapsible sections, larger touch targets (48px), reduced animations for performance
