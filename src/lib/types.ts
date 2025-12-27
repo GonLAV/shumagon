@@ -100,3 +100,94 @@ export interface NeighborhoodData {
     avgIncome: number
   }
 }
+
+export interface ARMeasurement {
+  id: string
+  type: 'distance' | 'area' | 'height' | 'volume'
+  value: number
+  unit: string
+  points: { x: number; y: number; z?: number }[]
+  timestamp: string
+  createdBy: string
+}
+
+export interface ARAnnotation {
+  id: string
+  position: { x: number; y: number; z?: number }
+  text: string
+  type: 'info' | 'warning' | 'feature' | 'improvement' | 'issue' | 'question'
+  timestamp: string
+  createdBy: string
+  replies?: ARAnnotationReply[]
+}
+
+export interface ARAnnotationReply {
+  id: string
+  text: string
+  timestamp: string
+  createdBy: string
+}
+
+export interface ARParticipant {
+  id: string
+  name: string
+  email: string
+  avatar?: string
+  role: 'appraiser' | 'client' | 'inspector' | 'viewer'
+  joinedAt: string
+  isActive: boolean
+  cursor?: { x: number; y: number }
+  color: string
+}
+
+export interface ARSession {
+  id: string
+  propertyId: string
+  title: string
+  description?: string
+  type: 'solo' | 'collaborative'
+  status: 'active' | 'paused' | 'completed' | 'archived'
+  measurements: ARMeasurement[]
+  annotations: ARAnnotation[]
+  photos: ARPhoto[]
+  videoRecordings: ARVideo[]
+  participants: ARParticipant[]
+  hostId: string
+  environmentalData?: {
+    light: number
+    temperature: number
+    humidity: number
+    noise: number
+    timestamp: string
+  }[]
+  duration: number
+  startedAt: string
+  completedAt?: string
+  shareLink?: string
+  shareCode?: string
+  isPublic: boolean
+  allowedViewers?: string[]
+}
+
+export interface ARPhoto {
+  id: string
+  dataUrl: string
+  timestamp: string
+  capturedBy: string
+  annotations?: string[]
+  environmentalData?: {
+    light: number
+    temperature: number
+    humidity: number
+    noise: number
+  }
+}
+
+export interface ARVideo {
+  id: string
+  dataUrl: string
+  duration: number
+  timestamp: string
+  capturedBy: string
+  thumbnailUrl?: string
+}

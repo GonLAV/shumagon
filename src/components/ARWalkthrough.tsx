@@ -2,8 +2,16 @@ import { useState, useRef, useEffect } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Progress } from '@/components/ui/progress'
 import { Slider } from '@/components/ui/slider'
+import { Input } from '@/components/ui/input'
+import { Separator } from '@/components/ui/separator'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import {
   Camera,
   CameraRotate,
@@ -14,7 +22,6 @@ import {
   VideoCamera,
   Ruler,
   Cube,
-  ScanSmiley,
   FloppyDisk,
   Eye,
   EyeClosed,
@@ -26,65 +33,55 @@ import {
   Drop,
   ThermometerSimple,
   SpeakerHigh,
-  HandGrabbing,
-  ArrowsOut
+  ArrowsOut,
+  Users,
+  ShareNetwork,
+  Copy,
+  UserPlus,
+  Chat,
+  ArrowBendUpLeft,
+  CheckCircle
 } from '@phosphor-icons/react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
-import type { Property } from '@/lib/types'
+import type { Property, ARSession, ARMeasurement, ARAnnotation, ARParticipant, ARPhoto } from '@/lib/types'
 
 interface ARWalkthroughProps {
   property: Property
   onClose: () => void
+  sessionId?: string
 }
 
-interface ARMeasurement {
-  id: string
-  type: 'distance' | 'area' | 'height'
-  value: number
-  unit: string
-  points: { x: number; y: number }[]
-  timestamp: string
-}
+const PARTICIPANT_COLORS = [
+  'oklch(0.65 0.25 265)',
+  'oklch(0.72 0.20 85)',
+  'oklch(0.68 0.20 155)',
+  'oklch(0.75 0.18 75)',
+  'oklch(0.62 0.24 28)',
+  'oklch(0.70 0.22 320)',
+]
 
-interface ARAnnotation {
-  id: string
-  position: { x: number; y: number }
-  text: string
-  type: 'info' | 'warning' | 'feature' | 'improvement'
-  timestamp: string
-}
-
-interface ARSession {
-  propertyId: string
-  measurements: ARMeasurement[]
-  annotations: ARAnnotation[]
-  photos: string[]
-  videoRecordings: string[]
-  duration: number
-  startedAt: string
-  completedAt?: string
-}
-
-export function ARWalkthrough({ property, onClose }: ARWalkthroughProps) {
+export function ARWalkthrough({ property, onClose, sessionId }: ARWalkthroughProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const overlayCanvasRef = useRef<HTMLCanvasElement>(null)
   const [stream, setStream] = useState<MediaStream | null>(null)
   const [isActive, setIsActive] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment')
-  const [arMode, setArMode] = useState<'walkthrough' | 'measure' | 'annotate' | 'analyze'>('walkthrough')
+  const [arMode, setArMode] = useState<'walkthrough' | 'measure' | 'annotate' | 'analyze' | 'collaborate'>('walkthrough')
   const [showOverlays, setShowOverlays] = useState(true)
   const [showGrid, setShowGrid] = useState(false)
   const [measurements, setMeasurements] = useState<ARMeasurement[]>([])
   const [annotations, setAnnotations] = useState<ARAnnotation[]>([])
   const [currentMeasurement, setCurrentMeasurement] = useState<{ x: number; y: number }[]>([])
   const [arSessions, setArSessions] = useKV<ARSession[]>('ar-sessions', [])
+  const [currentSession, setCurrentSession] = useState<ARSession | null>(null)
   const [sessionStartTime] = useState(Date.now())
   const [sessionDuration, setSessionDuration] = useState(0)
-  const [capturedPhotos, setCapturedPhotos] = useState<string[]>([])
+  const [capturedPhotos, setCapturedPhotos] = useState<ARPhoto[]>([])
   const [aiSuggestions, setAiSuggestions] = useState<string[]>([])
   const [showAISuggestions, setShowAISuggestions] = useState(false)
   const [brightness, setBrightness] = useState(100)
@@ -95,6 +92,17 @@ export function ARWalkthrough({ property, onClose }: ARWalkthroughProps) {
     humidity: 45,
     noise: 30
   })
+  const [isCollaborative, setIsCollaborative] = useState(false)
+  const [participants, setParticipants] = useState<ARParticipant[]>([])
+  const [showShareDialog, setShowShareDialog] = useState(false)
+  const [shareCode, setShareCode] = useState('')
+  const [showChat, setShowChat] = useState(false)
+  const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; sender: string; timestamp: string; senderColor: string }>>([])
+  const [chatInput, setChatInput] = useState('')
+  const [currentUser, setCurrentUser] = useState<ARParticipant | null>(null)
+  const [cursorPositions, setCursorPositions] = useState<Map<string, { x: number; y: number }>>(new Map())
+  const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null)
+  const [showParticipants, setShowParticipants] = useState(false)
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -116,6 +124,41 @@ export function ARWalkthrough({ property, onClose }: ARWalkthroughProps) {
     }, 2000)
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    const initializeUser = async () => {
+      const user = await window.spark.user()
+      if (user) {
+        const newUser: ARParticipant = {
+          id: user.id.toString(),
+          name: user.login || 'משתמש',
+          email: user.email || '',
+          avatar: user.avatarUrl || undefined,
+          role: user.isOwner ? 'appraiser' : 'client',
+          joinedAt: new Date().toISOString(),
+          isActive: true,
+          color: PARTICIPANT_COLORS[0]
+        }
+        setCurrentUser(newUser)
+        setParticipants([newUser])
+      }
+    }
+    initializeUser()
+  }, [])
+
+  useEffect(() => {
+    if (sessionId && arSessions) {
+      const existingSession = arSessions.find(s => s.id === sessionId)
+      if (existingSession) {
+        setCurrentSession(existingSession)
+        setMeasurements(existingSession.measurements)
+        setAnnotations(existingSession.annotations)
+        setCapturedPhotos(existingSession.photos)
+        setParticipants(existingSession.participants)
+        setIsCollaborative(existingSession.type === 'collaborative')
+      }
+    }
+  }, [sessionId, arSessions])
 
   const startCamera = async () => {
     try {
@@ -160,7 +203,7 @@ export function ARWalkthrough({ property, onClose }: ARWalkthroughProps) {
   }
 
   const capturePhoto = () => {
-    if (videoRef.current && canvasRef.current) {
+    if (videoRef.current && canvasRef.current && currentUser) {
       const canvas = canvasRef.current
       const video = videoRef.current
       canvas.width = video.videoWidth
@@ -169,8 +212,17 @@ export function ARWalkthrough({ property, onClose }: ARWalkthroughProps) {
       if (ctx) {
         ctx.drawImage(video, 0, 0)
         const photoData = canvas.toDataURL('image/png')
-        setCapturedPhotos(prev => [...prev, photoData])
+        const newPhoto: ARPhoto = {
+          id: Date.now().toString(),
+          dataUrl: photoData,
+          timestamp: new Date().toISOString(),
+          capturedBy: currentUser.name,
+          environmentalData: environmentalData
+        }
+        setCapturedPhotos(prev => [...prev, newPhoto])
         toast.success('תמונה נשמרה בהצלחה')
+        
+        broadcastToParticipants('photo_captured', newPhoto)
       }
     }
   }
@@ -186,8 +238,10 @@ export function ARWalkthrough({ property, onClose }: ARWalkthroughProps) {
   }
 
   const handleCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!currentUser) return
+    
     if (arMode === 'measure') {
-      const rect = canvasRef.current?.getBoundingClientRect()
+      const rect = overlayCanvasRef.current?.getBoundingClientRect()
       if (rect) {
         const x = e.clientX - rect.left
         const y = e.clientY - rect.top
@@ -206,15 +260,18 @@ export function ARWalkthrough({ property, onClose }: ARWalkthroughProps) {
             value: parseFloat(realDistance.toFixed(2)),
             unit: 'm',
             points: [...currentMeasurement, { x, y }],
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            createdBy: currentUser.name
           }
           setMeasurements(prev => [...prev, newMeasurement])
           setCurrentMeasurement([])
           toast.success(`נמדד: ${realDistance.toFixed(2)} מטר`)
+          
+          broadcastToParticipants('measurement_added', newMeasurement)
         }
       }
     } else if (arMode === 'annotate') {
-      const rect = canvasRef.current?.getBoundingClientRect()
+      const rect = overlayCanvasRef.current?.getBoundingClientRect()
       if (rect) {
         const x = e.clientX - rect.left
         const y = e.clientY - rect.top
@@ -225,12 +282,26 @@ export function ARWalkthrough({ property, onClose }: ARWalkthroughProps) {
             position: { x, y },
             text: annotationText,
             type: 'info',
-            timestamp: new Date().toISOString()
+            timestamp: new Date().toISOString(),
+            createdBy: currentUser.name
           }
           setAnnotations(prev => [...prev, newAnnotation])
           toast.success('הערה נוספה')
+          
+          broadcastToParticipants('annotation_added', newAnnotation)
         }
       }
+    }
+  }
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!currentUser || !isCollaborative) return
+    
+    const rect = overlayCanvasRef.current?.getBoundingClientRect()
+    if (rect) {
+      const x = e.clientX - rect.left
+      const y = e.clientY - rect.top
+      broadcastToParticipants('cursor_move', { x, y })
     }
   }
 
@@ -253,7 +324,8 @@ Provide suggestions about:
 Return your response as a JSON object with a "suggestions" property containing an array of 5 concise suggestion strings in Hebrew.`
 
     try {
-      const result = await window.spark.llm(promptText, 'gpt-4o-mini', true)
+      const prompt = window.spark.llmPrompt([promptText] as any)
+      const result = await window.spark.llm(prompt, 'gpt-4o-mini', true)
       const data = JSON.parse(result)
       setAiSuggestions(data.suggestions || [])
       setShowAISuggestions(true)
@@ -262,19 +334,93 @@ Return your response as a JSON object with a "suggestions" property containing a
     }
   }
 
+  const broadcastToParticipants = (type: string, data: any) => {
+    if (!isCollaborative || !currentUser) return
+    
+    console.log(`Broadcasting ${type} to participants:`, data)
+  }
+
+  const startCollaborativeSession = () => {
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase()
+    setShareCode(code)
+    setIsCollaborative(true)
+    setShowShareDialog(true)
+    toast.success('סשן שיתופי נוצר בהצלחה')
+  }
+
+  const copyShareCode = () => {
+    navigator.clipboard.writeText(shareCode)
+    toast.success('קוד שותף למסך')
+  }
+
+  const sendChatMessage = () => {
+    if (!chatInput.trim() || !currentUser) return
+    
+    const newMessage = {
+      id: Date.now().toString(),
+      text: chatInput,
+      sender: currentUser.name,
+      timestamp: new Date().toISOString(),
+      senderColor: currentUser.color
+    }
+    
+    setChatMessages(prev => [...prev, newMessage])
+    setChatInput('')
+    broadcastToParticipants('chat_message', newMessage)
+  }
+
+  const addAnnotationReply = (annotationId: string, replyText: string) => {
+    if (!currentUser) return
+    
+    setAnnotations(prev => prev.map(ann => {
+      if (ann.id === annotationId) {
+        return {
+          ...ann,
+          replies: [...(ann.replies || []), {
+            id: Date.now().toString(),
+            text: replyText,
+            timestamp: new Date().toISOString(),
+            createdBy: currentUser.name
+          }]
+        }
+      }
+      return ann
+    }))
+  }
+
   const saveSession = () => {
+    if (!currentUser) return
+    
     const session: ARSession = {
+      id: currentSession?.id || Date.now().toString(),
       propertyId: property.id,
+      title: `${property.address.street} - AR Session`,
+      description: `סיור AR עבור ${property.address.street}`,
+      type: isCollaborative ? 'collaborative' : 'solo',
+      status: 'completed',
       measurements,
       annotations,
       photos: capturedPhotos,
       videoRecordings: [],
+      participants,
+      hostId: currentUser.id,
       duration: sessionDuration,
       startedAt: new Date(sessionStartTime).toISOString(),
-      completedAt: new Date().toISOString()
+      completedAt: new Date().toISOString(),
+      shareCode: isCollaborative ? shareCode : undefined,
+      isPublic: false
     }
     
-    setArSessions(prev => [...(prev || []), session])
+    setArSessions((prev) => {
+      const existing = (prev || []).findIndex(s => s.id === session.id)
+      if (existing >= 0) {
+        const updated = [...(prev || [])]
+        updated[existing] = session
+        return updated
+      }
+      return [...(prev || []), session]
+    })
+    
     toast.success('סשן AR נשמר בהצלחה')
   }
 
@@ -315,8 +461,10 @@ Return your response as a JSON object with a "suggestions" property containing a
         )}
 
         <canvas
+          ref={overlayCanvasRef}
           className="absolute inset-0 w-full h-full"
           onClick={handleCanvasClick}
+          onMouseMove={handleMouseMove}
           style={{ cursor: arMode !== 'walkthrough' ? 'crosshair' : 'default' }}
         />
 
@@ -326,7 +474,10 @@ Return your response as a JSON object with a "suggestions" property containing a
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <Button
-                    onClick={isActive ? stopCamera : startCamera}
+                    onClick={() => {
+                      stopCamera()
+                      onClose()
+                    }}
                     size="icon"
                     variant="outline"
                     className="glass-effect border-white/20 hover:bg-white/20"
@@ -340,6 +491,18 @@ Return your response as a JSON object with a "suggestions" property containing a
                 </div>
                 
                 <div className="flex items-center gap-2">
+                  {isCollaborative && (
+                    <Button
+                      onClick={() => setShowParticipants(!showParticipants)}
+                      size="sm"
+                      variant="outline"
+                      className="glass-effect border-white/20 text-white hover:bg-white/10 gap-2"
+                    >
+                      <Users size={16} weight="fill" />
+                      <span>{participants.length}</span>
+                    </Button>
+                  )}
+                  
                   {isRecording && (
                     <motion.div
                       animate={{ opacity: [1, 0.3, 1] }}
@@ -357,10 +520,70 @@ Return your response as a JSON object with a "suggestions" property containing a
                     {arMode === 'measure' && 'מדידה'}
                     {arMode === 'annotate' && 'הערות'}
                     {arMode === 'analyze' && 'ניתוח AI'}
+                    {arMode === 'collaborate' && 'שיתוף פעולה'}
                   </Badge>
                 </div>
               </div>
             </div>
+
+            {showParticipants && (
+              <motion.div
+                initial={{ x: 300 }}
+                animate={{ x: 0 }}
+                className="absolute top-20 right-4 w-72"
+              >
+                <Card className="glass-effect border-white/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2 text-white">
+                        <Users size={18} weight="fill" />
+                        <span className="font-semibold text-sm">משתתפים ({participants.length})</span>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setShowParticipants(false)}
+                        className="h-6 w-6 text-white hover:bg-white/10"
+                      >
+                        <X size={14} />
+                      </Button>
+                    </div>
+                    <div className="space-y-2">
+                      {participants.map((participant) => (
+                        <div
+                          key={participant.id}
+                          className="flex items-center gap-3 p-2 rounded-lg bg-white/5"
+                        >
+                          <div 
+                            className="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-xs"
+                            style={{ background: participant.color }}
+                          >
+                            {participant.name.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-white text-sm font-medium">{participant.name}</div>
+                            <div className="text-white/60 text-xs">{participant.role}</div>
+                          </div>
+                          {participant.isActive && (
+                            <div className="w-2 h-2 rounded-full bg-success animate-pulse" />
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <Separator className="my-3 bg-white/10" />
+                    <Button
+                      onClick={startCollaborativeSession}
+                      disabled={isCollaborative}
+                      size="sm"
+                      className="w-full gap-2"
+                    >
+                      <ShareNetwork size={16} />
+                      {isCollaborative ? 'סשן שיתופי פעיל' : 'הפעל סשן שיתופי'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
 
             <div className="absolute top-20 left-4 space-y-2">
               <Card className="glass-effect border-white/20 text-white">
@@ -393,9 +616,12 @@ Return your response as a JSON object with a "suggestions" property containing a
                     </div>
                     <div className="space-y-1 max-h-32 overflow-y-auto">
                       {measurements.slice(-5).map((m) => (
-                        <div key={m.id} className="text-xs flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-accent" />
-                          {m.value} {m.unit}
+                        <div key={m.id} className="text-xs flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-2 h-2 rounded-full bg-accent" />
+                            <span>{m.value} {m.unit}</span>
+                          </div>
+                          <span className="text-white/50">{m.createdBy}</span>
                         </div>
                       ))}
                     </div>
@@ -444,6 +670,60 @@ Return your response as a JSON object with a "suggestions" property containing a
               </motion.div>
             )}
 
+            {showChat && isCollaborative && (
+              <motion.div
+                initial={{ y: 400 }}
+                animate={{ y: 0 }}
+                className="absolute bottom-32 left-4 w-96"
+              >
+                <Card className="glass-effect border-white/20">
+                  <CardContent className="p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2 text-white">
+                        <Chat size={18} weight="fill" />
+                        <span className="font-semibold text-sm">צ׳אט קבוצתי</span>
+                      </div>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => setShowChat(false)}
+                        className="h-6 w-6 text-white hover:bg-white/10"
+                      >
+                        <X size={14} />
+                      </Button>
+                    </div>
+                    <div className="space-y-2 max-h-48 overflow-y-auto mb-3">
+                      {chatMessages.map((msg) => (
+                        <div key={msg.id} className="text-xs">
+                          <div className="flex items-baseline gap-2">
+                            <span 
+                              className="font-semibold"
+                              style={{ color: msg.senderColor }}
+                            >
+                              {msg.sender}:
+                            </span>
+                            <span className="text-white/90">{msg.text}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-2">
+                      <Input
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        onKeyPress={(e) => e.key === 'Enter' && sendChatMessage()}
+                        placeholder="הקלד הודעה..."
+                        className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                      />
+                      <Button onClick={sendChatMessage} size="icon">
+                        <CheckCircle size={18} weight="fill" />
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
             <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
@@ -482,9 +762,30 @@ Return your response as a JSON object with a "suggestions" property containing a
                   >
                     <MagicWand size={16} weight="fill" />
                   </Button>
+                  <Button
+                    onClick={() => {
+                      setArMode('collaborate')
+                      setShowParticipants(true)
+                    }}
+                    size="sm"
+                    variant={arMode === 'collaborate' ? 'default' : 'outline'}
+                    className={arMode === 'collaborate' ? 'bg-accent text-accent-foreground' : 'glass-effect border-white/20 text-white hover:bg-white/10'}
+                  >
+                    <Users size={16} weight="fill" />
+                  </Button>
                 </div>
 
                 <div className="flex items-center gap-2">
+                  {isCollaborative && (
+                    <Button
+                      onClick={() => setShowChat(!showChat)}
+                      size="icon"
+                      variant="outline"
+                      className="glass-effect border-white/20 text-white hover:bg-white/10"
+                    >
+                      <Chat size={20} weight="fill" />
+                    </Button>
+                  )}
                   <Button
                     onClick={toggleCamera}
                     size="icon"
@@ -611,7 +912,7 @@ Return your response as a JSON object with a "suggestions" property containing a
                       animate={{ scale: 1 }}
                       className="flex-shrink-0 w-16 h-16 rounded-lg overflow-hidden border-2 border-white/30"
                     >
-                      <img src={photo} alt={`Capture ${i + 1}`} className="w-full h-full object-cover" />
+                      <img src={photo.dataUrl} alt={`Capture ${i + 1}`} className="w-full h-full object-cover" />
                     </motion.div>
                   ))}
                   {capturedPhotos.length > 5 && (
@@ -636,14 +937,26 @@ Return your response as a JSON object with a "suggestions" property containing a
               top: annotation.position.y,
               transform: 'translate(-50%, -50%)'
             }}
-            className="pointer-events-none"
+            className="pointer-events-auto cursor-pointer"
+            onClick={() => setSelectedAnnotation(annotation.id)}
           >
             <div className="relative">
               <div className="w-6 h-6 rounded-full bg-accent glow-accent flex items-center justify-center">
                 <div className="w-3 h-3 rounded-full bg-white" />
               </div>
-              <div className="absolute top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/90 text-white text-xs px-3 py-1.5 rounded-lg">
-                {annotation.text}
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 whitespace-nowrap bg-black/90 text-white text-xs px-3 py-1.5 rounded-lg max-w-xs">
+                <div className="font-semibold text-accent mb-1">{annotation.createdBy}</div>
+                <div>{annotation.text}</div>
+                {annotation.replies && annotation.replies.length > 0 && (
+                  <div className="mt-2 space-y-1 border-t border-white/20 pt-2">
+                    {annotation.replies.map(reply => (
+                      <div key={reply.id} className="text-xs">
+                        <span className="text-white/60">{reply.createdBy}: </span>
+                        <span>{reply.text}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </motion.div>
@@ -665,7 +978,66 @@ Return your response as a JSON object with a "suggestions" property containing a
             <div className="w-4 h-4 rounded-full bg-primary glow-primary border-2 border-white" />
           </motion.div>
         ))}
+
+        {isCollaborative && Array.from(cursorPositions.entries()).map(([userId, pos]) => {
+          const participant = participants.find(p => p.id === userId)
+          if (!participant || userId === currentUser?.id) return null
+          
+          return (
+            <motion.div
+              key={userId}
+              animate={{ x: pos.x, y: pos.y }}
+              transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+              style={{
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                pointerEvents: 'none'
+              }}
+            >
+              <div 
+                className="w-4 h-4 rounded-full border-2 border-white"
+                style={{ background: participant.color }}
+              />
+              <div 
+                className="text-xs font-semibold mt-1 px-2 py-1 rounded bg-black/80 whitespace-nowrap"
+                style={{ color: participant.color }}
+              >
+                {participant.name}
+              </div>
+            </motion.div>
+          )
+        })}
       </div>
+
+      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+        <DialogContent className="glass-effect border-white/20">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <ShareNetwork size={24} className="text-accent" weight="fill" />
+              שתף סשן שיתופי
+            </DialogTitle>
+            <DialogDescription>
+              שתף את הקוד הזה עם משתתפים אחרים כדי להצטרף לסשן AR
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2">
+              <Input
+                value={shareCode}
+                readOnly
+                className="font-mono text-lg text-center"
+              />
+              <Button onClick={copyShareCode} size="icon">
+                <Copy size={18} />
+              </Button>
+            </div>
+            <div className="text-sm text-muted-foreground text-center">
+              המשתתפים יכולים להצטרף על ידי הזנת קוד זה בעמוד הצטרפות לסשן
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   )
 }

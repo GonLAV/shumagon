@@ -365,7 +365,15 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
         </TabsContent>
 
         <TabsContent value="ar-sessions" className="mt-6">
-          <ARSessionsViewer propertyId={property.id} />
+          <ARSessionsViewer
+            property={property}
+            onBack={() => setActiveTab('details')}
+            onStartSession={() => setShowARWalkthrough(true)}
+            onJoinSession={(sessionId) => {
+              setShowARWalkthrough(true)
+              toast.success('מצטרף לסשן...')
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="investment" className="mt-6">

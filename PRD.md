@@ -162,6 +162,28 @@ This is a professional tool requiring multiple sophisticated features: property 
   - Grid overlay for alignment
   - Professional glass-morphism AR UI with minimal obstruction
 
+### Collaborative AR Sessions for Remote Property Inspections (NEW - Game-Changing)
+- **Functionality**: Multi-user AR sessions enabling real-time collaboration between appraisers, clients, and inspectors with shared annotations, measurements, live chat, cursor tracking, and session playback
+- **Purpose**: Enable remote property inspections with stakeholders in different locations, facilitate expert consultations, and create comprehensive collaborative documentation
+- **Trigger**: Click "שיתוף פעולה" mode button in AR interface or "הצטרף לסשן" in AR sessions viewer
+- **Progression**: 
+  - Host flow: Start AR session → Click collaborate mode → System generates unique 6-character share code → Share code with participants → See participants join in real-time → Collaborators' cursors appear in different colors → All measurements/annotations broadcast to all participants → Use group chat for communication → Save collaborative session with full participant history
+  - Join flow: Click "הצטרף לסשן" → Enter 6-character share code → Join active session → See host and other participants → Add own measurements and annotations → Participate in group chat → View complete session data
+- **Success criteria**:
+  - Session codes generated instantly (< 100ms)
+  - Participants join within 2 seconds of code entry
+  - Real-time sync of all actions (measurements, annotations, photos) across participants
+  - Each participant has unique color identifier
+  - Live cursor tracking shows participant positions
+  - Group chat with message history
+  - Participant list shows active/inactive status
+  - Session saves include all participants' contributions with attribution
+  - Session viewer displays collaborative timeline
+  - Export sessions with full participant data
+  - Support 2-10 simultaneous participants
+  - Annotation replies and threaded discussions
+  - Share code copying with one click
+
 ## Edge Case Handling
 
 - **No Comparable Properties Found**: Display message with suggestions to expand search radius or adjust criteria, allow manual comparable entry
