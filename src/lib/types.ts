@@ -67,6 +67,7 @@ export interface Comparable {
   adjustedPrice: number
   pricePerSqm: number
   selected: boolean
+  similarityScore?: number
 }
 
 export interface Client {

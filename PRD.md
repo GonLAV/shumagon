@@ -1,6 +1,6 @@
 # Planning Guide
 
-A comprehensive real estate appraisal platform for professional appraisers with advanced 3D visualization, AI-powered analysis, floor plan design, investment forecasting, and environmental quality assessment - surpassing Simplex3D and Quicker.co.il with cutting-edge features they don't have - designed with a futuristic, minimalist interface inspired by Tesla and SpaceX product philosophy.
+A comprehensive real estate appraisal platform for professional appraisers with advanced 3D visualization, AI-powered analysis, floor plan design, investment forecasting, environmental quality assessment, advanced market comparison tools, and professional report generation - surpassing Simplex3D and Quicker.co.il with cutting-edge features they don't have - designed with a futuristic, minimalist interface inspired by Tesla and SpaceX product philosophy.
 
 **Experience Qualities**:
 1. **Futuristic & Sophisticated** - Dark, immersive interface with glowing accents, glass morphism effects, and smooth animations that feel like using cutting-edge technology from the future
@@ -8,7 +8,7 @@ A comprehensive real estate appraisal platform for professional appraisers with 
 3. **Precision & Trust** - Data-rich displays with monospace typography for numbers, gradient highlights for important values, and visual feedback that instills confidence
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
-This is a professional tool requiring multiple sophisticated features: property database management, comparable property search and analysis, automated valuation models, report generation, document management, client tracking, data visualization, 3D building visualization, sun/shade analysis, view quality analysis, floor plan designer, investment forecasting, and environmental quality assessment - all presented through an exceptionally polished, futuristic interface that makes complex tasks feel simple.
+This is a professional tool requiring multiple sophisticated features: property database management, advanced AI-powered comparable property search and analysis with filtering/sorting/similarity scoring, automated valuation models, professional report generation with customizable sections, document management, client tracking, data visualization, 3D building visualization, sun/shade analysis, view quality analysis, floor plan designer with AI generation, investment forecasting with ROI analysis, environmental quality assessment, AR walkthrough mode with measurements/annotations/environmental sensors, collaborative AR sessions with real-time sync and group chat - all presented through an exceptionally polished, futuristic interface that makes complex tasks feel simple.
 
 ## Essential Features
 
@@ -40,12 +40,36 @@ This is a professional tool requiring multiple sophisticated features: property 
 - **Progression**: Set search parameters (radius, similarity threshold) → Click "הפעל ניתוח AI מתקדם" → AI generates 5 comparable properties with realistic addresses, prices, and adjustments → Review comparables → Toggle selection → Click "חשב מחדש" to update valuation → Click "עדכן ניתוח AI" for professional insights in Hebrew
 - **Success criteria**: Generates realistic comparables within 10 seconds, calculates adjustments automatically, provides confidence score, allows manual refinement, generates professional analysis in Hebrew
 
-### Report Generator
-- **Functionality**: Creates professional PDF/Word reports with all appraisal data, photos, comparables, and analysis
-- **Purpose**: Deliver formal appraisal documentation to clients
-- **Trigger**: Click "Generate Report" after completing valuation
-- **Progression**: Select report template → Review/edit sections → Add appraiser notes → Preview report → Export as PDF/Word
-- **Success criteria**: Professional formatting, includes all required sections, customizable templates, includes photos and charts
+### Advanced Market Comparison Tool (NEW - Beyond Quicker & Simplex3D)
+- **Functionality**: Intelligent AI-powered search for comparable properties with advanced filtering, sorting, and automatic similarity scoring across multiple criteria
+- **Purpose**: Find the most relevant comparable sales to support professional valuation methodology with precision and transparency
+- **Trigger**: Click "חיפוש מתקדם" tab in property detail view
+- **Progression**: Set search parameters (radius 0.5-10km, timeframe 3-36 months, size range, property types) → Select max results (5-20) → Click "חיפוש AI מתקדם" → AI generates realistic comparable properties with addresses, prices, adjustments, and similarity scores → Sort by similarity/distance/price/date → Toggle selection of comparables → View statistics (selected count, avg adjusted price, price range, avg similarity) → Click "שמור נבחרים" to save selected comparables
+- **Success criteria**: 
+  - Generates 5-20 realistic comparables within 10 seconds using GPT-4
+  - Each comparable has similarity score (0-100%), realistic address, accurate pricing
+  - Automatic adjustments calculated for location, size, condition, floor, age, features
+  - Sortable by 4 different criteria
+  - Visual similarity indicators and color-coded adjustments (green/red)
+  - Real-time statistics dashboard showing selection metrics
+  - Grid view with detailed adjustment breakdown
+  - Saves selections back to property for report generation
+
+### Professional Report Generator (NEW - Beyond Quicker & Simplex3D)
+- **Functionality**: Comprehensive report generation system with AI-powered content creation, customizable sections, multiple format export (PDF/Word/HTML), and professional templates
+- **Purpose**: Create polished, client-ready appraisal reports with minimal manual effort while maintaining professional standards
+- **Trigger**: Click "ייצוא דוח" tab in property detail view
+- **Progression**: Select report format (PDF/Word/HTML) → Choose template (standard/detailed/summary/bank) → Enter appraiser name and license → Toggle report sections (14 customizable sections) → Click "צור תוכן AI" to generate professional Hebrew content (executive summary, location analysis, market analysis, conclusions) → Add custom notes and recommendations → Optional watermark for drafts → Click "ייצא דוח" → AI generates complete HTML report → Downloads as file → Can print directly
+- **Success criteria**:
+  - 14 customizable report sections with required/optional flags
+  - AI generates professional Hebrew content in 5-10 seconds
+  - Report includes: cover page, executive summary, property details, valuation results, market analysis, comparable properties table, location analysis, photos, legal disclaimer, appendices
+  - HTML format exports immediately with professional styling
+  - Print-optimized layout with page breaks
+  - Includes all property data, client info, valuation results, comparables table
+  - Professional formatting with grid layouts, tables, headers
+  - Draft watermark option
+  - Downloadable with auto-generated filename
 
 ### Market Trends Analytics
 - **Functionality**: Visual analytics showing price trends, days on market, price per sqm by neighborhood

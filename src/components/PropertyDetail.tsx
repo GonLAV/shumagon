@@ -31,6 +31,8 @@ import { InvestmentAnalysis } from './InvestmentAnalysis'
 import { EnvironmentalAnalysis } from './EnvironmentalAnalysis'
 import { ARWalkthrough } from './ARWalkthrough'
 import { ARSessionsViewer } from './ARSessionsViewer'
+import { AdvancedMarketComparison } from './AdvancedMarketComparison'
+import { ReportGenerator } from './ReportGenerator'
 
 interface PropertyDetailProps {
   property: Property
@@ -116,7 +118,7 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-9">
+        <TabsList className="grid w-full grid-cols-6 lg:grid-cols-11">
           <TabsTrigger value="details">פרטי נכס</TabsTrigger>
           <TabsTrigger value="valuation">שומה</TabsTrigger>
           <TabsTrigger value="ai-valuation" className="gap-2">
@@ -124,6 +126,14 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
             AI שומה
           </TabsTrigger>
           <TabsTrigger value="comparables">נכסים דומים</TabsTrigger>
+          <TabsTrigger value="advanced-search" className="gap-2">
+            <MagnifyingGlass size={14} weight="bold" />
+            חיפוש מתקדם
+          </TabsTrigger>
+          <TabsTrigger value="report" className="gap-2">
+            <FileText size={14} weight="bold" />
+            ייצוא דוח
+          </TabsTrigger>
           <TabsTrigger value="ar-sessions" className="gap-2">
             <Camera size={14} weight="fill" />
             סיורי AR
@@ -275,9 +285,12 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
           <Card>
             <CardHeader>
               <div className="flex items-center justify-between">
-                <Button className="gap-2">
+                <Button 
+                  className="gap-2"
+                  onClick={() => setActiveTab('advanced-search')}
+                >
                   <MagnifyingGlass size={18} />
-                  חפש נכסים נוספים
+                  חיפוש מתקדם
                 </Button>
                 <CardTitle className="text-right">נכסים דומים</CardTitle>
               </div>
@@ -341,6 +354,24 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="advanced-search" className="mt-6">
+          <AdvancedMarketComparison
+            property={property}
+            onSelectComparables={(selectedComps) => {
+              toast.success(`${selectedComps.length} נכסים נשמרו`)
+              setActiveTab('comparables')
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="report" className="mt-6">
+          <ReportGenerator
+            property={property}
+            client={client}
+            comparables={comparables}
+          />
         </TabsContent>
 
         <TabsContent value="3d-view" className="mt-6">
