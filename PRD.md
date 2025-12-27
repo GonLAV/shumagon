@@ -145,6 +145,23 @@ This is a professional tool requiring multiple sophisticated features: property 
 - **Progression**: Click "הפעל ניתוח סביבתי" → AI analyzes location → View air quality score & PM2.5 → Check noise levels (dB) → See nearby amenities with walk times → Review walkability/bike/transit scores
 - **Success criteria**: Overall score (1-100), detailed metrics (air, noise, green space), amenity list with distances, mobility scores, highlights key strengths and concerns
 
+### AR Walkthrough Mode for Virtual Property Tours (NEW - Revolutionary)
+- **Functionality**: Smartphone camera-integrated AR walkthrough system allowing real-time property exploration with measurements, annotations, environmental sensors, and AI-powered insights
+- **Purpose**: Enable remote property inspections, create immersive documentation, and provide advanced on-site analysis tools for appraisers
+- **Trigger**: Click "סיור AR" button in property detail header
+- **Progression**: Grant camera access → Select AR mode (walkthrough/measure/annotate/analyze) → Point camera at property → Take measurements by tapping two points → Add annotations with text → Capture photos → Record environmental data (light, temperature, humidity, noise) → AI generates real-time suggestions → Save session with all data → View saved AR sessions in "סיורי AR" tab
+- **Success criteria**: 
+  - Smooth 30fps camera feed with low latency (<100ms)
+  - Accurate distance measurements (±5% margin)
+  - Environmental sensors display real-time data
+  - AI generates 5 contextual suggestions within 3 seconds
+  - All measurements, annotations, and photos persist to session
+  - Sessions viewable with full data history
+  - Support front/back camera switching
+  - Brightness and zoom controls (50-150%, 1-3x)
+  - Grid overlay for alignment
+  - Professional glass-morphism AR UI with minimal obstruction
+
 ## Edge Case Handling
 
 - **No Comparable Properties Found**: Display message with suggestions to expand search radius or adjust criteria, allow manual comparable entry
@@ -155,6 +172,11 @@ This is a professional tool requiring multiple sophisticated features: property 
 - **Conflicting Valuation Methods**: Display all methods side-by-side, explain variances, allow appraiser to select final value with notes
 - **Missing Market Data**: Gracefully show "data unavailable" with explanation, suggest alternative analysis methods
 - **Report Generation Failure**: Maintain draft progress, allow section-by-section export, provide error details
+- **Camera Permission Denied**: Show friendly message explaining why camera is needed, provide link to browser settings, allow continuing without AR
+- **Low Light Conditions in AR**: Brightness slider auto-adjusts, displays warning if light sensor shows <20%, suggests using flash or postponing
+- **AR Session Interrupted**: Auto-save session data every 30 seconds, restore on return, show "Session Recovered" notification
+- **Browser Doesn't Support Camera API**: Detect on load, show upgrade message, disable AR features gracefully with alternative photo upload option
+- **Device Motion During Measurement**: Show stability indicator, require steady hold for 1 second, retry if too much motion detected
 
 ## Design Direction
 

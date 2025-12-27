@@ -19,7 +19,8 @@ import {
   Car,
   Package,
   CheckCircle,
-  Sparkle
+  Sparkle,
+  Camera
 } from '@phosphor-icons/react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
@@ -28,6 +29,8 @@ import { Property3DView } from './Property3DView'
 import { FloorPlanDesigner } from './FloorPlanDesigner'
 import { InvestmentAnalysis } from './InvestmentAnalysis'
 import { EnvironmentalAnalysis } from './EnvironmentalAnalysis'
+import { ARWalkthrough } from './ARWalkthrough'
+import { ARSessionsViewer } from './ARSessionsViewer'
 
 interface PropertyDetailProps {
   property: Property
@@ -42,6 +45,7 @@ interface PropertyDetailProps {
 export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDelete }: PropertyDetailProps) {
   const [activeTab, setActiveTab] = useState('details')
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
+  const [showARWalkthrough, setShowARWalkthrough] = useState(false)
   const [comparables] = useState<Comparable[]>(generateMockComparables())
   
   const client = clients.find(c => c.id === property.clientId)
@@ -91,6 +95,13 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
             <Trash size={18} />
             מחיקה
           </Button>
+          <Button 
+            onClick={() => setShowARWalkthrough(true)} 
+            className="gap-2 bg-accent hover:bg-accent/90 text-accent-foreground glow-accent"
+          >
+            <Camera size={18} weight="fill" />
+            סיור AR
+          </Button>
           <Button onClick={handleGenerateReport} className="gap-2">
             <FileText size={18} weight="bold" />
             ייצוא דוח
@@ -105,7 +116,7 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
+        <TabsList className="grid w-full grid-cols-5 lg:grid-cols-9">
           <TabsTrigger value="details">פרטי נכס</TabsTrigger>
           <TabsTrigger value="valuation">שומה</TabsTrigger>
           <TabsTrigger value="ai-valuation" className="gap-2">
@@ -113,6 +124,10 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
             AI שומה
           </TabsTrigger>
           <TabsTrigger value="comparables">נכסים דומים</TabsTrigger>
+          <TabsTrigger value="ar-sessions" className="gap-2">
+            <Camera size={14} weight="fill" />
+            סיורי AR
+          </TabsTrigger>
           <TabsTrigger value="3d-view">תצוגה 3D</TabsTrigger>
           <TabsTrigger value="floor-plan">תוכנית קומה</TabsTrigger>
           <TabsTrigger value="investment">ניתוח השקעה</TabsTrigger>
@@ -349,6 +364,10 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
           />
         </TabsContent>
 
+        <TabsContent value="ar-sessions" className="mt-6">
+          <ARSessionsViewer propertyId={property.id} />
+        </TabsContent>
+
         <TabsContent value="investment" className="mt-6">
           <InvestmentAnalysis
             propertyValue={property.valuationData?.estimatedValue || property.details.builtArea * 25000}
@@ -382,6 +401,13 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {showARWalkthrough && (
+        <ARWalkthrough 
+          property={property} 
+          onClose={() => setShowARWalkthrough(false)} 
+        />
+      )}
     </div>
   )
 }
