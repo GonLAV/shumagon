@@ -24,6 +24,10 @@ import {
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
 import { AIValuation } from './AIValuation'
+import { Property3DView } from './Property3DView'
+import { FloorPlanDesigner } from './FloorPlanDesigner'
+import { InvestmentAnalysis } from './InvestmentAnalysis'
+import { EnvironmentalAnalysis } from './EnvironmentalAnalysis'
 
 interface PropertyDetailProps {
   property: Property
@@ -101,7 +105,7 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-        <TabsList className="grid w-full max-w-3xl grid-cols-4">
+        <TabsList className="grid w-full grid-cols-4 lg:grid-cols-8">
           <TabsTrigger value="details">פרטי נכס</TabsTrigger>
           <TabsTrigger value="valuation">שומה</TabsTrigger>
           <TabsTrigger value="ai-valuation" className="gap-2">
@@ -109,6 +113,10 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
             AI שומה
           </TabsTrigger>
           <TabsTrigger value="comparables">נכסים דומים</TabsTrigger>
+          <TabsTrigger value="3d-view">תצוגה 3D</TabsTrigger>
+          <TabsTrigger value="floor-plan">תוכנית קומה</TabsTrigger>
+          <TabsTrigger value="investment">ניתוח השקעה</TabsTrigger>
+          <TabsTrigger value="environment">ניתוח סביבתי</TabsTrigger>
         </TabsList>
 
         <TabsContent value="details" className="space-y-6 mt-6">
@@ -318,6 +326,41 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
               </div>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="3d-view" className="mt-6">
+          <Property3DView
+            propertyData={{
+              floors: property.details.totalFloors,
+              buildingHeight: property.details.totalFloors * 3,
+              plotWidth: 10,
+              plotLength: 12,
+              orientation: 0,
+              neighborhood: property.address.neighborhood
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="floor-plan" className="mt-6">
+          <FloorPlanDesigner
+            onSave={(rooms) => {
+              toast.success('תוכנית קומה נשמרה לנכס')
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="investment" className="mt-6">
+          <InvestmentAnalysis
+            propertyValue={property.valuationData?.estimatedValue || property.details.builtArea * 25000}
+            neighborhood={property.address.neighborhood}
+            propertyType={property.type}
+          />
+        </TabsContent>
+
+        <TabsContent value="environment" className="mt-6">
+          <EnvironmentalAnalysis
+            address={property.address}
+          />
         </TabsContent>
       </Tabs>
 

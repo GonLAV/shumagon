@@ -1,6 +1,6 @@
 # Planning Guide
 
-A comprehensive real estate appraisal platform for professional appraisers to evaluate properties, generate detailed reports, manage comparable properties, and provide accurate valuations using data-driven insights and advanced analysis tools - designed with a futuristic, minimalist interface inspired by Tesla and SpaceX product philosophy.
+A comprehensive real estate appraisal platform for professional appraisers with advanced 3D visualization, AI-powered analysis, floor plan design, investment forecasting, and environmental quality assessment - surpassing Simplex3D and Quicker.co.il with cutting-edge features they don't have - designed with a futuristic, minimalist interface inspired by Tesla and SpaceX product philosophy.
 
 **Experience Qualities**:
 1. **Futuristic & Sophisticated** - Dark, immersive interface with glowing accents, glass morphism effects, and smooth animations that feel like using cutting-edge technology from the future
@@ -8,7 +8,7 @@ A comprehensive real estate appraisal platform for professional appraisers to ev
 3. **Precision & Trust** - Data-rich displays with monospace typography for numbers, gradient highlights for important values, and visual feedback that instills confidence
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
-This is a professional tool requiring multiple sophisticated features: property database management, comparable property search and analysis, automated valuation models, report generation, document management, client tracking, and data visualization - all presented through an exceptionally polished, futuristic interface that makes complex tasks feel simple.
+This is a professional tool requiring multiple sophisticated features: property database management, comparable property search and analysis, automated valuation models, report generation, document management, client tracking, data visualization, 3D building visualization, sun/shade analysis, view quality analysis, floor plan designer, investment forecasting, and environmental quality assessment - all presented through an exceptionally polished, futuristic interface that makes complex tasks feel simple.
 
 ## Essential Features
 
@@ -95,6 +95,55 @@ This is a professional tool requiring multiple sophisticated features: property 
 - **Trigger**: Automatic when property address is entered
 - **Progression**: Enter address → Fetch historical data → Display timeline → Show price changes → Flag unusual patterns
 - **Success criteria**: Data from public records, shows 10+ year history, visualizes price trends
+
+### 3D Building Visualization (Simplex3D Feature - Enhanced)
+- **Functionality**: Interactive 3D model of the property and surrounding buildings using Three.js, with real-time rendering and rotation
+- **Purpose**: Visualize the property in context, understand spatial relationships, and assess building characteristics
+- **Trigger**: Click "תצוגה 3D" tab in property details
+- **Progression**: View 3D model → Rotate/zoom camera → See building dimensions → View context buildings → Toggle layers
+- **Success criteria**: Smooth 60fps rendering, realistic building representation, interactive camera controls, displays accurate dimensions
+
+### Sun & Shade Analysis (Simplex3D Feature - Enhanced)
+- **Functionality**: Dynamic sun position simulation showing shadow patterns throughout the day and seasons with real-time visualization
+- **Purpose**: Assess sunlight exposure which affects property value, energy costs, and quality of life
+- **Trigger**: Click "שמש וצל" tab within 3D view
+- **Progression**: Set time of day (0-24h slider) → Select season → View sun position → See shadow patterns → Calculate sun exposure percentage
+- **Success criteria**: Realistic sun movement, accurate shadow rendering, seasonal variations (winter/spring/summer/fall), displays exposure score
+
+### View Quality Analysis (Simplex3D Feature - Enhanced)
+- **Functionality**: Analyzes visible areas, hidden zones, and view quality from different angles with 360° assessment
+- **Purpose**: Quantify view value which significantly impacts property pricing
+- **Trigger**: Click "ניתוח נוף" tab within 3D view
+- **Progression**: Set viewing angle (0-360°) → Calculate visible area → Identify obstructions → Rate view quality → Show visibility metrics
+- **Success criteria**: Quality score (1-100), identifies open views, partial obstructions, privacy level, nearby landmarks
+
+### Design Comparison Tool (Simplex3D Feature - Enhanced)
+- **Functionality**: Side-by-side comparison of current vs. proposed building designs with impact analysis
+- **Purpose**: Evaluate renovation potential and value increase from design changes
+- **Trigger**: Click "השוואה" tab within 3D view
+- **Progression**: View current design → Load alternative design → Compare metrics (sun exposure, view quality, built area, value) → Show differences
+- **Success criteria**: Clear visual comparison, quantified improvements, estimated value impact
+
+### Floor Plan Designer (NEW - Beyond Simplex3D)
+- **Functionality**: Interactive canvas-based floor plan creator with drag-and-drop rooms, auto-measurements, and AI generation
+- **Purpose**: Create, edit, and visualize apartment layouts with professional precision
+- **Trigger**: Click "תוכנית קומה" tab in property details
+- **Progression**: Click "הוסף חדר" → Draw/place room → Set room type (living, bedroom, kitchen, etc.) → Adjust dimensions → AI auto-generate layout option → Export as image
+- **Success criteria**: Intuitive drawing tools, snap-to-grid (20px), displays room areas, color-coded by type, AI generates realistic layouts, exportable
+
+### Investment Analysis & Forecasting (NEW - Beyond Simplex3D)
+- **Functionality**: AI-powered investment analysis with projected value, ROI, risk assessment, and rental yield over 1-10 year timeframes
+- **Purpose**: Help investors make data-driven decisions with professional-grade analysis
+- **Trigger**: Click "ניתוח השקעה" tab in property details
+- **Progression**: Select timeframe (1y/3y/5y/10y) → Click "הפעל ניתוח AI" → View projected value → See expected return % → Review risk/liquidity scores → Read AI recommendation
+- **Success criteria**: Realistic market projections, investment grade (A+ to C), identifies strengths and risks, rental yield calculation, actionable Hebrew recommendations
+
+### Environmental & Quality of Life Analysis (NEW - Beyond Competitors)
+- **Functionality**: Comprehensive environmental assessment including air quality, noise levels, green spaces, walkability, and amenity proximity
+- **Purpose**: Provide holistic location analysis beyond traditional property metrics
+- **Trigger**: Click "ניתוח סביבתי" tab in property details
+- **Progression**: Click "הפעל ניתוח סביבתי" → AI analyzes location → View air quality score & PM2.5 → Check noise levels (dB) → See nearby amenities with walk times → Review walkability/bike/transit scores
+- **Success criteria**: Overall score (1-100), detailed metrics (air, noise, green space), amenity list with distances, mobility scores, highlights key strengths and concerns
 
 ## Edge Case Handling
 
