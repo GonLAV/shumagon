@@ -33,12 +33,12 @@ This is a professional tool requiring multiple sophisticated features: property 
 - **Progression**: Set search criteria (radius, property type, size range, sale date) → View results on map and list → Select comparables → Adjust comparison weights
 - **Success criteria**: Returns relevant matches within seconds, displays on interactive map, allows filtering and sorting
 
-### Valuation Calculator
-- **Functionality**: Multiple valuation methods (comparable sales, cost approach, income approach) with adjustments
-- **Purpose**: Calculate property value using industry-standard methodologies
-- **Trigger**: After selecting comparable properties
-- **Progression**: Select valuation method → Review comparable adjustments → Apply property-specific factors → Generate estimated value range → Review confidence score
-- **Success criteria**: Calculations follow industry standards, adjustments are documented, provides value range with confidence intervals
+### AI-Powered Valuation Calculator
+- **Functionality**: AI-powered valuation that automatically finds comparable properties, calculates adjustments, and generates professional appraisal insights using GPT-4
+- **Purpose**: Automate the complex process of property valuation while maintaining professional standards and providing transparent comparable analysis
+- **Trigger**: Click "AI שומה" tab in property details or "הפעל ניתוח AI מתקדם" button
+- **Progression**: Set search parameters (radius, similarity threshold) → Click "הפעל ניתוח AI מתקדם" → AI generates 5 comparable properties with realistic addresses, prices, and adjustments → Review comparables → Toggle selection → Click "חשב מחדש" to update valuation → Click "עדכן ניתוח AI" for professional insights in Hebrew
+- **Success criteria**: Generates realistic comparables within 10 seconds, calculates adjustments automatically, provides confidence score, allows manual refinement, generates professional analysis in Hebrew
 
 ### Report Generator
 - **Functionality**: Creates professional PDF/Word reports with all appraisal data, photos, comparables, and analysis
@@ -62,11 +62,11 @@ This is a professional tool requiring multiple sophisticated features: property 
 - **Success criteria**: Searchable client database, shows complete history, tracks communication
 
 ### AI-Powered Property Description
-- **Functionality**: Generates professional property descriptions from entered data and photos
+- **Functionality**: Generates professional property descriptions in Hebrew from entered data and photos using GPT-4
 - **Purpose**: Save time writing descriptions and ensure consistent, professional language
-- **Trigger**: Click "Generate Description" in property details
-- **Progression**: Review property data → Click generate → AI creates description → Edit as needed → Save
-- **Success criteria**: Descriptions are accurate, professional tone, customizable, saves appraiser time
+- **Trigger**: Click "ייצר תיאור AI" in property form
+- **Progression**: Enter property details → Click "ייצר תיאור AI" → AI analyzes property data → Generates 2-3 sentence professional description in Hebrew → Appraiser can edit → Save
+- **Success criteria**: Descriptions are accurate, professional tone in Hebrew, highlights key features, editable, saves appraiser 5+ minutes per property
 
 ### Neighborhood Analysis
 - **Functionality**: Comprehensive area reports including schools, amenities, crime data, demographics

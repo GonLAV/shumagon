@@ -18,10 +18,12 @@ import {
   Elevator,
   Car,
   Package,
-  CheckCircle
+  CheckCircle,
+  Sparkle
 } from '@phosphor-icons/react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
+import { AIValuation } from './AIValuation'
 
 interface PropertyDetailProps {
   property: Property
@@ -99,9 +101,13 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-        <TabsList className="grid w-full max-w-2xl grid-cols-3">
+        <TabsList className="grid w-full max-w-3xl grid-cols-4">
           <TabsTrigger value="details">פרטי נכס</TabsTrigger>
           <TabsTrigger value="valuation">שומה</TabsTrigger>
+          <TabsTrigger value="ai-valuation" className="gap-2">
+            <Sparkle size={14} weight="fill" />
+            AI שומה
+          </TabsTrigger>
           <TabsTrigger value="comparables">נכסים דומים</TabsTrigger>
         </TabsList>
 
@@ -221,14 +227,25 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
               <CardContent className="py-12 text-center">
                 <MagnifyingGlass size={48} className="mx-auto mb-4 text-muted-foreground" />
                 <h3 className="text-lg font-semibold mb-2">טרם בוצעה שומה</h3>
-                <p className="text-muted-foreground mb-4">החל בתהליך השומה על ידי חיפוש נכסים דומים</p>
-                <Button className="gap-2">
-                  <MagnifyingGlass size={18} />
-                  מצא נכסים דומים
+                <p className="text-muted-foreground mb-4">השתמש בכרטיסיה "AI שומה" לביצוע שומה מתקדמת</p>
+                <Button className="gap-2" onClick={() => setActiveTab('ai-valuation')}>
+                  <Sparkle size={18} weight="fill" />
+                  עבור לשומת AI
                 </Button>
               </CardContent>
             </Card>
           )}
+        </TabsContent>
+
+        <TabsContent value="ai-valuation" className="mt-6">
+          <AIValuation
+            property={property}
+            onUpdateValuation={(valuationData) => {
+              const updatedProperty = { ...property, valuationData }
+              onSave(updatedProperty)
+              toast.success('השומה עודכנה בהצלחה')
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="comparables" className="space-y-6 mt-6">
