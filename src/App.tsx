@@ -9,10 +9,11 @@ import { MarketInsights } from '@/components/MarketInsights'
 import { ClientPortal } from '@/components/ClientPortal'
 import { ClientPortalManagement } from '@/components/ClientPortalManagement'
 import { BusinessManagement } from '@/components/BusinessManagement'
-import { House, ChartBar, Users, FileText, UserCircle, CurrencyDollar } from '@phosphor-icons/react'
+import { House, ChartBar, Users, FileText, UserCircle, CurrencyDollar, Flask } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { AppHeader } from '@/components/app/AppHeader'
 import { PropertiesTab } from '@/components/app/PropertiesTab'
+import { ValuationEngineTester } from '@/components/ValuationEngineTester'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -109,6 +110,10 @@ function App() {
               <UserCircle size={18} weight="duotone" />
               <span className="hidden sm:inline">פורטל לקוחות</span>
             </TabsTrigger>
+            <TabsTrigger value="tester" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Flask size={18} weight="duotone" />
+              <span className="hidden sm:inline">בדיקת מנוע שמאות</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-0">
@@ -167,6 +172,10 @@ function App() {
               properties={properties || []}
               onSelectProperty={handleSelectProperty}
             />
+          </TabsContent>
+
+          <TabsContent value="tester" className="mt-0">
+            <ValuationEngineTester />
           </TabsContent>
         </Tabs>
       </main>
