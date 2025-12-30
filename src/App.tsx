@@ -9,11 +9,12 @@ import { MarketInsights } from '@/components/MarketInsights'
 import { ClientPortal } from '@/components/ClientPortal'
 import { ClientPortalManagement } from '@/components/ClientPortalManagement'
 import { BusinessManagement } from '@/components/BusinessManagement'
-import { House, ChartBar, Users, FileText, UserCircle, CurrencyDollar, Flask } from '@phosphor-icons/react'
+import { House, ChartBar, Users, FileText, UserCircle, CurrencyDollar, Flask, Palette } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { AppHeader } from '@/components/app/AppHeader'
 import { PropertiesTab } from '@/components/app/PropertiesTab'
 import { ValuationEngineTester } from '@/components/ValuationEngineTester'
+import { BrandingSettingsTab } from '@/components/BrandingSettingsTab'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -114,6 +115,10 @@ function App() {
               <Flask size={18} weight="duotone" />
               <span className="hidden sm:inline">בדיקת מנוע שמאות</span>
             </TabsTrigger>
+            <TabsTrigger value="branding" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Palette size={18} weight="duotone" />
+              <span className="hidden sm:inline">מיתוג PDF</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-0">
@@ -176,6 +181,10 @@ function App() {
 
           <TabsContent value="tester" className="mt-0">
             <ValuationEngineTester />
+          </TabsContent>
+
+          <TabsContent value="branding" className="mt-0">
+            <BrandingSettingsTab />
           </TabsContent>
         </Tabs>
       </main>

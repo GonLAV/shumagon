@@ -72,24 +72,47 @@ This is a professional tool requiring multiple sophisticated features: property 
   - Downloadable with auto-generated filename
 
 ### Valuation Engine Test Results PDF Export (NEW - Professional Documentation)
-- **Functionality**: Professional PDF export system for valuation engine test results with comprehensive documentation of all three calculation methods (Comparable Sales, Cost Approach, Income Approach)
+- **Functionality**: Professional PDF export system for valuation engine test results with comprehensive documentation of all three calculation methods (Comparable Sales, Cost Approach, Income Approach) with custom branding support
 - **Purpose**: Generate professional, client-ready valuation reports directly from test results for documentation, presentation, or legal purposes
 - **Trigger**: Click "ייצא ל-PDF" button next to individual test results or "ייצא דוח מקיף" for comprehensive multi-method report in Valuation Engine Tester
 - **Progression**: 
-  - Single method: Run valuation method → View results → Click "ייצא ל-PDF" → PDF auto-downloads with complete analysis
-  - Multi-method: Run all three methods → Click "ייצא דוח מקיף" → Comprehensive PDF auto-downloads with comparison analysis
+  - Single method: Run valuation method → View results → Click "ייצא ל-PDF" → PDF auto-downloads with complete analysis and custom branding
+  - Multi-method: Run all three methods → Click "ייצא דוח מקיף" → Comprehensive PDF auto-downloads with comparison analysis and custom branding
 - **Success criteria**:
-  - Professional multi-page PDF with branded header and formatting
+  - Professional multi-page PDF with custom branded header and formatting
+  - Applies user-configured branding settings (logo, colors, company info) from branding settings
   - Includes complete property information and valuation summary
   - Detailed methodology explanation for each approach
   - Step-by-step calculation breakdown with formulas and inputs
-  - Visual hierarchy with color-coded sections (Purple for Comparable Sales, Yellow for Cost, Green for Income)
+  - Visual hierarchy with custom or default color-coded sections
   - Comprehensive reports include executive summary, comparison table, and statistical analysis
   - Auto-generated report numbers and dates
   - Professional assumptions and limitations sections
-  - Legal disclaimer and footer with page numbers
+  - Custom footer with company info and page numbers
   - Client-side generation (no server required) using jsPDF library
   - Instant download with descriptive filename
+
+### Custom PDF Branding System (NEW - Professional Brand Identity)
+- **Functionality**: Comprehensive branding customization system allowing users to configure company logo, colors, fonts, headers, footers, and contact information that automatically apply to all PDF exports
+- **Purpose**: Enable appraisers to create professional, branded PDF reports that reflect their company identity and maintain consistent visual presentation across all documents
+- **Trigger**: Click "מיתוג PDF" tab in main navigation
+- **Progression**: 
+  - Configure company details (name, tagline, phone, email, website, license number) → Upload company logo (PNG/JPG up to 2MB) with position and size options → Select brand colors (primary, header background/text, footer background/text) using color pickers → Configure header settings (enable/disable, show logo, show company name, show tagline, border options) → Configure footer settings (enable/disable, show page numbers, show company name, show contact info, border options) → Click "שמור" to save settings → All future PDF exports automatically use these branding settings
+- **Success criteria**:
+  - Complete company information management (name, tagline, contact details)
+  - Logo upload with image validation (file type, size limit 2MB)
+  - Logo preview with options for position (left/center/right) and size (small/medium/large)
+  - Color customization with visual color pickers and hex input
+  - Separate header and footer enable/disable toggles
+  - Header customization: toggle logo, company name, tagline, and bottom border
+  - Footer customization: toggle page numbers, company name, contact info, and top border
+  - Real-time unsaved changes indicator with badge notification
+  - Settings persist using useKV and automatically load on return visits
+  - Reset to defaults functionality
+  - Settings automatically apply to all PDF exports (valuation reports, comprehensive reports)
+  - Professional glass-morphism UI matching app aesthetic
+  - Grid layout with organized sections for easy configuration
+  - Informational card explaining that settings apply to future PDF exports only
 
 ### Market Trends Analytics
 - **Functionality**: Visual analytics showing price trends, days on market, price per sqm by neighborhood

@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf'
 import type { ValuationResult } from './valuationEngine'
-import type { Property } from './types'
+import type { Property, BrandingSettings } from './types'
 
 export interface PDFExportOptions {
   includeCalculations?: boolean
@@ -11,6 +11,7 @@ export interface PDFExportOptions {
   appraiserLicense?: string
   reportDate?: string
   reportNumber?: string
+  branding?: BrandingSettings
 }
 
 export class ValuationPDFExporter {

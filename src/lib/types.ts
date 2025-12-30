@@ -339,3 +339,80 @@ export interface AuditLog {
   changes?: Record<string, { before: any; after: any }>
   metadata?: Record<string, any>
 }
+
+export interface BrandingSettings {
+  id: string
+  companyName: string
+  companyTagline?: string
+  logo?: {
+    dataUrl: string
+    width: number
+    height: number
+    position: 'left' | 'center' | 'right'
+    size: 'small' | 'medium' | 'large'
+  }
+  colors: {
+    primary: string
+    secondary: string
+    accent: string
+    headerBackground: string
+    headerText: string
+    footerBackground: string
+    footerText: string
+  }
+  fonts: {
+    heading: string
+    body: string
+    headingSize: number
+    bodySize: number
+  }
+  header: {
+    enabled: boolean
+    height: number
+    showLogo: boolean
+    showCompanyName: boolean
+    showTagline: boolean
+    customText?: string
+    backgroundColor?: string
+    textColor?: string
+    borderBottom: boolean
+  }
+  footer: {
+    enabled: boolean
+    height: number
+    showPageNumbers: boolean
+    showCompanyName: boolean
+    showContactInfo: boolean
+    customText?: string
+    backgroundColor?: string
+    textColor?: string
+    borderTop: boolean
+  }
+  contactInfo: {
+    address?: string
+    phone?: string
+    email?: string
+    website?: string
+    licenseNumber?: string
+  }
+  watermark?: {
+    text: string
+    opacity: number
+    angle: number
+    fontSize: number
+    color: string
+  }
+  pageLayout: {
+    margins: {
+      top: number
+      bottom: number
+      left: number
+      right: number
+    }
+    pageSize: 'a4' | 'letter' | 'legal'
+    orientation: 'portrait' | 'landscape'
+  }
+  createdAt: string
+  updatedAt: string
+  isDefault: boolean
+}
