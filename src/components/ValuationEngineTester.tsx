@@ -11,8 +11,9 @@ import { ScrollArea } from '@/components/ui/scroll-area'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ValuationEngine, type ValuationResult } from '@/lib/valuationEngine'
 import type { Property, Comparable, PropertyCondition } from '@/lib/types'
-import { Calculator, TrendUp, CurrencyDollar, CheckCircle, WarningCircle, ArrowRight } from '@phosphor-icons/react'
+import { Calculator, TrendUp, CurrencyDollar, CheckCircle, WarningCircle, ArrowRight, FilePdf, Download } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { exportSingleValuationToPDF, exportMultipleValuationsToPDF } from '@/lib/pdfExport'
 
 export function ValuationEngineTester() {
   const [testProperty, setTestProperty] = useState<Property>(createDefaultTestProperty())
@@ -84,6 +85,59 @@ export function ValuationEngineTester() {
     runIncomeTest()
   }
 
+  const exportToPDF = (result: ValuationResult) => {
+    try {
+      exportSingleValuationToPDF(result, testProperty, {
+        includeCalculations: true,
+        includeAssumptions: true,
+        includeLimitations: true,
+        includeMethodology: true,
+        appraiserName: 'Professional Appraiser',
+        reportDate: new Date().toLocaleDateString('en-US')
+      })
+      toast.success('PDF נוצר בהצלחה', {
+        description: 'הדוח הורד למחשב שלך'
+      })
+    } catch (error) {
+      toast.error('שגיאה ביצירת PDF', {
+        description: error instanceof Error ? error.message : 'שגיאה לא ידועה'
+      })
+    }
+  }
+
+  const exportAllToPDF = () => {
+    const results: Array<{ result: ValuationResult; property: Property }> = []
+    if (comparableResult) results.push({ result: comparableResult, property: testProperty })
+    if (costResult) results.push({ result: costResult, property: testProperty })
+    if (incomeResult) results.push({ result: incomeResult, property: testProperty })
+
+    if (results.length === 0) {
+      toast.error('אין תוצאות לייצוא', {
+        description: 'הרץ לפחות שיטת שמאות אחת לפני הייצוא'
+      })
+      return
+    }
+
+    try {
+      exportMultipleValuationsToPDF(results, {
+        includeCalculations: true,
+        includeAssumptions: true,
+        includeLimitations: true,
+        includeMethodology: true,
+        appraiserName: 'Professional Appraiser',
+        reportDate: new Date().toLocaleDateString('en-US'),
+        reportNumber: `VAL-${Date.now()}`
+      })
+      toast.success('דוח מקיף נוצר בהצלחה', {
+        description: `${results.length} שיטות שמאות נכללו בדוח`
+      })
+    } catch (error) {
+      toast.error('שגיאה ביצירת PDF', {
+        description: error instanceof Error ? error.message : 'שגיאה לא ידועה'
+      })
+    }
+  }
+
   const toggleComparable = (id: string) => {
     setComparables(prev => prev.map(c => 
       c.id === id ? { ...c, selected: !c.selected } : c
@@ -97,10 +151,18 @@ export function ValuationEngineTester() {
           <h1 className="text-3xl font-bold text-foreground">מנוע שמאות - מערכת בדיקה</h1>
           <p className="text-muted-foreground mt-2">בדיקת שלוש שיטות השמאות המקצועיות</p>
         </div>
-        <Button onClick={runAllTests} size="lg" className="gap-2">
-          <Calculator size={20} weight="duotone" />
-          הפעל את כל השיטות
-        </Button>
+        <div className="flex gap-3">
+          {(comparableResult || costResult || incomeResult) && (
+            <Button onClick={exportAllToPDF} size="lg" variant="outline" className="gap-2 border-primary/30 hover:bg-primary/10">
+              <Download size={20} weight="duotone" />
+              ייצא דוח מקיף
+            </Button>
+          )}
+          <Button onClick={runAllTests} size="lg" className="gap-2">
+            <Calculator size={20} weight="duotone" />
+            הפעל את כל השיטות
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -311,7 +373,7 @@ export function ValuationEngineTester() {
 
             {comparableResult && (
               <div className="mt-6">
-                <ResultDisplay result={comparableResult} />
+                <ResultDisplay result={comparableResult} property={testProperty} onExportPDF={exportToPDF} />
               </div>
             )}
           </TabsContent>
@@ -397,7 +459,7 @@ export function ValuationEngineTester() {
 
             {costResult && (
               <div className="mt-6">
-                <ResultDisplay result={costResult} />
+                <ResultDisplay result={costResult} property={testProperty} onExportPDF={exportToPDF} />
               </div>
             )}
           </TabsContent>
@@ -513,7 +575,7 @@ export function ValuationEngineTester() {
 
             {incomeResult && (
               <div className="mt-6">
-                <ResultDisplay result={incomeResult} />
+                <ResultDisplay result={incomeResult} property={testProperty} onExportPDF={exportToPDF} />
               </div>
             )}
           </TabsContent>
@@ -598,7 +660,7 @@ function PropertyInputs({ property, onChange }: { property: Property; onChange: 
   )
 }
 
-function ResultDisplay({ result }: { result: ValuationResult }) {
+function ResultDisplay({ result, property, onExportPDF }: { result: ValuationResult; property?: Property; onExportPDF?: (result: ValuationResult) => void }) {
   const getMethodName = (method: string) => {
     const names = {
       'comparable-sales': 'שיטת ההשוואה',
@@ -611,10 +673,18 @@ function ResultDisplay({ result }: { result: ValuationResult }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-bold">תוצאות החישוב</h3>
-        <Badge variant="outline" className="text-base px-4 py-2">
-          {getMethodName(result.method)}
-        </Badge>
+        <div className="flex items-center gap-4">
+          <h3 className="text-xl font-bold">תוצאות החישוב</h3>
+          <Badge variant="outline" className="text-base px-4 py-2">
+            {getMethodName(result.method)}
+          </Badge>
+        </div>
+        {onExportPDF && (
+          <Button onClick={() => onExportPDF(result)} variant="outline" className="gap-2 border-accent/30 hover:bg-accent/10">
+            <FilePdf size={20} weight="duotone" />
+            ייצא ל-PDF
+          </Button>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
