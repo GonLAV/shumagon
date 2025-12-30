@@ -291,3 +291,105 @@ export function generateMockMarketTrends(): MarketTrend[] {
   
   return trends
 }
+
+export function generateMockReports() {
+  return [
+    {
+      id: 'report-1',
+      propertyId: '1',
+      clientId: 'client-1',
+      title: 'דוח שמאות מלא - רחוב הרצל 45',
+      format: 'pdf' as const,
+      template: 'detailed' as const,
+      status: 'delivered' as const,
+      sections: [
+        {
+          id: 'sec-1',
+          title: 'תקציר מנהלים',
+          content: 'הנכס הינו דירת 4 חדרים מעוצבת ומשופצת ברחוב הרצל 45, תל אביב. השווי המשוער: ₪4,850,000 בהתבסס על ניתוח השוואתי מקיף של שוק הנדל"ן באזור.',
+          type: 'text' as const,
+          order: 1,
+          required: true,
+          enabled: true
+        },
+        {
+          id: 'sec-2',
+          title: 'פרטי הנכס',
+          content: 'דירת 4 חדרים, 95 מ"ר בנוי, קומה 3 מתוך 5, בנין משנת 2015 עם מעלית.',
+          type: 'text' as const,
+          order: 2,
+          required: true,
+          enabled: true
+        },
+        {
+          id: 'sec-3',
+          title: 'ניתוח שוק',
+          content: 'שוק הנדל"ן בנווה צדק נמצא במגמת עלייה מתמשכת. הביקוש לדירות משופצות גבוה במיוחד.',
+          type: 'text' as const,
+          order: 3,
+          required: true,
+          enabled: true
+        }
+      ],
+      appraiserName: 'יוסי כהן',
+      appraiserLicense: 'LIC-12345',
+      generatedAt: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+      deliveredAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      watermark: false
+    },
+    {
+      id: 'report-2',
+      propertyId: '2',
+      clientId: 'client-2',
+      title: 'דוח שמאות - רחוב רוטשילד 128',
+      format: 'html' as const,
+      template: 'standard' as const,
+      status: 'completed' as const,
+      sections: [
+        {
+          id: 'sec-1',
+          title: 'תקציר מנהלים',
+          content: 'פנטהאוז יוקרתי ברחוב רוטשילד 128. שווי משוער: ₪12,300,000.',
+          type: 'text' as const,
+          order: 1,
+          required: true,
+          enabled: true
+        }
+      ],
+      appraiserName: 'יוסי כהן',
+      appraiserLicense: 'LIC-12345',
+      generatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+      watermark: false
+    }
+  ]
+}
+
+export function generateMockUpdateRequests() {
+  return [
+    {
+      id: 'req-1',
+      propertyId: '1',
+      clientId: 'client-1',
+      reportId: 'report-1',
+      title: 'עדכון שווי לאור שיפוצים חדשים',
+      description: 'ביצענו שיפוצים נוספים במטבח והחלפנו את חלונות האלומיניום. אשמח לעדכון השומה המשקפת את השיפורים.',
+      priority: 'medium' as const,
+      status: 'in-progress' as const,
+      requestedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      response: 'קיבלתי את הבקשה. אבוא לבקר בנכס בשבוע הבא כדי להעריך את השיפוצים החדשים ולעדכן את השומה בהתאם.'
+    },
+    {
+      id: 'req-2',
+      propertyId: '3',
+      clientId: 'client-3',
+      title: 'שאלה לגבי השוואה לנכס דומה',
+      description: 'ראיתי דירה דומה ברחוב הסמוך שנמכרה במחיר גבוה יותר. האם ניתן להסביר את ההבדל?',
+      priority: 'low' as const,
+      status: 'pending' as const,
+      requestedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString()
+    }
+  ]
+}
+

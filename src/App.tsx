@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useKV } from '@github/spark/hooks'
 import type { Property, Client } from '@/lib/types'
 import { generateMockProperties, generateMockClients } from '@/lib/mockData'
@@ -6,7 +6,9 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Dashboard } from '@/components/Dashboard'
 import { ClientManager } from '@/components/ClientManager'
 import { MarketInsights } from '@/components/MarketInsights'
-import { House, ChartBar, Users } from '@phosphor-icons/react'
+import { ClientPortal } from '@/components/ClientPortal'
+import { ClientPortalManagement } from '@/components/ClientPortalManagement'
+import { House, ChartBar, Users, FileText, UserCircle } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { AppHeader } from '@/components/app/AppHeader'
 import { PropertiesTab } from '@/components/app/PropertiesTab'
@@ -17,6 +19,14 @@ function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const [isCreatingProperty, setIsCreatingProperty] = useState(false)
+  const [isClientPortalMode, setIsClientPortalMode] = useState(false)
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    if (urlParams.get('portal') === 'true') {
+      setIsClientPortalMode(true)
+    }
+  }, [])
 
   const handleSaveProperty = (property: Property) => {
     setProperties((current) => {
@@ -49,6 +59,22 @@ function App() {
     setActiveTab('properties')
   }
 
+  if (isClientPortalMode) {
+    return (
+      <>
+        <ClientPortal 
+          clients={clients || []} 
+          properties={properties || []}
+          onBackToAdmin={() => {
+            setIsClientPortalMode(false)
+            window.history.replaceState({}, '', window.location.pathname)
+          }}
+        />
+        <Toaster />
+      </>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-background grid-bg">
       <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
@@ -73,6 +99,10 @@ function App() {
             <TabsTrigger value="insights" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <ChartBar size={18} weight="duotone" />
               <span className="hidden sm:inline">ניתוח שוק</span>
+            </TabsTrigger>
+            <TabsTrigger value="portal" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <UserCircle size={18} weight="duotone" />
+              <span className="hidden sm:inline">פורטל לקוחות</span>
             </TabsTrigger>
           </TabsList>
 
@@ -117,6 +147,14 @@ function App() {
 
           <TabsContent value="insights" className="mt-0">
             <MarketInsights properties={properties || []} />
+          </TabsContent>
+
+          <TabsContent value="portal" className="mt-0">
+            <ClientPortalManagement
+              clients={clients || []}
+              properties={properties || []}
+              onSelectProperty={handleSelectProperty}
+            />
           </TabsContent>
         </Tabs>
       </main>

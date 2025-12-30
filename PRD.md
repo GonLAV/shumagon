@@ -208,6 +208,37 @@ This is a professional tool requiring multiple sophisticated features: property 
   - Annotation replies and threaded discussions
   - Share code copying with one click
 
+### Client Portal for Viewing Reports and Requesting Updates (NEW - Client-Centric)
+- **Functionality**: Dedicated client-facing portal where clients can log in, view their properties, access published appraisal reports, download documents, submit update requests, track request status, and communicate with their appraiser
+- **Purpose**: Empower clients with self-service access to their appraisal data, streamline communication, reduce back-and-forth emails, and provide transparency in the appraisal process
+- **Trigger**: 
+  - Client flow: Visit portal URL → Enter email → View personalized dashboard
+  - Appraiser flow: Click "פורטל לקוחות" tab in admin interface
+- **Progression**:
+  - Client login → Enter email address → Access personalized portal → View dashboard with stats (reports, properties, open requests) → Navigate tabs:
+    - Reports tab: Browse all reports → Search/filter/sort → View report details → Download reports
+    - Update Requests tab: View all requests → See status/priority badges → Read appraiser responses
+    - Properties tab: View property cards with details and valuations
+    - Activity tab: See login/download/request history timeline
+  - Submit new request: Click "בקשת עדכון" → Select property → Select report (optional) → Enter title and description → Set priority → Submit → Receive confirmation
+  - Appraiser management: View pending requests → Update request status (pending/in-review/in-progress) → Respond to requests (manual or AI-generated) → Mark as completed/rejected → Manage published reports → Track client activity
+- **Success criteria**:
+  - Email-based login with client database lookup
+  - Real-time activity tracking and logging
+  - Search and sort functionality for reports
+  - Priority and status badges for update requests
+  - AI-powered response generation for appraisers (GPT-4o-mini)
+  - Request workflow: pending → in-review → in-progress → completed/rejected
+  - Professional report viewing with sections
+  - Download functionality for all report formats
+  - Notification system (bell icon with unread indicator)
+  - Secure client data isolation (clients only see their own data)
+  - Copy portal link functionality for easy sharing
+  - Stats dashboard for both clients and appraisers
+  - Glass-morphism UI matching main app aesthetic
+  - Mobile-responsive layout
+  - Activity history with relative timestamps
+
 ## Edge Case Handling
 
 - **No Comparable Properties Found**: Display message with suggestions to expand search radius or adjust criteria, allow manual comparable entry
@@ -223,6 +254,12 @@ This is a professional tool requiring multiple sophisticated features: property 
 - **AR Session Interrupted**: Auto-save session data every 30 seconds, restore on return, show "Session Recovered" notification
 - **Browser Doesn't Support Camera API**: Detect on load, show upgrade message, disable AR features gracefully with alternative photo upload option
 - **Device Motion During Measurement**: Show stability indicator, require steady hold for 1 second, retry if too much motion detected
+- **Client Tries to Access Another Client's Data**: Strict data isolation by client ID, show 404 if attempting to access unauthorized content
+- **Appraiser Accidentally Publishes Wrong Report**: Add "unpublish" button in management panel, allow status rollback to draft
+- **Multiple Update Requests for Same Property**: Group by property in UI, show relationship indicators, allow bulk operations
+- **Client Submits Empty or Invalid Request**: Client-side validation requires title and description, show friendly error messages
+- **Network Failure During Portal Access**: Graceful offline state, cache recent data, show reconnection status, queue actions for sync
+- **Client Login with Non-Existent Email**: Clear error message, suggest contacting appraiser, no security information leakage
 
 ## Design Direction
 

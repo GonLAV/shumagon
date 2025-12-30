@@ -192,3 +192,67 @@ export interface ARVideo {
   capturedBy: string
   thumbnailUrl?: string
 }
+
+export interface Report {
+  id: string
+  propertyId: string
+  clientId: string
+  title: string
+  format: 'pdf' | 'word' | 'html'
+  template: 'standard' | 'detailed' | 'summary' | 'bank'
+  status: 'draft' | 'pending-review' | 'completed' | 'delivered'
+  sections: ReportSection[]
+  appraiserName: string
+  appraiserLicense: string
+  generatedAt: string
+  deliveredAt?: string
+  downloadUrl?: string
+  notes?: string
+  watermark: boolean
+}
+
+export interface ReportSection {
+  id: string
+  title: string
+  content: string
+  type: 'text' | 'table' | 'chart' | 'image' | 'list'
+  order: number
+  required: boolean
+  enabled: boolean
+}
+
+export interface UpdateRequest {
+  id: string
+  propertyId: string
+  clientId: string
+  reportId?: string
+  title: string
+  description: string
+  priority: 'low' | 'medium' | 'high' | 'urgent'
+  status: 'pending' | 'in-review' | 'in-progress' | 'completed' | 'rejected'
+  requestedAt: string
+  updatedAt: string
+  completedAt?: string
+  response?: string
+  attachments?: string[]
+  internalNotes?: string
+}
+
+export interface ClientActivity {
+  id: string
+  clientId: string
+  type: 'login' | 'view-report' | 'download-report' | 'create-request' | 'message' | 'update-request'
+  description: string
+  metadata?: Record<string, any>
+  timestamp: string
+}
+
+export interface ClientPortalAccess {
+  clientId: string
+  email: string
+  password?: string
+  isActive: boolean
+  lastLogin?: string
+  notifications: boolean
+  emailNotifications: boolean
+}
