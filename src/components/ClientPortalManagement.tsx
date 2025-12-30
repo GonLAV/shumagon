@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useKV } from '@github/spark/hooks'
 import type { Client, Property, Report, UpdateRequest } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
@@ -43,15 +44,6 @@ export function ClientPortalManagement({ clients, properties, onSelectProperty }
   const [responseText, setResponseText] = useState('')
   const [showResponseDialog, setShowResponseDialog] = useState(false)
   const [activeTab, setActiveTab] = useState('requests')
-
-  useEffect(() => {
-    if (!reports || reports.length === 0) {
-      setReports(generateMockReports() as any)
-    }
-    if (!updateRequests || updateRequests.length === 0) {
-      setUpdateRequests(generateMockUpdateRequests() as any)
-    }
-  }, [])
 
   const pendingRequests = (updateRequests || []).filter(r => 
     r.status === 'pending' || r.status === 'in-review' || r.status === 'in-progress'
@@ -582,5 +574,3 @@ function ReportsManagementTab({
     </div>
   )
 }
-
-import { useState } from 'react'

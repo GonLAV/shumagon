@@ -8,7 +8,8 @@ import { ClientManager } from '@/components/ClientManager'
 import { MarketInsights } from '@/components/MarketInsights'
 import { ClientPortal } from '@/components/ClientPortal'
 import { ClientPortalManagement } from '@/components/ClientPortalManagement'
-import { House, ChartBar, Users, FileText, UserCircle } from '@phosphor-icons/react'
+import { BusinessManagement } from '@/components/BusinessManagement'
+import { House, ChartBar, Users, FileText, UserCircle, CurrencyDollar } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { AppHeader } from '@/components/app/AppHeader'
 import { PropertiesTab } from '@/components/app/PropertiesTab'
@@ -100,6 +101,10 @@ function App() {
               <ChartBar size={18} weight="duotone" />
               <span className="hidden sm:inline">ניתוח שוק</span>
             </TabsTrigger>
+            <TabsTrigger value="business" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <CurrencyDollar size={18} weight="duotone" />
+              <span className="hidden sm:inline">ניהול עסקי</span>
+            </TabsTrigger>
             <TabsTrigger value="portal" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <UserCircle size={18} weight="duotone" />
               <span className="hidden sm:inline">פורטל לקוחות</span>
@@ -147,6 +152,13 @@ function App() {
 
           <TabsContent value="insights" className="mt-0">
             <MarketInsights properties={properties || []} />
+          </TabsContent>
+
+          <TabsContent value="business" className="mt-0">
+            <BusinessManagement
+              properties={properties || []}
+              clients={clients || []}
+            />
           </TabsContent>
 
           <TabsContent value="portal" className="mt-0">

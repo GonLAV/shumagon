@@ -256,3 +256,86 @@ export interface ClientPortalAccess {
   notifications: boolean
   emailNotifications: boolean
 }
+
+export interface Invoice {
+  id: string
+  propertyId: string
+  clientId: string
+  invoiceNumber: string
+  status: 'draft' | 'sent' | 'paid' | 'overdue' | 'cancelled'
+  issueDate: string
+  dueDate: string
+  lineItems: InvoiceLineItem[]
+  subtotal: number
+  taxRate: number
+  taxAmount: number
+  totalAmount: number
+  paidAmount: number
+  balance: number
+  paymentTerms: string
+  notes?: string
+  paymentMethod?: 'cash' | 'check' | 'bank-transfer' | 'credit-card'
+  paidAt?: string
+  createdAt: string
+  updatedAt: string
+}
+
+export interface InvoiceLineItem {
+  id: string
+  description: string
+  serviceType: ServiceType
+  quantity: number
+  unitPrice: number
+  amount: number
+}
+
+export type ServiceType = 
+  | 'residential-appraisal'
+  | 'commercial-appraisal'
+  | 'land-appraisal'
+  | 'rental-appraisal'
+  | 'complex-appraisal'
+  | 'consultation'
+  | 'site-inspection'
+  | 'additional-report'
+  | 'rush-fee'
+  | 'travel-expenses'
+  | 'other'
+
+export interface PricingTemplate {
+  id: string
+  name: string
+  serviceType: ServiceType
+  basePrice: number
+  pricePerSqm?: number
+  minimumPrice?: number
+  maximumPrice?: number
+  description: string
+  isActive: boolean
+}
+
+export interface DigitalSignature {
+  id: string
+  documentId: string
+  documentType: 'report' | 'invoice' | 'contract'
+  signedBy: string
+  signerName: string
+  signerLicense?: string
+  signatureData: string
+  timestamp: string
+  ipAddress: string
+  hash: string
+  verified: boolean
+}
+
+export interface AuditLog {
+  id: string
+  entityType: 'property' | 'report' | 'invoice' | 'client'
+  entityId: string
+  action: 'created' | 'updated' | 'deleted' | 'viewed' | 'exported' | 'signed'
+  userId: string
+  userName: string
+  timestamp: string
+  changes?: Record<string, { before: any; after: any }>
+  metadata?: Record<string, any>
+}

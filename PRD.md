@@ -239,6 +239,72 @@ This is a professional tool requiring multiple sophisticated features: property 
   - Mobile-responsive layout
   - Activity history with relative timestamps
 
+### Professional Valuation Engine (NEW - Core Appraisal System)
+- **Functionality**: Advanced calculation engine implementing three professional appraisal methodologies with automatic adjustments, formula documentation, and confidence scoring
+- **Purpose**: Provide legally-sound, mathematically-accurate valuations following Israeli appraisal standards with full transparency and professional documentation
+- **Trigger**: Click "שומה מקצועית" or valuation calculator in property details
+- **Progression**: 
+  - Select methodology (comparable sales/cost approach/income approach) → Enter required parameters → System calculates with step-by-step documentation → Review calculations and adjustments → View confidence score → See assumptions and limitations → Save valuation to property
+  - Comparable Sales: Uses selected comparables → Applies adjustments for location, size, condition, floor, age, features → Weighted reconciliation by similarity score → Standard deviation analysis
+  - Cost Approach: Land value + construction cost - depreciation → Effective age calculation based on condition → Economic life analysis
+  - Income Approach: Monthly rent → Vacancy adjustment → Operating expenses → NOI calculation → Capitalization rate application
+- **Success criteria**:
+  - Industry-standard adjustment factors (location ±15%, condition ±10%, floor ±4%, features +7%)
+  - Depreciation calculated using effective age (condition-adjusted)
+  - Confidence scoring (40-90%) based on data quality
+  - Complete calculation documentation with formulas and inputs
+  - Professional methodology narrative in Hebrew
+  - Assumptions and limitations clearly stated
+  - Value range (min/max) with standard deviation
+  - Reconciliation explaining final value selection
+  - All calculations saved with property record
+
+### Business Management & Invoicing System (NEW - Revenue Management)
+- **Functionality**: Complete invoicing and pricing system with automated invoice generation, payment tracking, revenue analytics, and customizable pricing templates
+- **Purpose**: Enable appraisers to run their business professionally with proper billing, track revenue, manage cash flow, and understand business performance
+- **Trigger**: Click "ניהול עסקי" tab in main navigation
+- **Progression**:
+  - Dashboard view: See monthly revenue, total revenue, outstanding balance, overdue invoices → Navigate to Invoices/Pricing/Analytics tabs
+  - Create invoice: Select property and client → System auto-calculates price based on property type and size → Add line items → Set payment terms → Generate invoice → Export to HTML/PDF
+  - Manage invoices: View all invoices with status badges → Click for details → Record payments → Update status automatically (draft→sent→paid/overdue) → Export invoice documents
+  - Pricing templates: View 9+ service types (residential, commercial, land, rental, complex, consultation, etc.) → Base price + per-sqm pricing → Minimum/maximum limits → Complexity adjustments
+  - Analytics: View total/monthly revenue → Service breakdown → Payment status distribution → Invoice statistics
+- **Success criteria**:
+  - Auto-pricing based on property characteristics (+₪1000 for >200 sqm, +₪500 for penthouses, etc.)
+  - Invoice numbering system (INV-YYYY-####)
+  - Tax calculation (17% VAT)
+  - Payment tracking with balance calculation
+  - Status workflow (draft→sent→paid/overdue→cancelled)
+  - HTML export with professional formatting
+  - Revenue dashboards and statistics
+  - Service type breakdown analytics
+  - Outstanding balance tracking
+  - Overdue invoice alerts
+  - Payment terms configuration (default 30 days)
+  - Line item management with quantities and unit prices
+
+### Digital Security & Audit Trail (NEW - Legal Protection)
+- **Functionality**: Comprehensive security system with document hashing, digital signatures, tamper detection, audit logging, and version control
+- **Purpose**: Provide legal protection, ensure document integrity, maintain compliance, and create defensible documentation trail for all appraisals
+- **Trigger**: Automatic for all document operations; accessible via security dashboard
+- **Progression**:
+  - Document signing: Generate SHA-256 hash → Create signature payload → Sign with appraiser credentials → Store signature with timestamp and IP → Verify on access
+  - Audit logging: Every action tracked (created/updated/deleted/viewed/exported/signed) → User attribution → Timestamp → Change tracking (before/after) → Metadata storage
+  - Security monitoring: View total actions → Actions by type → Active users → Recent activity (last 24h) → Suspicious activity detection
+  - Tamper detection: Hash verification on document access → Alert if content modified → Signature invalidation
+- **Success criteria**:
+  - SHA-256 cryptographic hashing
+  - Digital signatures with timestamp and IP address
+  - Complete audit trail for all entities (property/report/invoice/client)
+  - Change tracking with before/after states
+  - Suspicious activity detection (rapid actions, mass deletions)
+  - Document lock status (draft editable, completed locked)
+  - Watermark generation for drafts
+  - Input sanitization to prevent XSS
+  - License validation
+  - Data masking for sensitive information
+  - Security reports and analytics
+
 ## Edge Case Handling
 
 - **No Comparable Properties Found**: Display message with suggestions to expand search radius or adjust criteria, allow manual comparable entry
