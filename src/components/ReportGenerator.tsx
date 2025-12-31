@@ -23,11 +23,14 @@ import {
   ChartBar,
   Buildings,
   MapPin,
-  Calendar
+  Calendar,
+  EnvelopeSimple,
+  PaperPlaneTilt
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import type { Property, Client, Comparable } from '@/lib/types'
+import { EmailReportDialog, type EmailData } from '@/components/EmailReportDialog'
 
 interface ReportGeneratorProps {
   property: Property
@@ -48,6 +51,7 @@ export function ReportGenerator({ property, client, comparables = [] }: ReportGe
   const [reportTemplate, setReportTemplate] = useState<'standard' | 'detailed' | 'summary' | 'bank'>('detailed')
   const [isGenerating, setIsGenerating] = useState(false)
   const [customNotes, setCustomNotes] = useState('')
+  const [showEmailDialog, setShowEmailDialog] = useState(false)
   const [appraiserName, setAppraiserName] = useState('שמאי מוסמך')
   const [appraiserLicense, setAppraiserLicense] = useState('')
   const [includeWatermark, setIncludeWatermark] = useState(false)
@@ -305,6 +309,17 @@ ${comparables.map(c => `- ${c.address}: ₪${c.salePrice.toLocaleString()} (מו
   const enabledCount = sections.filter(s => s.enabled).length
   const totalCount = sections.length
 
+  const handleSendEmail = async (emailData: EmailData) => {
+    toast.loading('שולח דוח באימייל...')
+
+    await new Promise(resolve => setTimeout(resolve, 2000))
+
+    console.log('Email sent:', emailData)
+    toast.success(`הדוח נשלח ל-${emailData.to.join(', ')}`)
+  }
+
+  const recipientSuggestions = client?.email ? [client.email] : []
+
   return (
     <div className="space-y-6">
       <Card className="glass-effect glow-primary">
@@ -318,6 +333,15 @@ ${comparables.map(c => `- ${c.address}: ₪${c.salePrice.toLocaleString()} (מו
               >
                 <Download size={18} weight="bold" />
                 {isGenerating ? 'מייצר דוח...' : 'ייצא דוח'}
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => setShowEmailDialog(true)}
+                disabled={isGenerating}
+                className="gap-2"
+              >
+                <PaperPlaneTilt size={18} weight="fill" />
+                שלח באימייל
               </Button>
               <Button
                 variant="outline"
@@ -486,6 +510,15 @@ ${comparables.map(c => `- ${c.address}: ₪${c.salePrice.toLocaleString()} (מו
           </p>
         </CardContent>
       </Card>
+
+      <EmailReportDialog
+        open={showEmailDialog}
+        onOpenChange={setShowEmailDialog}
+        reportTitle={`${property.address.street}, ${property.address.city}`}
+        reportType={reportTemplate === 'bank' ? 'דוח שמאות לבנק' : 'דוח שמאות'}
+        recipientSuggestions={recipientSuggestions}
+        onSend={handleSendEmail}
+      />
     </div>
   )
 }

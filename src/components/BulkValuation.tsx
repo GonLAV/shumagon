@@ -25,7 +25,8 @@ import {
   FileText,
   FileCsv,
   FileXls,
-  CaretDown
+  CaretDown,
+  PaperPlaneTilt
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -33,6 +34,7 @@ import { ValuationEngine } from '@/lib/valuationEngine'
 import { exportBulkValuationPDF } from '@/lib/bulkPdfExport'
 import { exportToCSV, exportToExcel, exportDetailedCSV } from '@/lib/bulkExportUtils'
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
+import { EmailReportDialog, type EmailData } from '@/components/EmailReportDialog'
 
 interface BulkValuationProps {
   properties: Property[]
@@ -71,6 +73,7 @@ export function BulkValuation({ properties, onUpdateProperty }: BulkValuationPro
   const [valuationMethod, setValuationMethod] = useState<'comparable-sales' | 'cost-approach' | 'income-approach' | 'auto'>('auto')
   const [searchRadius, setSearchRadius] = useState(2)
   const [similarityThreshold, setSimilarityThreshold] = useState(75)
+  const [showEmailDialog, setShowEmailDialog] = useState(false)
 
   const eligibleProperties = useMemo(() => {
     return properties.filter(p => 
@@ -309,6 +312,15 @@ Format: {"comparables": [...]}`
     }
   }
 
+  const handleSendEmail = async (emailData: EmailData) => {
+    toast.loading('שולח דוח תיק השקעות באימייל...')
+    
+    await new Promise(resolve => setTimeout(resolve, 2000))
+    
+    console.log('Bulk report email sent:', emailData)
+    toast.success(`דוח תיק ההשקעות נשלח ל-${emailData.to.join(', ')}`)
+  }
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('he-IL', {
       style: 'currency',
@@ -369,6 +381,11 @@ Format: {"comparables": [...]}`
               <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
                 <FileXls size={18} weight="duotone" />
                 ייצוא Excel
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setShowEmailDialog(true)} className="gap-2 cursor-pointer">
+                <PaperPlaneTilt size={18} weight="fill" />
+                שלח באימייל
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -776,6 +793,15 @@ Format: {"comparables": [...]}`
           </CardContent>
         </Card>
       )}
+
+      <EmailReportDialog
+        open={showEmailDialog}
+        onOpenChange={setShowEmailDialog}
+        reportTitle={`תיק השקעות - ${valuationResults.filter(r => r.status === 'completed').length} נכסים`}
+        reportType="דוח שומה מרובה"
+        recipientSuggestions={[]}
+        onSend={handleSendEmail}
+      />
     </div>
   )
 }

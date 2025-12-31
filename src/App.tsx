@@ -13,13 +13,14 @@ import { PropertyDigitalTwin } from '@/components/PropertyDigitalTwin'
 import { LiveDataConnections } from '@/components/LiveDataConnections'
 import { TeamCollaboration } from '@/components/TeamCollaboration'
 import { DevelopmentRightsCalculator } from '@/components/DevelopmentRightsCalculator'
-import { House, ChartBar, Users, UserCircle, CurrencyDollar, Flask, Palette, Cube, Database, UsersThree, Calculator, ListChecks } from '@phosphor-icons/react'
+import { House, ChartBar, Users, UserCircle, CurrencyDollar, Flask, Palette, Cube, Database, UsersThree, Calculator, ListChecks, EnvelopeSimple } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { AppHeader } from '@/components/app/AppHeader'
 import { PropertiesTab } from '@/components/app/PropertiesTab'
 import { ValuationEngineTester } from '@/components/ValuationEngineTester'
 import { BrandingSettingsTab } from '@/components/BrandingSettingsTab'
 import { BulkValuation } from '@/components/BulkValuation'
+import { EmailHistory } from '@/components/EmailHistory'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -91,7 +92,7 @@ function App() {
 
       <main className="container mx-auto px-6 py-8 relative">
         <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-          <TabsList className="mb-8 glass-effect p-1.5 grid grid-cols-6 lg:grid-cols-13 gap-1">
+          <TabsList className="mb-8 glass-effect p-1.5 grid grid-cols-6 lg:grid-cols-14 gap-1">
             <TabsTrigger value="dashboard" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <House size={18} weight="duotone" />
               <span className="hidden sm:inline">לוח בקרה</span>
@@ -111,6 +112,10 @@ function App() {
             <TabsTrigger value="bulk" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <ListChecks size={18} weight="duotone" />
               <span className="hidden sm:inline">שומה מרובה</span>
+            </TabsTrigger>
+            <TabsTrigger value="email" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <EnvelopeSimple size={18} weight="duotone" />
+              <span className="hidden sm:inline">דוחות שנשלחו</span>
             </TabsTrigger>
             <TabsTrigger value="business" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <CurrencyDollar size={18} weight="duotone" />
@@ -194,6 +199,10 @@ function App() {
               properties={properties || []} 
               onUpdateProperty={handleSaveProperty}
             />
+          </TabsContent>
+
+          <TabsContent value="email" className="mt-0">
+            <EmailHistory />
           </TabsContent>
 
           <TabsContent value="business" className="mt-0">
