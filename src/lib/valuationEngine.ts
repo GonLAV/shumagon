@@ -1,4 +1,17 @@
 import type { Property, Comparable, PropertyCondition } from './types'
+import {
+  CONDITION_MULTIPLIERS,
+  FLOOR_ADJUSTMENTS,
+  MAX_FLOOR_KEY,
+  FEATURE_VALUES,
+  EFFECTIVE_AGE_FACTORS,
+  LOCATION_DISTANCE_ADJUSTMENTS,
+  LOCATION_DEFAULT_ADJUSTMENT,
+  SIZE_ADJUSTMENT_NOOP_THRESHOLD,
+  SIZE_ADJUSTMENT_FACTOR,
+  AGE_ADJUSTMENT_STEPS,
+  AGE_DEFAULT_ADJUSTMENT
+} from './valuationTables'
 
 export interface ValuationResult {
   method: 'comparable-sales' | 'cost-approach' | 'income-approach' | 'hybrid'
@@ -10,6 +23,20 @@ export interface ValuationResult {
   reconciliation: string
   assumptions: string[]
   limitations: string[]
+  qualityChecks?: ValuationQualityCheck[]
+}
+
+export interface ValuationQualityCheck {
+  severity: 'info' | 'warning' | 'error'
+  code:
+    | 'missing-input'
+    | 'low-sample'
+    | 'high-variation'
+    | 'outlier'
+    | 'large-adjustment'
+    | 'parameter-out-of-range'
+    | 'method-divergence'
+  message: string
 }
 
 export interface ValuationCalculation {
@@ -29,40 +56,71 @@ export interface AdjustmentFactors {
   features: number
 }
 
-const CONDITION_MULTIPLIERS: Record<PropertyCondition, number> = {
-  'new': 1.15,
-  'excellent': 1.08,
-  'good': 1.00,
-  'fair': 0.92,
-  'poor': 0.80,
-  'renovation-needed': 0.70
-}
-
-const FLOOR_ADJUSTMENTS: Record<number, number> = {
-  0: -0.05,
-  1: 0,
-  2: 0.02,
-  3: 0.03,
-  4: 0.04,
-  5: 0.04,
-  6: 0.03,
-  7: 0.02,
-  8: 0.01
-}
-
-const FEATURE_VALUES = {
-  elevator: 0.05,
-  parking: 0.07,
-  storage: 0.03,
-  balcony: 0.04,
-  accessible: 0.03,
-  airConditioning: 0.02,
-  securityDoor: 0.01,
-  renovated: 0.08,
-  waterHeating: 0.01
-}
-
 export class ValuationEngine {
+
+  /**
+   * Reconcile multiple method results into a single hybrid result.
+   * This does not re-run calculations; it only combines outputs.
+   */
+  static reconcileValuations(
+    results: ValuationResult[],
+    weights?: Partial<Record<ValuationResult['method'], number>>
+  ): ValuationResult {
+    if (results.length === 0) {
+      throw new Error('אין תוצאות לשקלול')
+    }
+
+    const defaultWeights: Record<ValuationResult['method'], number> = {
+      'comparable-sales': 0.6,
+      'income-approach': 0.6,
+      'cost-approach': 0.4,
+      'hybrid': 0
+    }
+
+    const methodWeights = results.map(r => {
+      const w = weights?.[r.method] ?? defaultWeights[r.method] ?? 1
+      return { result: r, weight: Math.max(w, 0) }
+    }).filter(x => x.weight > 0)
+
+    const totalWeight = methodWeights.reduce((sum, x) => sum + x.weight, 0)
+    const weightedValue = methodWeights.reduce((sum, x) => sum + x.result.estimatedValue * x.weight, 0) / totalWeight
+    const estimatedValue = Math.round(weightedValue / 1000) * 1000
+
+    const mins = results.map(r => r.valueRange.min)
+    const maxs = results.map(r => r.valueRange.max)
+    const valueRange = {
+      min: Math.round(Math.min(...mins) / 1000) * 1000,
+      max: Math.round(Math.max(...maxs) / 1000) * 1000
+    }
+
+    const confidence = Math.round(
+      methodWeights.reduce((sum, x) => sum + x.result.confidence * x.weight, 0) / totalWeight
+    )
+
+    const allChecks = results.flatMap(r => r.qualityChecks || [])
+    const divergenceCheck = this.buildDivergenceCheck(results)
+
+    return {
+      method: 'hybrid',
+      estimatedValue,
+      valueRange,
+      confidence,
+      methodology: 'שקלול תוצאות בין שיטות שומה (Reconciliation) על בסיס משקולות והערכת איכות הנתונים.',
+      calculations: [
+        {
+          step: 'שקלול בין שיטות',
+          description: `שקלול ${results.length} תוצאות שומה`,
+          formula: 'Σ(שווי שיטה × משקל) / Σ(משקלות)',
+          inputs: Object.fromEntries(methodWeights.map(x => [x.result.method, x.weight])),
+          result: estimatedValue
+        }
+      ],
+      reconciliation: this.buildHybridReconciliation(results, estimatedValue),
+      assumptions: Array.from(new Set(results.flatMap(r => r.assumptions))),
+      limitations: Array.from(new Set(results.flatMap(r => r.limitations))),
+      qualityChecks: divergenceCheck ? [...allChecks, divergenceCheck] : allChecks
+    }
+  }
   
   static calculateComparableSalesApproach(
     property: Property,
@@ -119,6 +177,8 @@ export class ValuationEngine {
 
     const confidence = this.calculateConfidence(selectedComps, standardDeviation, avgAdjustedPrice)
 
+    const qualityChecks = this.buildComparableQualityChecks(selectedComps, adjustedPrices, standardDeviation, avgAdjustedPrice)
+
     return {
       method: 'comparable-sales',
       estimatedValue: finalValue,
@@ -128,7 +188,8 @@ export class ValuationEngine {
       calculations,
       reconciliation: this.generateReconciliation(adjustedPrices, finalValue, confidence),
       assumptions: this.generateAssumptions('comparable-sales'),
-      limitations: this.generateLimitations('comparable-sales', selectedComps.length)
+      limitations: this.generateLimitations('comparable-sales', selectedComps.length),
+      qualityChecks
     }
   }
 
@@ -196,6 +257,8 @@ export class ValuationEngine {
       max: Math.round(totalValue * 1.10 / 1000) * 1000
     }
 
+    const qualityChecks = this.buildCostQualityChecks({ landValue, constructionCostPerSqm, depreciationRate })
+
     return {
       method: 'cost-approach',
       estimatedValue: totalValue,
@@ -205,7 +268,8 @@ export class ValuationEngine {
       calculations,
       reconciliation: `שווי הנכס נקבע בשיטת העלות, המתבססת על ערך הקרקע בתוספת עלות בנייה חלופית בניכוי פחת. המבנה בגיל ${buildingAge} שנים (גיל אפקטיבי ${effectiveAge} שנים) עם שיעור פחת של ${(depreciationRate * 100).toFixed(1)}%.`,
       assumptions: this.generateAssumptions('cost-approach'),
-      limitations: this.generateLimitations('cost-approach', 0)
+      limitations: this.generateLimitations('cost-approach', 0),
+      qualityChecks
     }
   }
 
@@ -279,6 +343,8 @@ export class ValuationEngine {
 
     const yieldPercent = (netOperatingIncome / estimatedValue * 100).toFixed(2)
 
+    const qualityChecks = this.buildIncomeQualityChecks({ vacancyRate, operatingExpenseRatio, capitalizationRate, monthlyRent })
+
     return {
       method: 'income-approach',
       estimatedValue,
@@ -288,8 +354,159 @@ export class ValuationEngine {
       calculations,
       reconciliation: `שווי הנכס נקבע בשיטת ההיוון המבוססת על הכנסה מהשכרה. תשואה צפויה של ${yieldPercent}% בשיעור היוון של ${(capitalizationRate * 100)}%. הכנסה תפעולית נטו שנתית של ₪${netOperatingIncome.toLocaleString()}.`,
       assumptions: this.generateAssumptions('income-approach'),
-      limitations: this.generateLimitations('income-approach', 0)
+      limitations: this.generateLimitations('income-approach', 0),
+      qualityChecks
     }
+  }
+
+  private static buildComparableQualityChecks(
+    selectedComps: Comparable[],
+    adjustedPrices: Array<{ comparable: Comparable; adjustments: { total: number }; adjustedPrice: number }>,
+    stdDev: number,
+    avgPrice: number
+  ): ValuationQualityCheck[] {
+    const checks: ValuationQualityCheck[] = []
+
+    if (selectedComps.length < 3) {
+      checks.push({
+        severity: 'warning',
+        code: 'low-sample',
+        message: 'פחות מ-3 עסקאות נבחרות להשוואה; מומלץ להוסיף עסקאות או להשלים בשיטה נוספת'
+      })
+    }
+
+    const coefficientOfVariation = (stdDev / avgPrice) * 100
+    if (coefficientOfVariation > 20) {
+      checks.push({
+        severity: 'warning',
+        code: 'high-variation',
+        message: `סטיית תקן גבוהה ביחס לממוצע (CV=${coefficientOfVariation.toFixed(1)}%); טווח הערכים רחב`
+      })
+    }
+
+    for (const item of adjustedPrices) {
+      if (Math.abs(item.adjustments.total) > 0.3) {
+        checks.push({
+          severity: 'warning',
+          code: 'large-adjustment',
+          message: `לעסקה "${item.comparable.address}" בוצעה התאמה כוללת חריגה (${(item.adjustments.total * 100).toFixed(1)}%)`
+        })
+      }
+    }
+
+    // Simple outlier detection (z-score > 2)
+    if (stdDev > 0) {
+      const mean = avgPrice
+      for (const item of adjustedPrices) {
+        const z = Math.abs((item.adjustedPrice - mean) / stdDev)
+        if (z > 2) {
+          checks.push({
+            severity: 'warning',
+            code: 'outlier',
+            message: `עסקה "${item.comparable.address}" היא חריגה ביחס לסט (z=${z.toFixed(2)})`
+          })
+        }
+      }
+    }
+
+    return checks
+  }
+
+  private static buildCostQualityChecks(params: {
+    landValue: number
+    constructionCostPerSqm: number
+    depreciationRate: number
+  }): ValuationQualityCheck[] {
+    const checks: ValuationQualityCheck[] = []
+
+    if (!(params.landValue > 0)) {
+      checks.push({ severity: 'error', code: 'missing-input', message: 'ערך קרקע חייב להיות גדול מ-0' })
+    }
+    if (!(params.constructionCostPerSqm > 0)) {
+      checks.push({ severity: 'error', code: 'missing-input', message: 'עלות בנייה למ"ר חייבת להיות גדולה מ-0' })
+    }
+    if (params.constructionCostPerSqm < 3000 || params.constructionCostPerSqm > 20000) {
+      checks.push({
+        severity: 'warning',
+        code: 'parameter-out-of-range',
+        message: 'עלות בנייה למ"ר מחוץ לטווח שכיח (3,000–20,000) — מומלץ לוודא נתון'
+      })
+    }
+    if (params.depreciationRate > 0.8) {
+      checks.push({
+        severity: 'warning',
+        code: 'parameter-out-of-range',
+        message: `שיעור פחת גבוה במיוחד (${(params.depreciationRate * 100).toFixed(1)}%) — בדוק שנת בנייה/מצב`
+      })
+    }
+
+    return checks
+  }
+
+  private static buildIncomeQualityChecks(params: {
+    vacancyRate: number
+    operatingExpenseRatio: number
+    capitalizationRate: number
+    monthlyRent: number
+  }): ValuationQualityCheck[] {
+    const checks: ValuationQualityCheck[] = []
+
+    if (!(params.monthlyRent > 0)) {
+      checks.push({ severity: 'error', code: 'missing-input', message: 'שכירות חודשית חייבת להיות גדולה מ-0' })
+    }
+
+    if (params.vacancyRate < 0 || params.vacancyRate > 0.3) {
+      checks.push({
+        severity: 'warning',
+        code: 'parameter-out-of-range',
+        message: 'שיעור פינויים מחוץ לטווח שכיח (0%–30%) — מומלץ לוודא הנחה'
+      })
+    }
+    if (params.operatingExpenseRatio < 0.1 || params.operatingExpenseRatio > 0.6) {
+      checks.push({
+        severity: 'warning',
+        code: 'parameter-out-of-range',
+        message: 'יחס הוצאות תפעול מחוץ לטווח שכיח (10%–60%) — מומלץ לוודא הנחה'
+      })
+    }
+    if (params.capitalizationRate <= 0) {
+      checks.push({ severity: 'error', code: 'missing-input', message: 'שיעור היוון חייב להיות גדול מ-0' })
+    } else if (params.capitalizationRate < 0.03 || params.capitalizationRate > 0.12) {
+      checks.push({
+        severity: 'warning',
+        code: 'parameter-out-of-range',
+        message: 'שיעור היוון מחוץ לטווח שכיח (3%–12%) — מומלץ לוודא הנחה'
+      })
+    }
+
+    return checks
+  }
+
+  private static buildDivergenceCheck(results: ValuationResult[]): ValuationQualityCheck | null {
+    if (results.length < 2) return null
+
+    const values = results.map(r => r.estimatedValue)
+    const min = Math.min(...values)
+    const max = Math.max(...values)
+    const mid = (min + max) / 2
+    if (mid <= 0) return null
+
+    const spreadPct = ((max - min) / mid) * 100
+    if (spreadPct >= 20) {
+      return {
+        severity: 'warning',
+        code: 'method-divergence',
+        message: `פער משמעותי בין שיטות שומה (≈${spreadPct.toFixed(1)}%). מומלץ לבצע ניתוח והצדקה (Reconciliation).`
+      }
+    }
+    return null
+  }
+
+  private static buildHybridReconciliation(results: ValuationResult[], estimatedValue: number): string {
+    const parts = results
+      .map(r => `${r.method}: ₪${r.estimatedValue.toLocaleString()} (ביטחון ${r.confidence}%)`)
+      .join(' | ')
+    return `בוצע שקלול בין שיטות השומה הבאות: ${parts}. השווי המסוכם נקבע על ₪${estimatedValue.toLocaleString()} בהתאם למשקולות ואיכות הנתונים.`
   }
 
   private static calculateAdjustments(property: Property, comparable: Comparable): AdjustmentFactors & { total: number } {
@@ -314,17 +531,16 @@ export class ValuationEngine {
   }
 
   private static calculateLocationAdjustment(property: Property, comparable: Comparable): number {
-    if (comparable.distance < 0.3) return 0
-    if (comparable.distance < 0.5) return -0.02
-    if (comparable.distance < 1.0) return -0.05
-    if (comparable.distance < 2.0) return -0.08
-    return -0.12
+    for (const step of LOCATION_DISTANCE_ADJUSTMENTS) {
+      if (comparable.distance < step.maxKm) return step.adjustment
+    }
+    return LOCATION_DEFAULT_ADJUSTMENT
   }
 
   private static calculateSizeAdjustment(subjectSize: number, compSize: number): number {
     const diff = (subjectSize - compSize) / compSize
-    if (Math.abs(diff) < 0.05) return 0
-    return diff * 0.15
+    if (Math.abs(diff) < SIZE_ADJUSTMENT_NOOP_THRESHOLD) return 0
+    return diff * SIZE_ADJUSTMENT_FACTOR
   }
 
   private static calculateConditionAdjustment(condition: PropertyCondition): number {
@@ -333,17 +549,17 @@ export class ValuationEngine {
   }
 
   private static calculateFloorAdjustment(subjectFloor: number, compFloor: number): number {
-    const subjectAdj = FLOOR_ADJUSTMENTS[Math.min(subjectFloor, 8)] || 0
-    const compAdj = FLOOR_ADJUSTMENTS[Math.min(compFloor, 8)] || 0
+    const subjectAdj = FLOOR_ADJUSTMENTS[Math.min(subjectFloor, MAX_FLOOR_KEY)] || 0
+    const compAdj = FLOOR_ADJUSTMENTS[Math.min(compFloor, MAX_FLOOR_KEY)] || 0
     return subjectAdj - compAdj
   }
 
   private static calculateAgeAdjustment(subjectYear: number, compYear: number): number {
     const ageDiff = Math.abs(subjectYear - compYear)
-    if (ageDiff < 5) return 0
-    if (ageDiff < 10) return -0.03
-    if (ageDiff < 20) return -0.06
-    return -0.10
+    for (const step of AGE_ADJUSTMENT_STEPS) {
+      if (ageDiff < step.maxYearsDiff) return step.adjustment
+    }
+    return AGE_DEFAULT_ADJUSTMENT
   }
 
   private static calculateFeaturesAdjustment(property: Property): number {
@@ -357,16 +573,7 @@ export class ValuationEngine {
   }
 
   private static calculateEffectiveAge(actualAge: number, condition: PropertyCondition): number {
-    const conditionFactor = {
-      'new': 0.5,
-      'excellent': 0.7,
-      'good': 1.0,
-      'fair': 1.3,
-      'poor': 1.6,
-      'renovation-needed': 2.0
-    }[condition]
-    
-    return Math.round(actualAge * conditionFactor)
+    return Math.round(actualAge * EFFECTIVE_AGE_FACTORS[condition])
   }
 
   private static applyWeightedReconciliation(adjustedPrices: Array<{ comparable: Comparable; adjustedPrice: number }>): number {

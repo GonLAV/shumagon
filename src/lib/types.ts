@@ -1,7 +1,7 @@
 export type PropertyType = 'apartment' | 'house' | 'penthouse' | 'garden-apartment' | 'duplex' | 'studio' | 'commercial' | 'land'
 export type PropertyStatus = 'draft' | 'in-progress' | 'completed' | 'sent'
 export type PropertyCondition = 'new' | 'excellent' | 'good' | 'fair' | 'poor' | 'renovation-needed'
-export type ValuationMethod = 'comparable-sales' | 'cost-approach' | 'income-approach'
+export type ValuationMethod = 'comparable-sales' | 'cost-approach' | 'income-approach' | 'hybrid'
 
 export interface Property {
   id: string

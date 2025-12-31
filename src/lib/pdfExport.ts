@@ -210,7 +210,8 @@ export class ValuationPDFExporter {
     const methodNames: Record<string, string> = {
       'comparable-sales': 'Comparable Sales Approach',
       'cost-approach': 'Cost Approach',
-      'income-approach': 'Income Approach'
+      'income-approach': 'Income Approach',
+      'hybrid': 'Reconciled (Hybrid)'
     }
 
     this.addHeader('Valuation Report', methodNames[result.method] || result.method)

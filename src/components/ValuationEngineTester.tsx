@@ -14,6 +14,9 @@ import type { Property, Comparable, PropertyCondition } from '@/lib/types'
 import { Calculator, TrendUp, CurrencyDollar, CheckCircle, WarningCircle, ArrowRight, FilePdf, Download } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { exportSingleValuationToPDF, exportMultipleValuationsToPDF } from '@/lib/pdfExport'
+import { parseCSV } from '@/lib/csvImport'
+import { ReportGenerator } from '@/lib/reportGenerator'
+import type { ReportSection } from '@/lib/reportGenerator'
 
 export function ValuationEngineTester() {
   const [testProperty, setTestProperty] = useState<Property>(createDefaultTestProperty())
@@ -30,6 +33,45 @@ export function ValuationEngineTester() {
   const [incomeResult, setIncomeResult] = useState<ValuationResult | null>(null)
   
   const [activeMethod, setActiveMethod] = useState<string>('comparable')
+  const [csvInput, setCsvInput] = useState('')
+  const [importedComparables, setImportedComparables] = useState<Comparable[]>([])
+  const [reportSections, setReportSections] = useState<ReportSection[]>([])
+  const [importErrors, setImportErrors] = useState<Array<{ row: number; message: string }>>([])
+
+  const handleCSVImport = () => {
+    if (!csvInput.trim()) {
+      toast.error('קובץ CSV ריק', { description: 'הדבק קוד CSV או בחר בקובץ' })
+      return
+    }
+
+    const result = parseCSV(csvInput)
+    setImportedComparables(result.comparables)
+    setImportErrors(result.errors)
+
+    if (result.comparables.length > 0) {
+      toast.success(`ייבוא הצליח`, {
+        description: `${result.comparables.length} עסקאות ${result.errors.length > 0 ? `+ ${result.errors.length} שגיאות` : ''}`
+      })
+    } else if (result.errors.length > 0) {
+      toast.error('ייבוא נכשל', { description: result.errors[0].message })
+    }
+  }
+
+  const handleGenerateReport = () => {
+    if (!comparableResult) {
+      toast.error('אין שומה', { description: 'הרץ שומה לפני יצירת דוח' })
+      return
+    }
+
+    const selectedComps = comparables.filter(c => c.selected)
+    const sections = ReportGenerator.generateStandardSections(
+      testProperty,
+      [comparableResult, costResult, incomeResult].filter(Boolean) as ValuationResult[],
+      selectedComps
+    )
+    setReportSections(sections)
+    toast.success('דוח נוצר', { description: `${sections.length} סעיפים` })
+  }
 
   const runComparableTest = () => {
     try {
