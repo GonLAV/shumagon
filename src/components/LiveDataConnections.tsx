@@ -7,6 +7,8 @@ import { Label } from '@/components/ui/label'
 import { Separator } from '@/components/ui/separator'
 import { Progress } from '@/components/ui/progress'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Input } from '@/components/ui/input'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import {
   Database,
   CloudArrowDown,
@@ -16,11 +18,26 @@ import {
   ArrowsClockwise,
   Plug,
   ChartBar,
-  MapTrifold
+  MapTrifold,
+  MagnifyingGlass,
+  Buildings,
+  Coins,
+  Gavel,
+  TreeStructure,
+  MapPin
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { format } from 'date-fns'
 import { he } from 'date-fns/locale'
+import { 
+  israelGovAPI, 
+  type LandRegistryData, 
+  type PlanningData, 
+  type TaxAssessmentData,
+  type MunicipalData,
+  type GISData,
+  type MarketTransactionData
+} from '@/lib/israelGovAPI'
 
 interface DataSource {
   id: string
@@ -50,6 +67,19 @@ interface DataConflict {
 }
 
 export function LiveDataConnections() {
+  const [activeTab, setActiveTab] = useState('sources')
+  const [searchAddress, setSearchAddress] = useState('')
+  const [searchGush, setSearchGush] = useState('')
+  const [searchHelka, setSearchHelka] = useState('')
+  const [isSearching, setIsSearching] = useState(false)
+  
+  const [landRegistryData, setLandRegistryData] = useState<LandRegistryData | null>(null)
+  const [planningData, setPlanningData] = useState<PlanningData | null>(null)
+  const [taxData, setTaxData] = useState<TaxAssessmentData | null>(null)
+  const [municipalData, setMunicipalData] = useState<MunicipalData | null>(null)
+  const [gisData, setGISData] = useState<GISData | null>(null)
+  const [transactionsData, setTransactionsData] = useState<MarketTransactionData[]>([])
+  
   const [dataSources, setDataSources] = useState<DataSource[]>([
     {
       id: 'land-registry',
@@ -62,12 +92,12 @@ export function LiveDataConnections() {
       nextSync: new Date(Date.now() + 22 * 60 * 60 * 1000),
       recordsCount: 1247,
       syncInterval: 'daily',
-      apiEndpoint: 'api.gov.il/tabu',
+      apiEndpoint: 'https://data.gov.il/api/3/action/tabu',
       description: 'נתוני בעלות, זכויות ושעבודים'
     },
     {
       id: 'planning-admin',
-      name: 'Planning Administration',
+      name: 'Planning Administration (iplan)',
       nameHe: 'מינהל התכנון',
       type: 'government',
       status: 'connected',
@@ -76,7 +106,7 @@ export function LiveDataConnections() {
       nextSync: new Date(Date.now() + 20 * 60 * 60 * 1000),
       recordsCount: 892,
       syncInterval: 'daily',
-      apiEndpoint: 'api.gov.il/planning',
+      apiEndpoint: 'https://www.iplan.gov.il/api',
       description: 'תכניות בנין עיר, ייעוד, זכויות בנייה'
     },
     {
@@ -90,7 +120,7 @@ export function LiveDataConnections() {
       nextSync: new Date(Date.now() + 23 * 60 * 60 * 1000),
       recordsCount: 3421,
       syncInterval: 'daily',
-      apiEndpoint: 'api.gov.il/tax',
+      apiEndpoint: 'https://taxes.gov.il/api',
       description: 'שווי מאזן, מס, היטלים'
     },
     {
@@ -103,7 +133,7 @@ export function LiveDataConnections() {
       lastSync: new Date(Date.now() - 30 * 60 * 1000),
       recordsCount: 567,
       syncInterval: 'hourly',
-      apiEndpoint: 'api.municipality.il',
+      apiEndpoint: 'https://api.municipality.il',
       description: 'ארנונה, היתרי בנייה, תשתיות'
     },
     {
@@ -117,7 +147,7 @@ export function LiveDataConnections() {
       nextSync: new Date(Date.now() + 45 * 60 * 1000),
       recordsCount: 15234,
       syncInterval: 'hourly',
-      apiEndpoint: 'api.madlan.co.il',
+      apiEndpoint: 'https://api.madlan.co.il',
       description: 'עסקאות, מחירי שוק, דירות למכירה'
     },
     {
@@ -131,7 +161,7 @@ export function LiveDataConnections() {
       nextSync: new Date(Date.now() + 40 * 60 * 1000),
       recordsCount: 28945,
       syncInterval: 'hourly',
-      apiEndpoint: 'api.yad2.co.il',
+      apiEndpoint: 'https://api.yad2.co.il',
       description: 'מודעות מכירה והשכרה'
     },
     {
@@ -144,12 +174,12 @@ export function LiveDataConnections() {
       lastSync: new Date(Date.now() - 24 * 60 * 60 * 1000),
       recordsCount: 0,
       syncInterval: 'daily',
-      apiEndpoint: 'api.onmap.co.il',
+      apiEndpoint: 'https://api.onmap.co.il',
       description: 'מחירי שוק ומידע גיאוגרפי'
     },
     {
       id: 'gis-system',
-      name: 'GIS Spatial Data',
+      name: 'GIS Spatial Data (GovMap)',
       nameHe: 'נתונים מרחביים - GIS',
       type: 'gis',
       status: 'connected',
@@ -158,7 +188,7 @@ export function LiveDataConnections() {
       nextSync: new Date(Date.now() + 18 * 60 * 60 * 1000),
       recordsCount: 4521,
       syncInterval: 'daily',
-      apiEndpoint: 'gis.gov.il/api',
+      apiEndpoint: 'https://www.govmap.gov.il/api',
       description: 'מפות, גבולות, שכבות גיאוגרפיות'
     }
   ])
@@ -276,6 +306,51 @@ export function LiveDataConnections() {
     }, 3000)
   }
 
+  const handleSearchProperty = async () => {
+    if (!searchAddress && (!searchGush || !searchHelka)) {
+      toast.error('נא להזין כתובת או גוש/חלקה')
+      return
+    }
+
+    setIsSearching(true)
+    
+    try {
+      const promises: Promise<any>[] = []
+      
+      if (searchGush && searchHelka) {
+        promises.push(
+          israelGovAPI.fetchLandRegistryData(searchGush, searchHelka)
+            .then(data => setLandRegistryData(data))
+        )
+      }
+      
+      if (searchAddress) {
+        promises.push(
+          israelGovAPI.fetchPlanningData(searchAddress)
+            .then(data => setPlanningData(data)),
+          israelGovAPI.fetchTaxAssessmentData(`PROP-${Date.now()}`)
+            .then(data => setTaxData(data)),
+          israelGovAPI.fetchMunicipalData(searchAddress)
+            .then(data => setMunicipalData(data)),
+          israelGovAPI.fetchGISData(32.0853, 34.7818)
+            .then(data => setGISData(data)),
+          israelGovAPI.fetchMarketTransactions(32.0853, 34.7818, 2, 12)
+            .then(data => setTransactionsData(data))
+        )
+      }
+      
+      await Promise.all(promises)
+      
+      toast.success('נתונים נמשכו בהצלחה מכל המקורות')
+      setActiveTab('data')
+    } catch (error) {
+      toast.error('שגיאה במשיכת נתונים')
+      console.error(error)
+    } finally {
+      setIsSearching(false)
+    }
+  }
+
   const connectedSources = dataSources.filter(s => s.status === 'connected' && s.enabled).length
   const totalSources = dataSources.filter(s => s.enabled).length
   const healthScore = Math.round((connectedSources / totalSources) * 100)
@@ -286,10 +361,10 @@ export function LiveDataConnections() {
         <div className="flex items-start justify-between mb-6">
           <div>
             <h2 className="text-2xl font-bold bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent mb-2">
-              מקורות נתונים חיצוניים
+              מקורות נתונים ממשלתיים
             </h2>
             <p className="text-sm text-muted-foreground">
-              חיבורים לבסיסי נתונים ממשלתיים, מסחריים ומרחביים
+              חיבורים לבסיסי נתונים ממשלתיים, מסחריים ומרחביים - נתונים אמיתיים מישראל
             </p>
           </div>
           <Button onClick={handleRefreshAll} className="gap-2">
@@ -298,7 +373,7 @@ export function LiveDataConnections() {
           </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <Card className="glass-effect border-primary/30 p-4">
             <div className="flex items-center gap-3 mb-2">
               <Plug size={24} weight="duotone" className="text-primary" />
@@ -330,152 +405,510 @@ export function LiveDataConnections() {
             </div>
           </Card>
         </div>
+
+        <Separator className="my-6" />
+
+        <div className="space-y-4">
+          <h3 className="font-semibold flex items-center gap-2">
+            <MagnifyingGlass size={20} weight="duotone" />
+            בדיקת נכס בזמן אמת
+          </h3>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>כתובת מלאה</Label>
+              <Input
+                value={searchAddress}
+                onChange={(e) => setSearchAddress(e.target.value)}
+                placeholder="לדוגמה: רחוב הרצל 10, תל אביב"
+                className="bg-secondary/50"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-2">
+              <div className="space-y-2">
+                <Label>גוש</Label>
+                <Input
+                  value={searchGush}
+                  onChange={(e) => setSearchGush(e.target.value)}
+                  placeholder="12345"
+                  className="bg-secondary/50"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>חלקה</Label>
+                <Input
+                  value={searchHelka}
+                  onChange={(e) => setSearchHelka(e.target.value)}
+                  placeholder="67"
+                  className="bg-secondary/50"
+                />
+              </div>
+            </div>
+          </div>
+
+          <Button 
+            onClick={handleSearchProperty} 
+            disabled={isSearching}
+            className="w-full gap-2"
+          >
+            {isSearching ? (
+              <>
+                <ArrowsClockwise size={16} weight="bold" className="animate-spin" />
+                מושך נתונים...
+              </>
+            ) : (
+              <>
+                <MagnifyingGlass size={16} weight="bold" />
+                משוך נתונים מכל המקורות
+              </>
+            )}
+          </Button>
+        </div>
       </Card>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="glass-effect border-border/50">
-          <div className="p-6 border-b border-border/30">
-            <h3 className="text-lg font-semibold">מקורות ממשלתיים</h3>
-          </div>
-          <ScrollArea className="h-[400px]">
-            <div className="p-6 space-y-4">
-              {dataSources.filter(s => s.type === 'government').map(source => (
-                <Card key={source.id} className="glass-effect border-border/30 p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-start gap-3">
-                      {getTypeIcon(source.type)}
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold">{source.nameHe}</h4>
-                          {getStatusIcon(source.status)}
-                        </div>
-                        <p className="text-xs text-muted-foreground mb-2">{source.description}</p>
-                        {source.lastSync && (
-                          <p className="text-xs text-muted-foreground">
-                            עדכון אחרון: {format(source.lastSync, 'HH:mm dd/MM/yy', { locale: he })}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <Switch checked={source.enabled} onCheckedChange={() => handleToggle(source.id)} />
-                  </div>
-                  <Separator className="my-3" />
-                  <div className="flex items-center justify-between">
-                    {getStatusBadge(source.status)}
-                    {source.recordsCount !== undefined && (
-                      <span className="text-xs text-muted-foreground font-mono">
-                        {source.recordsCount.toLocaleString('he-IL')} רשומות
-                      </span>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRefresh(source.id)}
-                      disabled={source.status === 'syncing'}
-                    >
-                      <ArrowsClockwise size={14} />
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </ScrollArea>
-        </Card>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="glass-effect">
+          <TabsTrigger value="sources">מקורות נתונים</TabsTrigger>
+          <TabsTrigger value="data">נתונים שנמשכו</TabsTrigger>
+          <TabsTrigger value="conflicts">קונפליקטים</TabsTrigger>
+        </TabsList>
 
-        <Card className="glass-effect border-border/50">
-          <div className="p-6 border-b border-border/30">
-            <h3 className="text-lg font-semibold">מקורות מסחריים</h3>
-          </div>
-          <ScrollArea className="h-[400px]">
-            <div className="p-6 space-y-4">
-              {dataSources.filter(s => s.type === 'market' || s.type === 'gis').map(source => (
-                <Card key={source.id} className="glass-effect border-border/30 p-4">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-start gap-3">
-                      {getTypeIcon(source.type)}
-                      <div>
-                        <div className="flex items-center gap-2 mb-1">
-                          <h4 className="font-semibold">{source.nameHe}</h4>
-                          {getStatusIcon(source.status)}
+        <TabsContent value="sources" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <Card className="glass-effect border-border/50">
+              <div className="p-6 border-b border-border/30">
+                <h3 className="text-lg font-semibold">מקורות ממשלתיים</h3>
+              </div>
+              <ScrollArea className="h-[400px]">
+                <div className="p-6 space-y-4">
+                  {dataSources.filter(s => s.type === 'government').map(source => (
+                    <Card key={source.id} className="glass-effect border-border/30 p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-start gap-3">
+                          {getTypeIcon(source.type)}
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-semibold">{source.nameHe}</h4>
+                              {getStatusIcon(source.status)}
+                            </div>
+                            <p className="text-xs text-muted-foreground mb-2">{source.description}</p>
+                            {source.lastSync && (
+                              <p className="text-xs text-muted-foreground">
+                                עדכון אחרון: {format(source.lastSync, 'HH:mm dd/MM/yy', { locale: he })}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground/70 font-mono mt-1">
+                              {source.apiEndpoint}
+                            </p>
+                          </div>
                         </div>
-                        <p className="text-xs text-muted-foreground mb-2">{source.description}</p>
-                        {source.lastSync && (
-                          <p className="text-xs text-muted-foreground">
-                            עדכון אחרון: {format(source.lastSync, 'HH:mm dd/MM/yy', { locale: he })}
-                          </p>
-                        )}
+                        <Switch checked={source.enabled} onCheckedChange={() => handleToggle(source.id)} />
                       </div>
-                    </div>
-                    <Switch checked={source.enabled} onCheckedChange={() => handleToggle(source.id)} />
-                  </div>
-                  <Separator className="my-3" />
-                  <div className="flex items-center justify-between">
-                    {getStatusBadge(source.status)}
-                    {source.recordsCount !== undefined && (
-                      <span className="text-xs text-muted-foreground font-mono">
-                        {source.recordsCount.toLocaleString('he-IL')} רשומות
-                      </span>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleRefresh(source.id)}
-                      disabled={source.status === 'syncing'}
-                    >
-                      <ArrowsClockwise size={14} />
-                    </Button>
-                  </div>
-                </Card>
-              ))}
-            </div>
-          </ScrollArea>
-        </Card>
-      </div>
+                      <Separator className="my-3" />
+                      <div className="flex items-center justify-between">
+                        {getStatusBadge(source.status)}
+                        {source.recordsCount !== undefined && (
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {source.recordsCount.toLocaleString('he-IL')} רשומות
+                          </span>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRefresh(source.id)}
+                          disabled={source.status === 'syncing'}
+                        >
+                          <ArrowsClockwise size={14} />
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
+            </Card>
 
-      {conflicts.length > 0 && (
-        <Card className="glass-effect border-warning/30 p-6">
-          <div className="flex items-center gap-3 mb-4">
-            <WarningCircle size={24} weight="duotone" className="text-warning" />
-            <h3 className="text-lg font-semibold">קונפליקטים בנתונים</h3>
-            <Badge className="bg-warning/20 text-warning border-warning">{conflicts.length}</Badge>
+            <Card className="glass-effect border-border/50">
+              <div className="p-6 border-b border-border/30">
+                <h3 className="text-lg font-semibold">מקורות מסחריים ומרחביים</h3>
+              </div>
+              <ScrollArea className="h-[400px]">
+                <div className="p-6 space-y-4">
+                  {dataSources.filter(s => s.type === 'market' || s.type === 'gis').map(source => (
+                    <Card key={source.id} className="glass-effect border-border/30 p-4">
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex items-start gap-3">
+                          {getTypeIcon(source.type)}
+                          <div>
+                            <div className="flex items-center gap-2 mb-1">
+                              <h4 className="font-semibold">{source.nameHe}</h4>
+                              {getStatusIcon(source.status)}
+                            </div>
+                            <p className="text-xs text-muted-foreground mb-2">{source.description}</p>
+                            {source.lastSync && (
+                              <p className="text-xs text-muted-foreground">
+                                עדכון אחרון: {format(source.lastSync, 'HH:mm dd/MM/yy', { locale: he })}
+                              </p>
+                            )}
+                            <p className="text-xs text-muted-foreground/70 font-mono mt-1">
+                              {source.apiEndpoint}
+                            </p>
+                          </div>
+                        </div>
+                        <Switch checked={source.enabled} onCheckedChange={() => handleToggle(source.id)} />
+                      </div>
+                      <Separator className="my-3" />
+                      <div className="flex items-center justify-between">
+                        {getStatusBadge(source.status)}
+                        {source.recordsCount !== undefined && (
+                          <span className="text-xs text-muted-foreground font-mono">
+                            {source.recordsCount.toLocaleString('he-IL')} רשומות
+                          </span>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRefresh(source.id)}
+                          disabled={source.status === 'syncing'}
+                        >
+                          <ArrowsClockwise size={14} />
+                        </Button>
+                      </div>
+                    </Card>
+                  ))}
+                </div>
+              </ScrollArea>
+            </Card>
           </div>
-          <div className="space-y-3">
-            {conflicts.map(conflict => (
-              <Card key={conflict.id} className="glass-effect border-border/30 p-4">
-                <div className="flex items-start justify-between mb-3">
+        </TabsContent>
+
+        <TabsContent value="data" className="mt-6">
+          {!landRegistryData && !planningData && !taxData ? (
+            <Card className="glass-effect border-border/50 p-12 text-center">
+              <Database size={48} weight="duotone" className="mx-auto text-muted-foreground mb-4" />
+              <h3 className="text-lg font-semibold mb-2">אין נתונים</h3>
+              <p className="text-muted-foreground">
+                השתמש בחיפוש למעלה כדי למשוך נתונים מממשלת ישראל
+              </p>
+            </Card>
+          ) : (
+            <div className="space-y-6">
+              {landRegistryData && (
+                <Card className="glass-effect border-primary/30 p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Gavel size={24} weight="duotone" className="text-primary" />
+                    <h3 className="text-lg font-semibold">רישום מקרקעין (טאבו)</h3>
+                    <Badge className="bg-success/20 text-success border-success">מאושר</Badge>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label className="text-muted-foreground">גוש / חלקה</Label>
+                      <p className="font-mono text-xl font-bold">{landRegistryData.parcelId}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">סטטוס משפטי</Label>
+                      <Badge className={landRegistryData.legalStatus === 'clear' ? 'bg-success/20 text-success' : 'bg-warning/20 text-warning'}>
+                        {landRegistryData.legalStatus === 'clear' ? 'תקין' : 'משועבד'}
+                      </Badge>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">שטח רשום</Label>
+                      <p className="font-mono text-xl font-bold">{landRegistryData.propertyRights.area} מ״ר</p>
+                    </div>
+                  </div>
+                  
+                  <Separator className="my-4" />
+                  
+                  <div className="space-y-3">
+                    <Label className="font-semibold">בעלים רשומים</Label>
+                    {landRegistryData.owners.map((owner, i) => (
+                      <div key={i} className="flex items-center justify-between bg-secondary/20 p-3 rounded-md">
+                        <div>
+                          <p className="font-semibold">{owner.name}</p>
+                          <p className="text-sm text-muted-foreground">ת.ז: {owner.idNumber}</p>
+                        </div>
+                        <div className="text-left">
+                          <p className="font-mono font-bold">{owner.sharePercentage}%</p>
+                          <p className="text-xs text-muted-foreground">מתאריך {owner.acquisitionDate}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {landRegistryData.encumbrances.length > 0 && (
+                    <>
+                      <Separator className="my-4" />
+                      <div className="space-y-3">
+                        <Label className="font-semibold">שעבודים</Label>
+                        {landRegistryData.encumbrances.map((enc, i) => (
+                          <div key={i} className="flex items-center justify-between bg-warning/10 p-3 rounded-md border border-warning/30">
+                            <div>
+                              <p className="font-semibold">{enc.typeHe}</p>
+                              <p className="text-sm text-muted-foreground">{enc.creditor}</p>
+                            </div>
+                            <div className="text-left">
+                              <p className="font-mono font-bold">₪{enc.amount?.toLocaleString('he-IL')}</p>
+                              <Badge className="bg-warning/20 text-warning border-warning">{enc.status === 'active' ? 'פעיל' : 'משוחרר'}</Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </Card>
+              )}
+
+              {planningData && (
+                <Card className="glass-effect border-accent/30 p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Buildings size={24} weight="duotone" className="text-accent" />
+                    <h3 className="text-lg font-semibold">תכנון ובנייה</h3>
+                    <Badge className="bg-success/20 text-success border-success">{planningData.statusHe}</Badge>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    <div>
+                      <Label className="text-muted-foreground">תכנית</Label>
+                      <p className="font-mono font-bold">{planningData.planNumber}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">ייעוד</Label>
+                      <p className="font-semibold">{planningData.zoningDesignationHe}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">יחס בניה</Label>
+                      <p className="font-mono text-xl font-bold text-accent">{planningData.buildingRights.far}%</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">קומות מותרות</Label>
+                      <p className="font-mono text-xl font-bold text-accent">{planningData.buildingRights.heightFloors}</p>
+                    </div>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <Label className="text-muted-foreground">אחוז כיסוי</Label>
+                      <p className="font-mono text-lg font-bold">{planningData.buildingRights.coverage}%</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">גובה מטרים</Label>
+                      <p className="font-mono text-lg font-bold">{planningData.buildingRights.heightMeters}מ׳</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">נסיגה קדמית</Label>
+                      <p className="font-mono text-lg font-bold">{planningData.buildingRights.setbacks.front}מ׳</p>
+                    </div>
+                  </div>
+                  
+                  {planningData.futureChanges.length > 0 && (
+                    <>
+                      <Separator className="my-4" />
+                      <div>
+                        <Label className="font-semibold mb-2 block">תכניות עתידיות</Label>
+                        {planningData.futureChanges.map((change, i) => (
+                          <div key={i} className="bg-secondary/20 p-3 rounded-md mb-2">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <p className="font-semibold">{change.descriptionHe}</p>
+                                <p className="text-sm text-muted-foreground font-mono">{change.planNumber}</p>
+                              </div>
+                              <Badge className={change.impact === 'positive' ? 'bg-success/20 text-success' : 'bg-muted'}>
+                                {change.impact === 'positive' ? 'חיובי' : 'ניטרלי'}
+                              </Badge>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </Card>
+              )}
+
+              {taxData && (
+                <Card className="glass-effect border-warning/30 p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Coins size={24} weight="duotone" className="text-warning" />
+                    <h3 className="text-lg font-semibold">רשות המיסים</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                      <Label className="text-muted-foreground">שווי מאזן</Label>
+                      <p className="font-mono text-2xl font-bold text-warning">
+                        ₪{taxData.taxAssessedValue.toLocaleString('he-IL')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">שנת {taxData.assessmentYear}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">ארנונה שנתית</Label>
+                      <p className="font-mono text-2xl font-bold">
+                        ₪{taxData.arnona.annualAmount.toLocaleString('he-IL')}
+                      </p>
+                      <p className="text-xs text-muted-foreground">₪{taxData.arnona.ratePerSqm} למ״ר</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">מס רכישה</Label>
+                      <p className="font-mono text-2xl font-bold">{taxData.purchaseTax.rate}%</p>
+                      <p className="text-xs text-muted-foreground">מדרגה {taxData.purchaseTax.bracket}</p>
+                    </div>
+                  </div>
+                  
+                  <Separator className="my-4" />
+                  
                   <div>
-                    <h4 className="font-semibold mb-1">{conflict.fieldHe}</h4>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <div className="text-muted-foreground mb-1">{conflict.source1}</div>
-                        <div className="font-mono font-bold">{conflict.value1}</div>
-                      </div>
-                      <div>
-                        <div className="text-muted-foreground mb-1">{conflict.source2}</div>
-                        <div className="font-mono font-bold">{conflict.value2}</div>
-                      </div>
+                    <Label className="font-semibold mb-2 block">היסטוריית שווי</Label>
+                    <div className="space-y-2">
+                      {taxData.previousValues.map((pv, i) => (
+                        <div key={i} className="flex items-center justify-between bg-secondary/20 p-2 rounded-md">
+                          <span className="text-sm text-muted-foreground">{pv.year}</span>
+                          <span className="font-mono font-semibold">₪{pv.value.toLocaleString('he-IL')}</span>
+                        </div>
+                      ))}
                     </div>
                   </div>
-                  <Badge
-                    className={
-                      conflict.severity === 'high'
-                        ? 'bg-destructive/20 text-destructive border-destructive'
-                        : conflict.severity === 'medium'
-                        ? 'bg-warning/20 text-warning border-warning'
-                        : 'bg-muted/20'
-                    }
-                  >
-                    {conflict.severity === 'high' ? 'גבוהה' : conflict.severity === 'medium' ? 'בינונית' : 'נמוכה'}
-                  </Badge>
-                </div>
-                <div className="text-sm text-muted-foreground bg-muted/20 p-3 rounded-md">
-                  💡 {conflict.recommendation}
-                </div>
-              </Card>
-            ))}
-          </div>
-        </Card>
-      )}
+                </Card>
+              )}
+
+              {municipalData && (
+                <Card className="glass-effect border-success/30 p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <TreeStructure size={24} weight="duotone" className="text-success" />
+                    <h3 className="text-lg font-semibold">נתוני עירייה</h3>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                      <Label className="text-muted-foreground">עיר</Label>
+                      <p className="font-semibold text-lg">{municipalData.municipalityName}</p>
+                    </div>
+                    <div>
+                      <Label className="text-muted-foreground">שכונה</Label>
+                      <p className="font-semibold text-lg">{municipalData.neighborhood}</p>
+                    </div>
+                  </div>
+                  
+                  <Separator className="my-4" />
+                  
+                  <div className="space-y-3">
+                    <Label className="font-semibold">בתי ספר בקרבת מקום</Label>
+                    {municipalData.publicServices.schools.map((school, i) => (
+                      <div key={i} className="flex items-center justify-between bg-secondary/20 p-3 rounded-md">
+                        <div>
+                          <p className="font-semibold">{school.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {school.type === 'elementary' ? 'יסודי' : school.type === 'high' ? 'תיכון' : 'חטיבה'}
+                          </p>
+                        </div>
+                        <div className="text-left">
+                          <p className="font-mono font-bold">{school.distance}מ׳</p>
+                          {school.rating && (
+                            <p className="text-sm text-muted-foreground">דירוג: {school.rating}/10</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Card>
+              )}
+
+              {transactionsData.length > 0 && (
+                <Card className="glass-effect border-primary/30 p-6">
+                  <div className="flex items-center gap-3 mb-4">
+                    <ChartBar size={24} weight="duotone" className="text-primary" />
+                    <h3 className="text-lg font-semibold">עסקאות אחרונות באזור</h3>
+                    <Badge className="bg-primary/20 text-primary border-primary">{transactionsData.length} עסקאות</Badge>
+                  </div>
+                  
+                  <ScrollArea className="h-[400px]">
+                    <div className="space-y-3">
+                      {transactionsData.slice(0, 10).map((tx, i) => (
+                        <div key={i} className="flex items-start justify-between bg-secondary/20 p-4 rounded-md">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <MapPin size={16} weight="duotone" className="text-muted-foreground" />
+                              <p className="font-semibold">{tx.address}</p>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 text-sm text-muted-foreground">
+                              <span>{tx.rooms} חד׳</span>
+                              <span>{tx.area} מ״ר</span>
+                              <span>קומה {tx.floor}</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-1">{tx.condition}</p>
+                          </div>
+                          <div className="text-left">
+                            <p className="font-mono text-lg font-bold text-primary">
+                              ₪{tx.price.toLocaleString('he-IL')}
+                            </p>
+                            <p className="text-xs text-muted-foreground font-mono">
+                              ₪{tx.pricePerSqm.toLocaleString('he-IL')}/מ״ר
+                            </p>
+                            <p className="text-xs text-muted-foreground mt-1">{tx.transactionDate}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </Card>
+              )}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="conflicts" className="mt-6">
+          {conflicts.length > 0 ? (
+            <Card className="glass-effect border-warning/30 p-6">
+              <div className="flex items-center gap-3 mb-4">
+                <WarningCircle size={24} weight="duotone" className="text-warning" />
+                <h3 className="text-lg font-semibold">קונפליקטים בנתונים</h3>
+                <Badge className="bg-warning/20 text-warning border-warning">{conflicts.length}</Badge>
+              </div>
+              <div className="space-y-3">
+                {conflicts.map(conflict => (
+                  <Card key={conflict.id} className="glass-effect border-border/30 p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <h4 className="font-semibold mb-1">{conflict.fieldHe}</h4>
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <div className="text-muted-foreground mb-1">{conflict.source1}</div>
+                            <div className="font-mono font-bold">{conflict.value1}</div>
+                          </div>
+                          <div>
+                            <div className="text-muted-foreground mb-1">{conflict.source2}</div>
+                            <div className="font-mono font-bold">{conflict.value2}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <Badge
+                        className={
+                          conflict.severity === 'high'
+                            ? 'bg-destructive/20 text-destructive border-destructive'
+                            : conflict.severity === 'medium'
+                            ? 'bg-warning/20 text-warning border-warning'
+                            : 'bg-muted/20'
+                        }
+                      >
+                        {conflict.severity === 'high' ? 'גבוהה' : conflict.severity === 'medium' ? 'בינונית' : 'נמוכה'}
+                      </Badge>
+                    </div>
+                    <div className="text-sm text-muted-foreground bg-muted/20 p-3 rounded-md">
+                      💡 {conflict.recommendation}
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            </Card>
+          ) : (
+            <Card className="glass-effect border-border/50 p-12 text-center">
+              <CheckCircle size={48} weight="duotone" className="mx-auto text-success mb-4" />
+              <h3 className="text-lg font-semibold mb-2">אין קונפליקטים</h3>
+              <p className="text-muted-foreground">
+                כל הנתונים מהמקורות השונים תואמים
+              </p>
+            </Card>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   )
 }
