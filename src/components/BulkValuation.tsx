@@ -801,6 +801,25 @@ Format: {"comparables": [...]}`
         reportType="דוח שומה מרובה"
         recipientSuggestions={[]}
         onSend={handleSendEmail}
+        attachments={[
+          {
+            name: `דוח-תיק-השקעות-${new Date().toISOString().split('T')[0]}.pdf`,
+            size: 1024 * 1024 * 2.5,
+            type: 'pdf',
+            preview: `דוח שומה מרובת נכסים\n\nתאריך: ${new Date().toLocaleDateString('he-IL')}\n\nסיכום:\n- סה"כ נכסים: ${valuationResults.filter(r => r.status === 'completed').length}\n- שווי כולל: ${portfolioStats ? formatCurrency(portfolioStats.totalValue) : 'N/A'}\n- שווי ממוצע: ${portfolioStats ? formatCurrency(portfolioStats.avgValue) : 'N/A'}\n\nמכיל ניתוח מפורט לכל נכס עם נתוני שוק מקומיים.`
+          },
+          {
+            name: `נתוני-שומות-${new Date().toISOString().split('T')[0]}.csv`,
+            size: 1024 * 45,
+            type: 'csv',
+            preview: `כתובת,סוג נכס,שטח,חדרים,שווי משוער,ביטחון,שיטה\n${valuationResults.filter(r => r.status === 'completed').slice(0, 3).map(r => `"${r.property.address.street}, ${r.property.address.city}",${getPropertyTypeLabel(r.property.type)},${r.property.details.builtArea},${r.property.details.rooms},${r.estimatedValue},${r.confidence}%,${r.method}`).join('\n')}\n...`
+          },
+          {
+            name: `ניתוח-תיק-השקעות.xlsx`,
+            size: 1024 * 128,
+            type: 'excel'
+          }
+        ]}
       />
     </div>
   )

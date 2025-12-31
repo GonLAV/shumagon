@@ -24,10 +24,12 @@ import {
   CheckCircle,
   XCircle,
   Plus,
-  X
+  X,
+  Eye
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
+import { EmailAttachmentPreview } from '@/components/EmailAttachmentPreview'
 
 interface EmailReportDialogProps {
   open: boolean
@@ -36,6 +38,12 @@ interface EmailReportDialogProps {
   reportType: string
   recipientSuggestions?: string[]
   onSend: (emailData: EmailData) => Promise<void>
+  attachments?: Array<{
+    name: string
+    size: number
+    type: 'pdf' | 'csv' | 'excel'
+    preview?: string
+  }>
 }
 
 export interface EmailData {
@@ -70,7 +78,8 @@ export function EmailReportDialog({
   reportTitle,
   reportType,
   recipientSuggestions = [],
-  onSend
+  onSend,
+  attachments = []
 }: EmailReportDialogProps) {
   const [emailTemplates] = useKV<EmailTemplate[]>('email-templates', [
     {
@@ -117,6 +126,7 @@ export function EmailReportDialog({
   const [newCc, setNewCc] = useState('')
   const [newBcc, setNewBcc] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState<string>('')
+  const [showPreview, setShowPreview] = useState(false)
 
   const applyTemplate = (templateId: string) => {
     const template = emailTemplates?.find(t => t.id === templateId)
@@ -261,8 +271,17 @@ export function EmailReportDialog({
     ?.sort((a, b) => new Date(b.lastUsed).getTime() - new Date(a.lastUsed).getTime())
     .slice(0, 5)
 
+  const defaultAttachments = attachments.length > 0 ? attachments : [
+    {
+      name: `${reportTitle}.pdf`,
+      size: 1024 * 500,
+      type: 'pdf' as const,
+    }
+  ]
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-3xl max-h-[90vh]" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -561,6 +580,15 @@ export function EmailReportDialog({
         </ScrollArea>
 
         <DialogFooter className="gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setShowPreview(true)}
+            className="gap-2"
+          >
+            <Eye size={18} />
+            תצוגה מקדימה
+          </Button>
+          <div className="flex-1" />
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             ביטול
           </Button>
@@ -571,5 +599,22 @@ export function EmailReportDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <EmailAttachmentPreview
+      open={showPreview}
+      onOpenChange={setShowPreview}
+      emailData={{
+        to,
+        cc,
+        bcc,
+        subject,
+        message,
+        includePassword,
+        password
+      }}
+      attachments={defaultAttachments}
+      reportTitle={reportTitle}
+    />
+  </>
   )
 }

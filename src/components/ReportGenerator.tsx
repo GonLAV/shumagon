@@ -518,6 +518,14 @@ ${comparables.map(c => `- ${c.address}: ₪${c.salePrice.toLocaleString()} (מו
         reportType={reportTemplate === 'bank' ? 'דוח שמאות לבנק' : 'דוח שמאות'}
         recipientSuggestions={recipientSuggestions}
         onSend={handleSendEmail}
+        attachments={[
+          {
+            name: `דוח-שמאות-${property.address.street.replace(/\s+/g, '-')}-${new Date().toISOString().split('T')[0]}.${reportFormat}`,
+            size: reportFormat === 'pdf' ? 1024 * 1024 * 3.2 : reportFormat === 'word' ? 1024 * 1024 * 1.8 : 1024 * 256,
+            type: reportFormat === 'pdf' ? 'pdf' : reportFormat === 'word' ? 'excel' : 'csv',
+            preview: `דוח שמאות מקצועי\n\nנכס: ${property.address.street}, ${property.address.city}\nסוג: ${property.type}\nשטח: ${property.details.builtArea} מ"ר\nחדרים: ${property.details.rooms}\n\nסעיפים כלולים:\n${sections.filter(s => s.enabled).map(s => `• ${s.title}`).join('\n')}\n\nתבנית: ${reportTemplate}\nפורמט: ${reportFormat.toUpperCase()}`
+          }
+        ]}
       />
     </div>
   )
