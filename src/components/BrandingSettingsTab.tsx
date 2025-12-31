@@ -8,7 +8,7 @@ import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { FloppyDisk, Info, UploadSimple, Trash, Eye } from '@phosphor-icons/react'
+import { FloppyDisk, Info, UploadSimple, Trash, Eye, Briefcase, Scales, Sparkle, DiamondsFour, CheckCircle } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { BrandingSettings } from '@/lib/types'
 import { PDFPreview } from '@/components/PDFPreview'
@@ -81,13 +81,119 @@ const defaultBranding: BrandingSettings = {
   isDefault: true
 }
 
+const PREDEFINED_THEMES = [
+  {
+    id: 'corporate',
+    name: 'קורפורטיבי',
+    description: 'מקצועי ועסקי, מתאים לחברות גדולות',
+    icon: Briefcase,
+    colors: {
+      primary: '#1E3A8A',
+      secondary: '#3B82F6',
+      accent: '#60A5FA',
+      headerBackground: '#1E3A8A',
+      headerText: '#FFFFFF',
+      footerBackground: '#F1F5F9',
+      footerText: '#334155'
+    },
+    fonts: {
+      heading: 'Arial',
+      body: 'Arial',
+      headingSize: 16,
+      bodySize: 11
+    }
+  },
+  {
+    id: 'legal',
+    name: 'משפטי',
+    description: 'פורמלי ומסורתי, מתאים לדוחות משפטיים',
+    icon: Scales,
+    colors: {
+      primary: '#1F2937',
+      secondary: '#4B5563',
+      accent: '#9CA3AF',
+      headerBackground: '#111827',
+      headerText: '#FFFFFF',
+      footerBackground: '#F9FAFB',
+      footerText: '#374151'
+    },
+    fonts: {
+      heading: 'Times',
+      body: 'Times',
+      headingSize: 14,
+      bodySize: 11
+    }
+  },
+  {
+    id: 'modern',
+    name: 'מודרני',
+    description: 'נקי ועכשווי, מתאים לעסקים צעירים',
+    icon: Sparkle,
+    colors: {
+      primary: '#7C3AED',
+      secondary: '#A78BFA',
+      accent: '#C4B5FD',
+      headerBackground: '#5B21B6',
+      headerText: '#FFFFFF',
+      footerBackground: '#FAF5FF',
+      footerText: '#6B21A8'
+    },
+    fonts: {
+      heading: 'Inter',
+      body: 'Inter',
+      headingSize: 16,
+      bodySize: 11
+    }
+  },
+  {
+    id: 'luxury',
+    name: 'יוקרתי',
+    description: 'אלגנטי ומרשים, מתאים לנכסים יוקרתיים',
+    icon: DiamondsFour,
+    colors: {
+      primary: '#92400E',
+      secondary: '#D97706',
+      accent: '#F59E0B',
+      headerBackground: '#78350F',
+      headerText: '#FEF3C7',
+      footerBackground: '#FFFBEB',
+      footerText: '#78350F'
+    },
+    fonts: {
+      heading: 'Georgia',
+      body: 'Georgia',
+      headingSize: 16,
+      bodySize: 11
+    }
+  }
+]
+
 export function BrandingSettingsTab() {
   const [settings, setSettings] = useKV<BrandingSettings>('branding-settings', defaultBranding)
   const [hasChanges, setHasChanges] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [appliedTheme, setAppliedTheme] = useState<string | null>(null)
+
+  const applyTheme = (themeId: string) => {
+    const theme = PREDEFINED_THEMES.find(t => t.id === themeId)
+    if (!theme || !settings) return
+
+    const updatedSettings: BrandingSettings = {
+      ...settings,
+      colors: theme.colors,
+      fonts: theme.fonts,
+      updatedAt: new Date().toISOString()
+    }
+
+    setSettings(updatedSettings)
+    setAppliedTheme(themeId)
+    setHasChanges(false)
+    toast.success(`ערכת העיצוב "${theme.name}" הוחלה בהצלחה`)
+  }
 
   const handleSave = () => {
-    setSettings((current) => ({ ...current!, updatedAt: new Date().toISOString() }))
+    if (!settings) return
+    setSettings({ ...settings, updatedAt: new Date().toISOString() })
     setHasChanges(false)
     toast.success('הגדרות המיתוג נשמרו בהצלחה')
   }
@@ -95,6 +201,7 @@ export function BrandingSettingsTab() {
   const handleReset = () => {
     setSettings(defaultBranding)
     setHasChanges(false)
+    setAppliedTheme(null)
     toast.success('הגדרות המיתוג אופסו לברירת מחדל')
   }
 
@@ -116,8 +223,9 @@ export function BrandingSettingsTab() {
     reader.onload = (event) => {
       const img = new Image()
       img.onload = () => {
-        setSettings((current) => ({
-          ...current!,
+        if (!settings) return
+        setSettings({
+          ...settings,
           logo: {
             dataUrl: event.target?.result as string,
             width: img.width,
@@ -126,7 +234,7 @@ export function BrandingSettingsTab() {
             size: 'medium'
           },
           updatedAt: new Date().toISOString()
-        }))
+        })
         setHasChanges(true)
         toast.success('הלוגו הועלה בהצלחה')
       }
@@ -136,10 +244,9 @@ export function BrandingSettingsTab() {
   }
 
   const handleRemoveLogo = () => {
-    setSettings((current) => {
-      const { logo, ...rest } = current!
-      return { ...rest, updatedAt: new Date().toISOString() }
-    })
+    if (!settings) return
+    const { logo, ...rest } = settings
+    setSettings({ ...rest, updatedAt: new Date().toISOString() })
     setHasChanges(true)
     toast.success('הלוגו הוסר')
   }
@@ -178,6 +285,88 @@ export function BrandingSettingsTab() {
         </div>
       </div>
 
+      <Card className="glass-effect border-primary/30 bg-gradient-to-br from-primary/5 to-accent/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Sparkle size={24} weight="duotone" className="text-primary" />
+            ערכות עיצוב מוכנות
+          </CardTitle>
+          <CardDescription>
+            בחר ערכת עיצוב מוכנה והחל אותה בלחיצה אחת - ניתן להתאים אישית לאחר מכן
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {PREDEFINED_THEMES.map((theme) => {
+              const Icon = theme.icon
+              const isApplied = appliedTheme === theme.id
+              
+              return (
+                <Card
+                  key={theme.id}
+                  className={`relative overflow-hidden cursor-pointer transition-all hover:scale-105 hover:shadow-lg ${
+                    isApplied 
+                      ? 'border-2 border-primary shadow-lg shadow-primary/20' 
+                      : 'border-border/50 hover:border-primary/50'
+                  }`}
+                  onClick={() => applyTheme(theme.id)}
+                >
+                  {isApplied && (
+                    <div className="absolute top-2 left-2 bg-primary text-primary-foreground rounded-full p-1">
+                      <CheckCircle size={20} weight="fill" />
+                    </div>
+                  )}
+                  
+                  <div
+                    className="h-24 flex items-center justify-center"
+                    style={{ backgroundColor: theme.colors.headerBackground }}
+                  >
+                    <Icon size={40} weight="duotone" style={{ color: theme.colors.headerText }} />
+                  </div>
+                  
+                  <CardContent className="p-4 space-y-2">
+                    <h3 className="font-bold text-lg">{theme.name}</h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {theme.description}
+                    </p>
+                    
+                    <div className="flex gap-1 pt-2">
+                      <div
+                        className="w-6 h-6 rounded-full border border-border"
+                        style={{ backgroundColor: theme.colors.primary }}
+                        title="צבע ראשי"
+                      />
+                      <div
+                        className="w-6 h-6 rounded-full border border-border"
+                        style={{ backgroundColor: theme.colors.secondary }}
+                        title="צבע משני"
+                      />
+                      <div
+                        className="w-6 h-6 rounded-full border border-border"
+                        style={{ backgroundColor: theme.colors.accent }}
+                        title="צבע הדגשה"
+                      />
+                    </div>
+                    
+                    <Button
+                      variant={isApplied ? "default" : "outline"}
+                      size="sm"
+                      className="w-full mt-2"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        applyTheme(theme.id)
+                      }}
+                    >
+                      {isApplied ? 'מוחל כעת' : 'החל ערכה'}
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="glass-effect border-border/50">
           <CardHeader>
@@ -191,8 +380,9 @@ export function BrandingSettingsTab() {
                 id="company-name"
                 value={settings.companyName}
                 onChange={(e) => {
-                  setSettings((c) => ({ ...c!, companyName: e.target.value }))
+                  setSettings({ ...settings, companyName: e.target.value })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
               />
             </div>
@@ -203,8 +393,9 @@ export function BrandingSettingsTab() {
                 id="tagline"
                 value={settings.companyTagline || ''}
                 onChange={(e) => {
-                  setSettings((c) => ({ ...c!, companyTagline: e.target.value }))
+                  setSettings({ ...settings, companyTagline: e.target.value })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
               />
             </div>
@@ -215,11 +406,12 @@ export function BrandingSettingsTab() {
                 id="phone"
                 value={settings.contactInfo.phone || ''}
                 onChange={(e) => {
-                  setSettings((c) => ({
-                    ...c!,
-                    contactInfo: { ...c!.contactInfo, phone: e.target.value }
-                  }))
+                  setSettings({
+                    ...settings,
+                    contactInfo: { ...settings.contactInfo, phone: e.target.value }
+                  })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
                 dir="ltr"
               />
@@ -232,11 +424,12 @@ export function BrandingSettingsTab() {
                 type="email"
                 value={settings.contactInfo.email || ''}
                 onChange={(e) => {
-                  setSettings((c) => ({
-                    ...c!,
-                    contactInfo: { ...c!.contactInfo, email: e.target.value }
-                  }))
+                  setSettings({
+                    ...settings,
+                    contactInfo: { ...settings.contactInfo, email: e.target.value }
+                  })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
                 dir="ltr"
               />
@@ -308,22 +501,24 @@ export function BrandingSettingsTab() {
                   type="color"
                   value={settings.colors.primary}
                   onChange={(e) => {
-                    setSettings((c) => ({
-                      ...c!,
-                      colors: { ...c!.colors, primary: e.target.value }
-                    }))
+                    setSettings({
+                      ...settings,
+                      colors: { ...settings.colors, primary: e.target.value }
+                    })
                     setHasChanges(true)
+                    setAppliedTheme(null)
                   }}
                   className="w-20 h-10"
                 />
                 <Input
                   value={settings.colors.primary}
                   onChange={(e) => {
-                    setSettings((c) => ({
-                      ...c!,
-                      colors: { ...c!.colors, primary: e.target.value }
-                    }))
+                    setSettings({
+                      ...settings,
+                      colors: { ...settings.colors, primary: e.target.value }
+                    })
                     setHasChanges(true)
+                    setAppliedTheme(null)
                   }}
                   dir="ltr"
                 />
@@ -337,22 +532,24 @@ export function BrandingSettingsTab() {
                   type="color"
                   value={settings.colors.headerBackground}
                   onChange={(e) => {
-                    setSettings((c) => ({
-                      ...c!,
-                      colors: { ...c!.colors, headerBackground: e.target.value }
-                    }))
+                    setSettings({
+                      ...settings,
+                      colors: { ...settings.colors, headerBackground: e.target.value }
+                    })
                     setHasChanges(true)
+                    setAppliedTheme(null)
                   }}
                   className="w-20 h-10"
                 />
                 <Input
                   value={settings.colors.headerBackground}
                   onChange={(e) => {
-                    setSettings((c) => ({
-                      ...c!,
-                      colors: { ...c!.colors, headerBackground: e.target.value }
-                    }))
+                    setSettings({
+                      ...settings,
+                      colors: { ...settings.colors, headerBackground: e.target.value }
+                    })
                     setHasChanges(true)
+                    setAppliedTheme(null)
                   }}
                   dir="ltr"
                 />
@@ -366,22 +563,24 @@ export function BrandingSettingsTab() {
                   type="color"
                   value={settings.colors.footerBackground}
                   onChange={(e) => {
-                    setSettings((c) => ({
-                      ...c!,
-                      colors: { ...c!.colors, footerBackground: e.target.value }
-                    }))
+                    setSettings({
+                      ...settings,
+                      colors: { ...settings.colors, footerBackground: e.target.value }
+                    })
                     setHasChanges(true)
+                    setAppliedTheme(null)
                   }}
                   className="w-20 h-10"
                 />
                 <Input
                   value={settings.colors.footerBackground}
                   onChange={(e) => {
-                    setSettings((c) => ({
-                      ...c!,
-                      colors: { ...c!.colors, footerBackground: e.target.value }
-                    }))
+                    setSettings({
+                      ...settings,
+                      colors: { ...settings.colors, footerBackground: e.target.value }
+                    })
                     setHasChanges(true)
+                    setAppliedTheme(null)
                   }}
                   dir="ltr"
                 />
@@ -401,11 +600,12 @@ export function BrandingSettingsTab() {
               <Select
                 value={settings.fonts.heading}
                 onValueChange={(value) => {
-                  setSettings((c) => ({
-                    ...c!,
-                    fonts: { ...c!.fonts, heading: value }
-                  }))
+                  setSettings({
+                    ...settings,
+                    fonts: { ...settings.fonts, heading: value }
+                  })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
               >
                 <SelectTrigger id="heading-font">
@@ -442,11 +642,12 @@ export function BrandingSettingsTab() {
                 step={1}
                 value={[settings.fonts.headingSize]}
                 onValueChange={([value]) => {
-                  setSettings((c) => ({
-                    ...c!,
-                    fonts: { ...c!.fonts, headingSize: value }
-                  }))
+                  setSettings({
+                    ...settings,
+                    fonts: { ...settings.fonts, headingSize: value }
+                  })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
               />
             </div>
@@ -456,11 +657,12 @@ export function BrandingSettingsTab() {
               <Select
                 value={settings.fonts.body}
                 onValueChange={(value) => {
-                  setSettings((c) => ({
-                    ...c!,
-                    fonts: { ...c!.fonts, body: value }
-                  }))
+                  setSettings({
+                    ...settings,
+                    fonts: { ...settings.fonts, body: value }
+                  })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
               >
                 <SelectTrigger id="body-font">
@@ -499,11 +701,12 @@ export function BrandingSettingsTab() {
                 step={0.5}
                 value={[settings.fonts.bodySize]}
                 onValueChange={([value]) => {
-                  setSettings((c) => ({
-                    ...c!,
-                    fonts: { ...c!.fonts, bodySize: value }
-                  }))
+                  setSettings({
+                    ...settings,
+                    fonts: { ...settings.fonts, bodySize: value }
+                  })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
               />
             </div>
@@ -525,11 +728,12 @@ export function BrandingSettingsTab() {
                 id="header-enabled"
                 checked={settings.header.enabled}
                 onCheckedChange={(checked) => {
-                  setSettings((c) => ({
-                    ...c!,
-                    header: { ...c!.header, enabled: checked }
-                  }))
+                  setSettings({
+                    ...settings,
+                    header: { ...settings.header, enabled: checked }
+                  })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
               />
             </div>
@@ -544,11 +748,12 @@ export function BrandingSettingsTab() {
                 checked={settings.header.showLogo}
                 disabled={!settings.header.enabled}
                 onCheckedChange={(checked) => {
-                  setSettings((c) => ({
-                    ...c!,
-                    header: { ...c!.header, showLogo: checked }
-                  }))
+                  setSettings({
+                    ...settings,
+                    header: { ...settings.header, showLogo: checked }
+                  })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
               />
             </div>
@@ -562,11 +767,12 @@ export function BrandingSettingsTab() {
                 id="footer-enabled"
                 checked={settings.footer.enabled}
                 onCheckedChange={(checked) => {
-                  setSettings((c) => ({
-                    ...c!,
-                    footer: { ...c!.footer, enabled: checked }
-                  }))
+                  setSettings({
+                    ...settings,
+                    footer: { ...settings.footer, enabled: checked }
+                  })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
               />
             </div>
@@ -581,11 +787,12 @@ export function BrandingSettingsTab() {
                 checked={settings.footer.showPageNumbers}
                 disabled={!settings.footer.enabled}
                 onCheckedChange={(checked) => {
-                  setSettings((c) => ({
-                    ...c!,
-                    footer: { ...c!.footer, showPageNumbers: checked }
-                  }))
+                  setSettings({
+                    ...settings,
+                    footer: { ...settings.footer, showPageNumbers: checked }
+                  })
                   setHasChanges(true)
+                  setAppliedTheme(null)
                 }}
               />
             </div>

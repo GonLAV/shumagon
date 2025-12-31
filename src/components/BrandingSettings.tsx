@@ -109,17 +109,20 @@ export function BrandingSettings() {
     reader.onload = (event) => {
       const img = new Image()
       img.onload = () => {
-        setBranding((current) => ({
-          ...current,
-          logo: {
-            dataUrl: event.target?.result as string,
-            width: img.width,
-            height: img.height,
-            position: current.logo?.position || 'left',
-            size: current.logo?.size || 'medium'
-          },
-          updatedAt: new Date().toISOString()
-        }))
+        setBranding((current) => {
+          const base = current || defaultBranding
+          return {
+            ...base,
+            logo: {
+              dataUrl: event.target?.result as string,
+              width: img.width,
+              height: img.height,
+              position: base.logo?.position || 'left',
+              size: base.logo?.size || 'medium'
+            },
+            updatedAt: new Date().toISOString()
+          }
+        })
         setHasChanges(true)
         toast.success('הלוגו הועלה בהצלחה')
       }
@@ -130,8 +133,8 @@ export function BrandingSettings() {
 
   const handleRemoveLogo = () => {
     setBranding((current) => {
-      if (!current) return defaultBranding
-      const updated = { ...current }
+      const base = current || defaultBranding
+      const updated = { ...base }
       delete updated.logo
       updated.updatedAt = new Date().toISOString()
       return updated
@@ -141,10 +144,13 @@ export function BrandingSettings() {
   }
 
   const handleSave = () => {
-    setBranding((current) => ({
-      ...current,
-      updatedAt: new Date().toISOString()
-    }))
+    setBranding((current) => {
+      const base = current || defaultBranding
+      return {
+        ...base,
+        updatedAt: new Date().toISOString()
+      }
+    })
     setHasChanges(false)
     toast.success('הגדרות המיתוג נשמרו בהצלחה')
   }
