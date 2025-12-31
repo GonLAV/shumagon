@@ -28,6 +28,7 @@ import { motion } from 'framer-motion'
 import type { BrandingSettings as BrandingSettingsType } from '@/lib/types'
 import { exportSingleValuationToPDF } from '@/lib/pdfExport'
 import type { Property } from '@/lib/types'
+import { professionalFonts, getFontsByCategory, getFontFamily } from '@/lib/fonts'
 
 const defaultBranding: BrandingSettingsType = {
   id: 'default',
@@ -795,78 +796,27 @@ export function BrandingSettings() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="max-h-96">
-                        <SelectItem value="Helvetica" style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Helvetica</span>
-                            <span className="text-xs text-muted-foreground">Classic • Professional • Clean</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Times" style={{ fontFamily: 'Times New Roman, Times, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Times New Roman</span>
-                            <span className="text-xs text-muted-foreground">Traditional • Formal • Legal</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Arial" style={{ fontFamily: 'Arial, sans-serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Arial</span>
-                            <span className="text-xs text-muted-foreground">Universal • Simple • Readable</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Georgia" style={{ fontFamily: 'Georgia, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Georgia</span>
-                            <span className="text-xs text-muted-foreground">Elegant • Readable • Scholarly</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Courier" style={{ fontFamily: 'Courier New, Courier, monospace' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Courier New</span>
-                            <span className="text-xs text-muted-foreground">Monospace • Technical • Precise</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Palatino" style={{ fontFamily: 'Palatino, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Palatino</span>
-                            <span className="text-xs text-muted-foreground">Elegant • Classic • Refined</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Garamond" style={{ fontFamily: 'Garamond, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Garamond</span>
-                            <span className="text-xs text-muted-foreground">Graceful • Literary • Timeless</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Verdana" style={{ fontFamily: 'Verdana, sans-serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Verdana</span>
-                            <span className="text-xs text-muted-foreground">Screen-optimized • Clear • Modern</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Trebuchet" style={{ fontFamily: 'Trebuchet MS, sans-serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Trebuchet MS</span>
-                            <span className="text-xs text-muted-foreground">Friendly • Contemporary • Rounded</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Calibri" style={{ fontFamily: 'Calibri, sans-serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Calibri</span>
-                            <span className="text-xs text-muted-foreground">Modern • Office • Approachable</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Cambria" style={{ fontFamily: 'Cambria, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Cambria</span>
-                            <span className="text-xs text-muted-foreground">Robust • Authoritative • Professional</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Book Antiqua" style={{ fontFamily: 'Book Antiqua, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Book Antiqua</span>
-                            <span className="text-xs text-muted-foreground">Vintage • Distinguished • Formal</span>
-                          </div>
-                        </SelectItem>
+                        {Object.entries(getFontsByCategory()).map(([category, fonts]) => (
+                          fonts.length > 0 && (
+                            <div key={category}>
+                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0 z-10">
+                                {category}
+                              </div>
+                              {fonts.map((font) => (
+                                <SelectItem 
+                                  key={font.value} 
+                                  value={font.value} 
+                                  style={{ fontFamily: font.family }}
+                                >
+                                  <div className="flex flex-col gap-1">
+                                    <span className="font-semibold">{font.name}</span>
+                                    <span className="text-xs text-muted-foreground">{font.description}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </div>
+                          )
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -885,80 +835,106 @@ export function BrandingSettings() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent className="max-h-96">
-                        <SelectItem value="Helvetica" style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Helvetica</span>
-                            <span className="text-xs text-muted-foreground">Classic • Professional • Clean</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Times" style={{ fontFamily: 'Times New Roman, Times, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Times New Roman</span>
-                            <span className="text-xs text-muted-foreground">Traditional • Formal • Legal</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Arial" style={{ fontFamily: 'Arial, sans-serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Arial</span>
-                            <span className="text-xs text-muted-foreground">Universal • Simple • Readable</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Georgia" style={{ fontFamily: 'Georgia, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Georgia</span>
-                            <span className="text-xs text-muted-foreground">Elegant • Readable • Scholarly</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Courier" style={{ fontFamily: 'Courier New, Courier, monospace' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Courier New</span>
-                            <span className="text-xs text-muted-foreground">Monospace • Technical • Precise</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Palatino" style={{ fontFamily: 'Palatino, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Palatino</span>
-                            <span className="text-xs text-muted-foreground">Elegant • Classic • Refined</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Garamond" style={{ fontFamily: 'Garamond, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Garamond</span>
-                            <span className="text-xs text-muted-foreground">Graceful • Literary • Timeless</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Verdana" style={{ fontFamily: 'Verdana, sans-serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Verdana</span>
-                            <span className="text-xs text-muted-foreground">Screen-optimized • Clear • Modern</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Trebuchet" style={{ fontFamily: 'Trebuchet MS, sans-serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Trebuchet MS</span>
-                            <span className="text-xs text-muted-foreground">Friendly • Contemporary • Rounded</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Calibri" style={{ fontFamily: 'Calibri, sans-serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Calibri</span>
-                            <span className="text-xs text-muted-foreground">Modern • Office • Approachable</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Cambria" style={{ fontFamily: 'Cambria, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Cambria</span>
-                            <span className="text-xs text-muted-foreground">Robust • Authoritative • Professional</span>
-                          </div>
-                        </SelectItem>
-                        <SelectItem value="Book Antiqua" style={{ fontFamily: 'Book Antiqua, serif' }}>
-                          <div className="flex flex-col gap-1">
-                            <span className="font-semibold">Book Antiqua</span>
-                            <span className="text-xs text-muted-foreground">Vintage • Distinguished • Formal</span>
-                          </div>
-                        </SelectItem>
+                        {Object.entries(getFontsByCategory()).map(([category, fonts]) => (
+                          fonts.length > 0 && (
+                            <div key={category}>
+                              <div className="px-2 py-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 sticky top-0 z-10">
+                                {category}
+                              </div>
+                              {fonts.map((font) => (
+                                <SelectItem 
+                                  key={font.value} 
+                                  value={font.value} 
+                                  style={{ fontFamily: font.family }}
+                                >
+                                  <div className="flex flex-col gap-1">
+                                    <span className="font-semibold">{font.name}</span>
+                                    <span className="text-xs text-muted-foreground">{font.description}</span>
+                                  </div>
+                                </SelectItem>
+                              ))}
+                            </div>
+                          )
+                        ))}
                       </SelectContent>
                     </Select>
+                  </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium">צירופי פונטים מומלצים</Label>
+                    <Badge variant="outline" className="text-xs">לחץ להחלה</Badge>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateBranding({
+                        fonts: { ...branding.fonts, heading: 'Merriweather', body: 'Source Sans 3' }
+                      })}
+                      className="h-auto flex-col items-start p-3 gap-1"
+                    >
+                      <div className="font-semibold text-xs">Editorial Classic</div>
+                      <div className="text-xs text-muted-foreground text-right">Merriweather + Source Sans 3</div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateBranding({
+                        fonts: { ...branding.fonts, heading: 'Playfair Display', body: 'Source Sans 3' }
+                      })}
+                      className="h-auto flex-col items-start p-3 gap-1"
+                    >
+                      <div className="font-semibold text-xs">Luxury Report</div>
+                      <div className="text-xs text-muted-foreground text-right">Playfair Display + Source Sans</div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateBranding({
+                        fonts: { ...branding.fonts, heading: 'IBM Plex Serif', body: 'IBM Plex Sans' }
+                      })}
+                      className="h-auto flex-col items-start p-3 gap-1"
+                    >
+                      <div className="font-semibold text-xs">Corporate Pro</div>
+                      <div className="text-xs text-muted-foreground text-right">IBM Plex Serif + IBM Plex Sans</div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateBranding({
+                        fonts: { ...branding.fonts, heading: 'Lora', body: 'Open Sans' }
+                      })}
+                      className="h-auto flex-col items-start p-3 gap-1"
+                    >
+                      <div className="font-semibold text-xs">Modern Readable</div>
+                      <div className="text-xs text-muted-foreground text-right">Lora + Open Sans</div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateBranding({
+                        fonts: { ...branding.fonts, heading: 'Roboto Slab', body: 'Inter' }
+                      })}
+                      className="h-auto flex-col items-start p-3 gap-1"
+                    >
+                      <div className="font-semibold text-xs">Tech Forward</div>
+                      <div className="text-xs text-muted-foreground text-right">Roboto Slab + Inter</div>
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => updateBranding({
+                        fonts: { ...branding.fonts, heading: 'EB Garamond', body: 'Source Sans 3' }
+                      })}
+                      className="h-auto flex-col items-start p-3 gap-1"
+                    >
+                      <div className="font-semibold text-xs">Timeless Legal</div>
+                      <div className="text-xs text-muted-foreground text-right">EB Garamond + Source Sans</div>
+                    </Button>
                   </div>
                 </div>
 
@@ -1007,7 +983,7 @@ export function BrandingSettings() {
                       <div className="space-y-2">
                         <div
                           style={{
-                            fontFamily: branding.fonts.heading,
+                            fontFamily: getFontFamily(branding.fonts.heading),
                             fontSize: `${branding.fonts.headingSize}pt`,
                             fontWeight: 600
                           }}
@@ -1017,7 +993,7 @@ export function BrandingSettings() {
                         </div>
                         <div
                           style={{
-                            fontFamily: branding.fonts.body,
+                            fontFamily: getFontFamily(branding.fonts.body),
                             fontSize: `${branding.fonts.bodySize}pt`
                           }}
                           className="text-foreground/80"
@@ -1032,7 +1008,7 @@ export function BrandingSettings() {
                         <div className="space-y-1">
                           <div className="text-muted-foreground text-xs">פונט כותרות</div>
                           <div
-                            style={{ fontFamily: branding.fonts.heading }}
+                            style={{ fontFamily: getFontFamily(branding.fonts.heading) }}
                             className="font-semibold text-foreground"
                           >
                             {branding.fonts.heading}
@@ -1041,7 +1017,7 @@ export function BrandingSettings() {
                         <div className="space-y-1">
                           <div className="text-muted-foreground text-xs">פונט תוכן</div>
                           <div
-                            style={{ fontFamily: branding.fonts.body }}
+                            style={{ fontFamily: getFontFamily(branding.fonts.body) }}
                             className="font-medium text-foreground"
                           >
                             {branding.fonts.body}
@@ -1053,7 +1029,7 @@ export function BrandingSettings() {
                         <div className="space-y-3">
                           <div
                             style={{
-                              fontFamily: branding.fonts.heading,
+                              fontFamily: getFontFamily(branding.fonts.heading),
                               fontSize: `${Math.max(branding.fonts.headingSize - 2, 12)}pt`,
                               fontWeight: 600
                             }}
@@ -1063,7 +1039,7 @@ export function BrandingSettings() {
                           </div>
                           <div
                             style={{
-                              fontFamily: branding.fonts.body,
+                              fontFamily: getFontFamily(branding.fonts.body),
                               fontSize: `${branding.fonts.bodySize}pt`,
                               lineHeight: 1.6
                             }}
@@ -1075,7 +1051,7 @@ export function BrandingSettings() {
                           <div className="flex gap-4 text-xs">
                             <div
                               style={{
-                                fontFamily: branding.fonts.body,
+                                fontFamily: getFontFamily(branding.fonts.body),
                                 fontSize: `${Math.max(branding.fonts.bodySize - 1, 7)}pt`
                               }}
                               className="text-muted-foreground"
@@ -1084,7 +1060,7 @@ export function BrandingSettings() {
                             </div>
                             <div
                               style={{
-                                fontFamily: branding.fonts.body,
+                                fontFamily: getFontFamily(branding.fonts.body),
                                 fontSize: `${Math.max(branding.fonts.bodySize - 1, 7)}pt`
                               }}
                               className="text-muted-foreground"
