@@ -30,12 +30,15 @@ import {
   Paperclip,
   FilePdf,
   FileText,
-  Lock
+  Lock,
+  FolderOpen,
+  MagicWand
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { EmailAttachmentPreview } from '@/components/EmailAttachmentPreview'
 import { FileUploadDropzone, type UploadedFile } from '@/components/FileUploadDropzone'
+import { EmailTemplateManager, type EmailTemplate } from '@/components/EmailTemplateManager'
 import { cn } from '@/lib/utils'
 
 interface EmailReportDialogProps {
@@ -67,13 +70,6 @@ export interface EmailData {
   customAttachments?: UploadedFile[]
 }
 
-interface EmailTemplate {
-  id: string
-  name: string
-  subject: string
-  message: string
-}
-
 interface SavedRecipient {
   email: string
   name: string
@@ -90,32 +86,7 @@ export function EmailReportDialog({
   onSend,
   attachments = []
 }: EmailReportDialogProps) {
-  const [emailTemplates] = useKV<EmailTemplate[]>('email-templates', [
-    {
-      id: 'professional',
-      name: 'מקצועי',
-      subject: 'דוח שמאות - {property}',
-      message: 'שלום רב,\n\nבצרוף מצ"ב דוח השמאות המבוקש עבור {property}.\n\nהדוח כולל ניתוח מקיף ושומה מקצועית של הנכס.\n\nנשמח לעמוד לשירותכם לכל שאלה.\n\nבברכה,\nצוות השמאות'
-    },
-    {
-      id: 'bank',
-      name: 'לבנק',
-      subject: 'דוח שמאות נדל"ן - {property}',
-      message: 'לכבוד,\nמחלקת משכנתאות\n\nהנדון: דוח שמאות עבור {property}\n\nמצ"ב דוח השמאות המבוקש לצורך קבלת משכנתא.\n\nהדוח נערך בהתאם לדרישות הבנק וכולל את כל הנתונים הנדרשים.\n\nבברכה,\nשמאי מקרקעין מוסמך'
-    },
-    {
-      id: 'client',
-      name: 'ללקוח',
-      subject: 'דוח השמאות שלך מוכן - {property}',
-      message: 'שלום,\n\nדוח השמאות עבור הנכס ב{property} מוכן!\n\nהדוח כולל:\n• שווי מעודכן של הנכס\n• ניתוח שוק מקיף\n• השוואה לנכסים דומים\n• המלצות מקצועיות\n\nניתן לצפות בדוח המצורף.\n\nנשמח לענות על כל שאלה.\n\nבהצלחה!'
-    },
-    {
-      id: 'urgent',
-      name: 'דחוף',
-      subject: '⚡ דוח שמאות דחוף - {property}',
-      message: 'שלום,\n\nבצרוף מצ"ב דוח השמאות הדחוף שביקשת עבור {property}.\n\nהדוח עבר בדיקת איכות מלאה ומוכן לשימוש.\n\nזמינים לכל שאלה.\n\nבברכה'
-    }
-  ])
+  const [emailTemplates, setEmailTemplates] = useKV<EmailTemplate[]>('email-templates', [])
 
   const [savedRecipients, setSavedRecipients] = useKV<SavedRecipient[]>('saved-recipients', [])
   const [emailHistory, setEmailHistory] = useKV<any[]>('email-history', [])
@@ -136,19 +107,24 @@ export function EmailReportDialog({
   const [newBcc, setNewBcc] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState<string>('')
   const [showPreview, setShowPreview] = useState(false)
+  const [showTemplateManager, setShowTemplateManager] = useState(false)
   const [selectedAttachments, setSelectedAttachments] = useState<string[]>(
     attachments.map(a => a.name)
   )
   const [customAttachments, setCustomAttachments] = useState<UploadedFile[]>([])
 
-  const applyTemplate = (templateId: string) => {
-    const template = emailTemplates?.find(t => t.id === templateId)
-    if (template) {
-      setSubject(template.subject.replace('{property}', reportTitle))
-      setMessage(template.message.replace(/{property}/g, reportTitle))
-      setSelectedTemplate(templateId)
-      toast.success(`תבנית "${template.name}" הוחלה`)
+  const applyTemplate = (template: EmailTemplate) => {
+    const replacePlaceholders = (text: string) => {
+      return text
+        .replace(/{property}/g, reportTitle)
+        .replace(/{reportType}/g, reportType)
+        .replace(/{date}/g, new Date().toLocaleDateString('he-IL'))
     }
+
+    setSubject(replacePlaceholders(template.subject))
+    setMessage(replacePlaceholders(template.message))
+    setSelectedTemplate(template.id)
+    toast.success(`תבנית "${template.name}" הוחלה`)
   }
 
   const addRecipient = (email: string, type: 'to' | 'cc' | 'bcc') => {
@@ -368,20 +344,55 @@ export function EmailReportDialog({
         <ScrollArea className="max-h-[60vh] pr-4">
           <div className="space-y-6">
             <div className="space-y-3">
-              <Label className="text-base font-semibold">תבניות הודעה</Label>
-              <div className="grid grid-cols-2 gap-2">
-                {emailTemplates?.map(template => (
-                  <Button
-                    key={template.id}
-                    variant={selectedTemplate === template.id ? 'default' : 'outline'}
-                    size="sm"
-                    onClick={() => applyTemplate(template.id)}
-                    className="justify-start"
-                  >
-                    {template.name}
-                  </Button>
-                ))}
+              <div className="flex items-center justify-between">
+                <Label className="text-base font-semibold">תבניות הודעה</Label>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowTemplateManager(true)}
+                  className="gap-2"
+                >
+                  <FolderOpen size={16} />
+                  נהל תבניות
+                </Button>
               </div>
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2">
+                {emailTemplates && emailTemplates.length > 0 ? (
+                  emailTemplates.slice(0, 6).map(template => (
+                    <Button
+                      key={template.id}
+                      variant={selectedTemplate === template.id ? 'default' : 'outline'}
+                      size="sm"
+                      onClick={() => applyTemplate(template)}
+                      className="justify-start h-auto py-2 px-3"
+                    >
+                      <div className="flex flex-col items-start gap-0.5">
+                        <span className="text-xs font-semibold">{template.name}</span>
+                        {template.useCount > 0 && (
+                          <span className="text-[10px] opacity-70">
+                            {template.useCount} שימושים
+                          </span>
+                        )}
+                      </div>
+                    </Button>
+                  ))
+                ) : (
+                  <div className="col-span-2 lg:col-span-3 text-center py-4 text-sm text-muted-foreground">
+                    אין תבניות. לחץ על "נהל תבניות" ליצירת תבניות.
+                  </div>
+                )}
+              </div>
+              {emailTemplates && emailTemplates.length > 6 && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTemplateManager(true)}
+                  className="w-full gap-2"
+                >
+                  <MagicWand size={16} />
+                  הצג עוד {emailTemplates.length - 6} תבניות
+                </Button>
+              )}
             </div>
 
             <Separator />
@@ -884,6 +895,15 @@ export function EmailReportDialog({
       attachments={defaultAttachments.filter(a => selectedAttachments.includes(a.name))}
       customAttachments={customAttachments.filter(f => f.status === 'complete')}
       reportTitle={reportTitle}
+    />
+
+    <EmailTemplateManager
+      open={showTemplateManager}
+      onOpenChange={setShowTemplateManager}
+      onSelectTemplate={(template) => {
+        applyTemplate(template)
+        setShowTemplateManager(false)
+      }}
     />
   </>
   )
