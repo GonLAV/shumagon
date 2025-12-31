@@ -6,9 +6,25 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/badge'
-import { FloppyDisk, Info, UploadSimple, Trash } from '@phosphor-icons/react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Slider } from '@/components/ui/slider'
+import { FloppyDisk, Info, UploadSimple, Trash, Eye } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import type { BrandingSettings } from '@/lib/types'
+import { PDFPreview } from '@/components/PDFPreview'
+import { Dialog, DialogContent } from '@/components/ui/dialog'
+
+const AVAILABLE_FONTS = [
+  { value: 'Helvetica', label: 'Helvetica', category: 'Sans-serif' },
+  { value: 'Times', label: 'Times New Roman', category: 'Serif' },
+  { value: 'Courier', label: 'Courier', category: 'Monospace' },
+  { value: 'Inter', label: 'Inter', category: 'Sans-serif' },
+  { value: 'JetBrains Mono', label: 'JetBrains Mono', category: 'Monospace' },
+  { value: 'Arial', label: 'Arial', category: 'Sans-serif' },
+  { value: 'Georgia', label: 'Georgia', category: 'Serif' },
+  { value: 'Verdana', label: 'Verdana', category: 'Sans-serif' },
+  { value: 'Palatino', label: 'Palatino', category: 'Serif' },
+]
 
 const defaultBranding: BrandingSettings = {
   id: 'default',
@@ -68,6 +84,7 @@ const defaultBranding: BrandingSettings = {
 export function BrandingSettingsTab() {
   const [settings, setSettings] = useKV<BrandingSettings>('branding-settings', defaultBranding)
   const [hasChanges, setHasChanges] = useState(false)
+  const [showPreview, setShowPreview] = useState(false)
 
   const handleSave = () => {
     setSettings((current) => ({ ...current!, updatedAt: new Date().toISOString() }))
@@ -149,6 +166,10 @@ export function BrandingSettingsTab() {
           )}
           <Button variant="outline" onClick={handleReset} size="sm">
             איפוס
+          </Button>
+          <Button variant="outline" onClick={() => setShowPreview(true)} size="sm" className="gap-2">
+            <Eye size={18} weight="duotone" />
+            תצוגה מקדימה
           </Button>
           <Button onClick={handleSave} disabled={!hasChanges} className="gap-2">
             <FloppyDisk size={18} weight="duotone" />
@@ -371,6 +392,126 @@ export function BrandingSettingsTab() {
 
         <Card className="glass-effect border-border/50">
           <CardHeader>
+            <CardTitle>גופנים ועיצוב טקסט</CardTitle>
+            <CardDescription>בחר גופנים לכותרות ולגוף הטקסט</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="heading-font">גופן כותרות</Label>
+              <Select
+                value={settings.fonts.heading}
+                onValueChange={(value) => {
+                  setSettings((c) => ({
+                    ...c!,
+                    fonts: { ...c!.fonts, heading: value }
+                  }))
+                  setHasChanges(true)
+                }}
+              >
+                <SelectTrigger id="heading-font">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {AVAILABLE_FONTS.map((font) => (
+                    <SelectItem key={font.value} value={font.value}>
+                      <span style={{ fontFamily: font.value }}>{font.label}</span>
+                      <span className="text-xs text-muted-foreground ml-2">({font.category})</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="p-4 bg-muted/30 rounded-lg border border-border">
+                <p
+                  className="text-center font-bold"
+                  style={{
+                    fontFamily: settings.fonts.heading,
+                    fontSize: `${settings.fonts.headingSize}pt`,
+                  }}
+                >
+                  תצוגה מקדימה - כותרת ראשית
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="heading-size">גודל כותרות: {settings.fonts.headingSize}pt</Label>
+              <Slider
+                id="heading-size"
+                min={12}
+                max={24}
+                step={1}
+                value={[settings.fonts.headingSize]}
+                onValueChange={([value]) => {
+                  setSettings((c) => ({
+                    ...c!,
+                    fonts: { ...c!.fonts, headingSize: value }
+                  }))
+                  setHasChanges(true)
+                }}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="body-font">גופן טקסט רגיל</Label>
+              <Select
+                value={settings.fonts.body}
+                onValueChange={(value) => {
+                  setSettings((c) => ({
+                    ...c!,
+                    fonts: { ...c!.fonts, body: value }
+                  }))
+                  setHasChanges(true)
+                }}
+              >
+                <SelectTrigger id="body-font">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {AVAILABLE_FONTS.map((font) => (
+                    <SelectItem key={font.value} value={font.value}>
+                      <span style={{ fontFamily: font.value }}>{font.label}</span>
+                      <span className="text-xs text-muted-foreground ml-2">({font.category})</span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <div className="p-4 bg-muted/30 rounded-lg border border-border">
+                <p
+                  className="text-right"
+                  style={{
+                    fontFamily: settings.fonts.body,
+                    fontSize: `${settings.fonts.bodySize}pt`,
+                    lineHeight: '1.6',
+                  }}
+                >
+                  זוהי תצוגה מקדימה של טקסט רגיל בדוח. הטקסט יופיע בגופן ובגודל שנבחרו. ניתן לראות כיצד
+                  הגופן משפיע על קריאות הטקסט ועל המראה הכללי של הדוח.
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="body-size">גודל טקסט רגיל: {settings.fonts.bodySize}pt</Label>
+              <Slider
+                id="body-size"
+                min={8}
+                max={14}
+                step={0.5}
+                value={[settings.fonts.bodySize]}
+                onValueChange={([value]) => {
+                  setSettings((c) => ({
+                    ...c!,
+                    fonts: { ...c!.fonts, bodySize: value }
+                  }))
+                  setHasChanges(true)
+                }}
+              />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="glass-effect border-border/50">
+          <CardHeader>
             <CardTitle>כותרת עליונה ותחתונה</CardTitle>
             <CardDescription>התאמת כותרות PDF</CardDescription>
           </CardHeader>
@@ -467,6 +608,12 @@ export function BrandingSettingsTab() {
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={showPreview} onOpenChange={setShowPreview}>
+        <DialogContent className="max-w-[95vw] max-h-[95vh] p-0">
+          <PDFPreview branding={settings} onClose={() => setShowPreview(false)} />
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
