@@ -43,8 +43,8 @@ const defaultBranding: BrandingSettingsType = {
     footerText: '#4B5563'
   },
   fonts: {
-    heading: 'Inter',
-    body: 'Inter',
+    heading: 'Helvetica',
+    body: 'Helvetica',
     headingSize: 16,
     bodySize: 11
   },
@@ -772,11 +772,12 @@ export function BrandingSettings() {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            className="space-y-4"
           >
             <Card className="glass-effect border-border/50">
               <CardHeader>
                 <CardTitle>הגדרות פונט</CardTitle>
-                <CardDescription>בחר פונטים וגדלים לדוחות</CardDescription>
+                <CardDescription>בחר פונטים וגדלים לדוחות עם תצוגה מקדימה חיה</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div className="grid grid-cols-2 gap-6">
@@ -790,14 +791,82 @@ export function BrandingSettings() {
                         })
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="font-medium">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Inter">Inter</SelectItem>
-                        <SelectItem value="Helvetica">Helvetica</SelectItem>
-                        <SelectItem value="Times">Times New Roman</SelectItem>
-                        <SelectItem value="Courier">Courier</SelectItem>
+                      <SelectContent className="max-h-96">
+                        <SelectItem value="Helvetica" style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Helvetica</span>
+                            <span className="text-xs text-muted-foreground">Classic • Professional • Clean</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Times" style={{ fontFamily: 'Times New Roman, Times, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Times New Roman</span>
+                            <span className="text-xs text-muted-foreground">Traditional • Formal • Legal</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Arial" style={{ fontFamily: 'Arial, sans-serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Arial</span>
+                            <span className="text-xs text-muted-foreground">Universal • Simple • Readable</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Georgia" style={{ fontFamily: 'Georgia, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Georgia</span>
+                            <span className="text-xs text-muted-foreground">Elegant • Readable • Scholarly</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Courier" style={{ fontFamily: 'Courier New, Courier, monospace' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Courier New</span>
+                            <span className="text-xs text-muted-foreground">Monospace • Technical • Precise</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Palatino" style={{ fontFamily: 'Palatino, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Palatino</span>
+                            <span className="text-xs text-muted-foreground">Elegant • Classic • Refined</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Garamond" style={{ fontFamily: 'Garamond, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Garamond</span>
+                            <span className="text-xs text-muted-foreground">Graceful • Literary • Timeless</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Verdana" style={{ fontFamily: 'Verdana, sans-serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Verdana</span>
+                            <span className="text-xs text-muted-foreground">Screen-optimized • Clear • Modern</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Trebuchet" style={{ fontFamily: 'Trebuchet MS, sans-serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Trebuchet MS</span>
+                            <span className="text-xs text-muted-foreground">Friendly • Contemporary • Rounded</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Calibri" style={{ fontFamily: 'Calibri, sans-serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Calibri</span>
+                            <span className="text-xs text-muted-foreground">Modern • Office • Approachable</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Cambria" style={{ fontFamily: 'Cambria, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Cambria</span>
+                            <span className="text-xs text-muted-foreground">Robust • Authoritative • Professional</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Book Antiqua" style={{ fontFamily: 'Book Antiqua, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Book Antiqua</span>
+                            <span className="text-xs text-muted-foreground">Vintage • Distinguished • Formal</span>
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -812,14 +881,82 @@ export function BrandingSettings() {
                         })
                       }
                     >
-                      <SelectTrigger>
+                      <SelectTrigger className="font-medium">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Inter">Inter</SelectItem>
-                        <SelectItem value="Helvetica">Helvetica</SelectItem>
-                        <SelectItem value="Times">Times New Roman</SelectItem>
-                        <SelectItem value="Courier">Courier</SelectItem>
+                      <SelectContent className="max-h-96">
+                        <SelectItem value="Helvetica" style={{ fontFamily: 'Helvetica, Arial, sans-serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Helvetica</span>
+                            <span className="text-xs text-muted-foreground">Classic • Professional • Clean</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Times" style={{ fontFamily: 'Times New Roman, Times, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Times New Roman</span>
+                            <span className="text-xs text-muted-foreground">Traditional • Formal • Legal</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Arial" style={{ fontFamily: 'Arial, sans-serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Arial</span>
+                            <span className="text-xs text-muted-foreground">Universal • Simple • Readable</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Georgia" style={{ fontFamily: 'Georgia, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Georgia</span>
+                            <span className="text-xs text-muted-foreground">Elegant • Readable • Scholarly</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Courier" style={{ fontFamily: 'Courier New, Courier, monospace' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Courier New</span>
+                            <span className="text-xs text-muted-foreground">Monospace • Technical • Precise</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Palatino" style={{ fontFamily: 'Palatino, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Palatino</span>
+                            <span className="text-xs text-muted-foreground">Elegant • Classic • Refined</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Garamond" style={{ fontFamily: 'Garamond, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Garamond</span>
+                            <span className="text-xs text-muted-foreground">Graceful • Literary • Timeless</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Verdana" style={{ fontFamily: 'Verdana, sans-serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Verdana</span>
+                            <span className="text-xs text-muted-foreground">Screen-optimized • Clear • Modern</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Trebuchet" style={{ fontFamily: 'Trebuchet MS, sans-serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Trebuchet MS</span>
+                            <span className="text-xs text-muted-foreground">Friendly • Contemporary • Rounded</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Calibri" style={{ fontFamily: 'Calibri, sans-serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Calibri</span>
+                            <span className="text-xs text-muted-foreground">Modern • Office • Approachable</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Cambria" style={{ fontFamily: 'Cambria, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Cambria</span>
+                            <span className="text-xs text-muted-foreground">Robust • Authoritative • Professional</span>
+                          </div>
+                        </SelectItem>
+                        <SelectItem value="Book Antiqua" style={{ fontFamily: 'Book Antiqua, serif' }}>
+                          <div className="flex flex-col gap-1">
+                            <span className="font-semibold">Book Antiqua</span>
+                            <span className="text-xs text-muted-foreground">Vintage • Distinguished • Formal</span>
+                          </div>
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -855,6 +992,110 @@ export function BrandingSettings() {
                       step={1}
                     />
                   </div>
+                </div>
+
+                <Separator />
+
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <Eye size={20} weight="duotone" className="text-primary" />
+                    <Label className="text-base font-semibold">תצוגה מקדימה</Label>
+                  </div>
+                  
+                  <Card className="bg-gradient-to-br from-muted/30 to-muted/10 border-primary/20">
+                    <CardContent className="p-6 space-y-4">
+                      <div className="space-y-2">
+                        <div
+                          style={{
+                            fontFamily: branding.fonts.heading,
+                            fontSize: `${branding.fonts.headingSize}pt`,
+                            fontWeight: 600
+                          }}
+                          className="text-foreground"
+                        >
+                          דוח שמאות מקרקעין
+                        </div>
+                        <div
+                          style={{
+                            fontFamily: branding.fonts.body,
+                            fontSize: `${branding.fonts.bodySize}pt`
+                          }}
+                          className="text-foreground/80"
+                        >
+                          The quick brown fox jumps over the lazy dog. שמאות נדל"ן מקצועית ומדויקת לכל סוגי הנכסים.
+                        </div>
+                      </div>
+
+                      <Separator className="opacity-50" />
+
+                      <div className="grid grid-cols-2 gap-4 text-sm">
+                        <div className="space-y-1">
+                          <div className="text-muted-foreground text-xs">פונט כותרות</div>
+                          <div
+                            style={{ fontFamily: branding.fonts.heading }}
+                            className="font-semibold text-foreground"
+                          >
+                            {branding.fonts.heading}
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <div className="text-muted-foreground text-xs">פונט תוכן</div>
+                          <div
+                            style={{ fontFamily: branding.fonts.body }}
+                            className="font-medium text-foreground"
+                          >
+                            {branding.fonts.body}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="p-4 rounded-lg bg-background/50 border border-border/50">
+                        <div className="space-y-3">
+                          <div
+                            style={{
+                              fontFamily: branding.fonts.heading,
+                              fontSize: `${Math.max(branding.fonts.headingSize - 2, 12)}pt`,
+                              fontWeight: 600
+                            }}
+                            className="text-foreground"
+                          >
+                            נכס למגורים - דירת 4 חדרים
+                          </div>
+                          <div
+                            style={{
+                              fontFamily: branding.fonts.body,
+                              fontSize: `${branding.fonts.bodySize}pt`,
+                              lineHeight: 1.6
+                            }}
+                            className="text-foreground/70"
+                          >
+                            הנכס ממוקם ברחוב הרצל 123, תל אביב, בקומה 3 מתוך 5. הדירה משופצת ומוארת, 
+                            כוללת מרפסת פתוחה עם נוף פנורמי, מעלית וחניה. שטח הנכס: 95 מ"ר.
+                          </div>
+                          <div className="flex gap-4 text-xs">
+                            <div
+                              style={{
+                                fontFamily: branding.fonts.body,
+                                fontSize: `${Math.max(branding.fonts.bodySize - 1, 7)}pt`
+                              }}
+                              className="text-muted-foreground"
+                            >
+                              שווי משוער: ₪2,450,000
+                            </div>
+                            <div
+                              style={{
+                                fontFamily: branding.fonts.body,
+                                fontSize: `${Math.max(branding.fonts.bodySize - 1, 7)}pt`
+                              }}
+                              className="text-muted-foreground"
+                            >
+                              מחיר למ"ר: ₪25,789
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
                 </div>
               </CardContent>
             </Card>

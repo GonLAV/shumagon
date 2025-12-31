@@ -93,16 +93,22 @@ This is a professional tool requiring multiple sophisticated features: property 
   - Instant download with descriptive filename
 
 ### Custom PDF Branding System (NEW - Professional Brand Identity)
-- **Functionality**: Comprehensive branding customization system allowing users to configure company logo, colors, fonts, headers, footers, and contact information that automatically apply to all PDF exports
+- **Functionality**: Comprehensive branding customization system allowing users to configure company logo, colors, fonts with live preview, headers, footers, and contact information that automatically apply to all PDF exports
 - **Purpose**: Enable appraisers to create professional, branded PDF reports that reflect their company identity and maintain consistent visual presentation across all documents
 - **Trigger**: Click "מיתוג PDF" tab in main navigation
 - **Progression**: 
-  - Configure company details (name, tagline, phone, email, website, license number) → Upload company logo (PNG/JPG up to 2MB) with position and size options → Select brand colors (primary, header background/text, footer background/text) using color pickers → Configure header settings (enable/disable, show logo, show company name, show tagline, border options) → Configure footer settings (enable/disable, show page numbers, show company name, show contact info, border options) → Click "שמור" to save settings → All future PDF exports automatically use these branding settings
+  - Configure company details (name, tagline, phone, email, website, license number) → Upload company logo (PNG/JPG up to 2MB) with position and size options → Select brand colors (primary, header background/text, footer background/text) using color pickers → Choose fonts from comprehensive dropdown with live preview showing font name, sample text, and visual hierarchy → Configure header settings (enable/disable, show logo, show company name, show tagline, border options) → Configure footer settings (enable/disable, show page numbers, show company name, show contact info, border options) → Click "שמור" to save settings → All future PDF exports automatically use these branding settings
 - **Success criteria**:
   - Complete company information management (name, tagline, contact details)
   - Logo upload with image validation (file type, size limit 2MB)
   - Logo preview with options for position (left/center/right) and size (small/medium/large)
   - Color customization with visual color pickers and hex input
+  - Font selection dropdown with 12+ professional fonts including web-safe and Google Fonts
+  - Live font preview showing font name rendered in the actual font
+  - Sample text preview ("The quick brown fox jumps...") in selected font
+  - Visual preview card showing heading vs body text hierarchy
+  - Real-time size adjustment for heading (12-24pt) and body (8-16pt) fonts
+  - Separate font selection for headings and body text
   - Separate header and footer enable/disable toggles
   - Header customization: toggle logo, company name, tagline, and bottom border
   - Footer customization: toggle page numbers, company name, contact info, and top border
