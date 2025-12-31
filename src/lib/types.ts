@@ -451,3 +451,64 @@ export interface ValuationCalculation {
   inputs: Record<string, number | string>
   result: number
 }
+
+export type SequenceTrigger = 'manual' | 'report-sent' | 'invoice-sent' | 'no-response' | 'payment-overdue' | 'appointment-scheduled'
+export type SequenceStatus = 'active' | 'paused' | 'completed' | 'archived'
+export type EmailStepStatus = 'pending' | 'scheduled' | 'sent' | 'failed' | 'skipped'
+
+export interface EmailSequenceStep {
+  id: string
+  order: number
+  delayDays: number
+  delayHours: number
+  subject: string
+  message: string
+  attachReport: boolean
+  attachInvoice: boolean
+  waitForResponse: boolean
+  enabled: boolean
+}
+
+export interface EmailSequence {
+  id: string
+  name: string
+  description: string
+  trigger: SequenceTrigger
+  status: SequenceStatus
+  steps: EmailSequenceStep[]
+  createdAt: string
+  updatedAt: string
+  lastUsed?: string
+  useCount: number
+  isDefault: boolean
+  tags: string[]
+}
+
+export interface SequenceExecution {
+  id: string
+  sequenceId: string
+  sequenceName: string
+  recipientEmail: string
+  recipientName: string
+  propertyId?: string
+  propertyAddress?: string
+  status: SequenceStatus
+  currentStepIndex: number
+  startedAt: string
+  completedAt?: string
+  pausedAt?: string
+  steps: ExecutionStep[]
+  metadata?: Record<string, any>
+}
+
+export interface ExecutionStep {
+  stepId: string
+  stepOrder: number
+  status: EmailStepStatus
+  scheduledFor: string
+  sentAt?: string
+  failedAt?: string
+  errorMessage?: string
+  opened?: boolean
+  clicked?: boolean
+}

@@ -388,6 +388,57 @@ This is a professional tool requiring multiple sophisticated features: property 
   - Mobile-responsive layout
   - Activity history with relative timestamps
 
+### Automated Follow-Up Email Sequences (NEW - Marketing Automation)
+- **Functionality**: Create and manage automated multi-step email campaigns that trigger based on events (report sent, payment overdue, no response) with scheduled delays and conditional logic
+- **Purpose**: Automate client communication, payment reminders, lead nurturing, and follow-ups to improve response rates, collect feedback, and maintain professional relationships without manual work
+- **Trigger**: Click "רצפי מעקב" tab in main navigation or set up sequences for specific events
+- **Progression**:
+  - View all email sequences → Create new sequence or select template → Configure sequence details (name, description, trigger type) → Add email steps with delays (days/hours) → Write subject and message for each step with template variables → Configure step options (attach report, attach invoice, wait for response) → Enable/disable individual steps → Save sequence → Activate sequence → View active executions → Monitor progress → Pause/resume/stop executions
+- **Success criteria**:
+  - Pre-configured default sequences:
+    * Client Follow-Up: 3-step sequence after report sent (1 day: check receipt, 3 days: reminder, 7 days: satisfaction survey)
+    * Payment Reminder: 3-step escalating reminders for overdue invoices (1 day: friendly, 3 days: firm, 5 days: urgent)
+    * Lead Nurturing: 3-step conversion campaign for prospects (immediate: intro, 3 days: process guide, 7 days: case study)
+  - Trigger types supported:
+    * Manual (start on-demand)
+    * Report sent (auto-trigger when report emailed)
+    * Invoice sent
+    * No response after X days
+    * Payment overdue
+    * Appointment scheduled
+  - Sequence builder with visual step editor
+  - Each step configurable:
+    * Delay in days and hours
+    * Subject line with variables
+    * Message body with variables ({name}, {address}, {value}, {invoice}, {dueDate}, {appraiser}, {company})
+    * Attach report toggle
+    * Attach invoice toggle
+    * Wait for response before next step
+    * Enable/disable individual steps
+  - Sequence status management (active/paused/archived)
+  - Execution tracking:
+    * Active executions list with recipient info
+    * Current step indicator
+    * Progress bar showing completion
+    * Step status (pending/scheduled/sent/failed)
+    * Time tracking (started, scheduled for, sent at)
+    * Pause/resume/stop controls
+  - Dashboard statistics:
+    * Number of active sequences
+    * Active executions count
+    * Completed sequences
+    * Total usage count
+  - Template variables auto-replace with actual data
+  - Duplicate sequence functionality
+  - Tags for organizing sequences
+  - Use count tracking per sequence
+  - Last used timestamp
+  - Professional UI with glass-effect cards
+  - Real-time status updates
+  - Color-coded badges for status
+  - Responsive timeline visualization
+  - Toast notifications for all actions
+
 ### Professional Valuation Engine (NEW - Core Appraisal System)
 - **Functionality**: Advanced calculation engine implementing three professional appraisal methodologies with automatic adjustments, formula documentation, and confidence scoring
 - **Purpose**: Provide legally-sound, mathematically-accurate valuations following Israeli appraisal standards with full transparency and professional documentation
