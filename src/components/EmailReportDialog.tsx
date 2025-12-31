@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   EnvelopeSimple,
   PaperPlaneTilt,
@@ -25,11 +26,16 @@ import {
   XCircle,
   Plus,
   X,
-  Eye
+  Eye,
+  Paperclip,
+  FilePdf,
+  FileText,
+  Lock
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { EmailAttachmentPreview } from '@/components/EmailAttachmentPreview'
+import { cn } from '@/lib/utils'
 
 interface EmailReportDialogProps {
   open: boolean
@@ -56,6 +62,7 @@ export interface EmailData {
   password?: string
   sendCopy: boolean
   scheduleDate?: Date
+  selectedAttachments?: string[]
 }
 
 interface EmailTemplate {
@@ -127,6 +134,9 @@ export function EmailReportDialog({
   const [newBcc, setNewBcc] = useState('')
   const [selectedTemplate, setSelectedTemplate] = useState<string>('')
   const [showPreview, setShowPreview] = useState(false)
+  const [selectedAttachments, setSelectedAttachments] = useState<string[]>(
+    attachments.map(a => a.name)
+  )
 
   const applyTemplate = (templateId: string) => {
     const template = emailTemplates?.find(t => t.id === templateId)
@@ -192,6 +202,51 @@ export function EmailReportDialog({
     toast.success('סיסמה נוצרה')
   }
 
+  const toggleAttachment = (attachmentName: string) => {
+    setSelectedAttachments(prev => {
+      if (prev.includes(attachmentName)) {
+        if (prev.length === 1) {
+          toast.error('חייב לבחור לפחות קובץ אחד')
+          return prev
+        }
+        return prev.filter(name => name !== attachmentName)
+      } else {
+        return [...prev, attachmentName]
+      }
+    })
+  }
+
+  const selectAllAttachments = () => {
+    setSelectedAttachments(attachments.map(a => a.name))
+    toast.success('כל הקבצים נבחרו')
+  }
+
+  const deselectAllAttachments = () => {
+    if (attachments.length > 0) {
+      setSelectedAttachments([attachments[0].name])
+      toast.info('חייב לבחור לפחות קובץ אחד')
+    }
+  }
+
+  const getFileIcon = (type: 'pdf' | 'csv' | 'excel') => {
+    switch (type) {
+      case 'pdf':
+        return <FilePdf size={20} weight="duotone" className="text-destructive" />
+      case 'csv':
+        return <FileText size={20} weight="duotone" className="text-success" />
+      case 'excel':
+        return <FileText size={20} weight="duotone" className="text-success" />
+      default:
+        return <Paperclip size={20} weight="duotone" />
+    }
+  }
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes < 1024) return `${bytes} B`
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+  }
+
   const handleSend = async () => {
     if (to.length === 0) {
       toast.error('נא להוסיף לפחות נמען אחד')
@@ -208,6 +263,11 @@ export function EmailReportDialog({
       return
     }
 
+    if (selectedAttachments.length === 0) {
+      toast.error('נא לבחור לפחות קובץ אחד לשליחה')
+      return
+    }
+
     setIsSending(true)
 
     try {
@@ -219,7 +279,8 @@ export function EmailReportDialog({
         message,
         includePassword,
         password: includePassword ? password : undefined,
-        sendCopy
+        sendCopy,
+        selectedAttachments
       }
 
       await onSend(emailData)
@@ -231,7 +292,8 @@ export function EmailReportDialog({
           subject,
           reportTitle,
           reportType,
-          status: 'sent'
+          status: 'sent',
+          attachmentCount: selectedAttachments.length
         },
         ...(current || []).slice(0, 49)
       ])
@@ -521,6 +583,115 @@ export function EmailReportDialog({
 
             <Separator />
 
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Paperclip size={20} weight="duotone" className="text-primary" />
+                  <Label className="text-base font-semibold">קבצים מצורפים</Label>
+                  <Badge variant="secondary" className="mr-2">
+                    {selectedAttachments.length} מתוך {attachments.length}
+                  </Badge>
+                </div>
+                <div className="flex gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={selectAllAttachments}
+                    disabled={selectedAttachments.length === attachments.length}
+                  >
+                    בחר הכל
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={deselectAllAttachments}
+                    disabled={selectedAttachments.length === 1 && attachments.length === 1}
+                  >
+                    נקה הכל
+                  </Button>
+                </div>
+              </div>
+
+              <div className="grid gap-2">
+                {defaultAttachments.map((attachment, index) => {
+                  const isSelected = selectedAttachments.includes(attachment.name)
+                  const totalSelectedSize = defaultAttachments
+                    .filter(a => selectedAttachments.includes(a.name))
+                    .reduce((sum, a) => sum + a.size, 0)
+
+                  return (
+                    <Card
+                      key={index}
+                      className={cn(
+                        "cursor-pointer transition-all hover:border-primary/50",
+                        isSelected 
+                          ? "border-primary bg-primary/5" 
+                          : "border-border opacity-60 hover:opacity-100"
+                      )}
+                      onClick={() => toggleAttachment(attachment.name)}
+                    >
+                      <CardContent className="p-3">
+                        <div className="flex items-center gap-3">
+                          <Checkbox
+                            checked={isSelected}
+                            onCheckedChange={() => toggleAttachment(attachment.name)}
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                          <div className="flex-shrink-0">
+                            {getFileIcon(attachment.type)}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <p className={cn(
+                                "text-sm font-semibold truncate",
+                                !isSelected && "text-muted-foreground"
+                              )}>
+                                {attachment.name}
+                              </p>
+                              {includePassword && (
+                                <Lock size={12} className="text-warning flex-shrink-0" />
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {formatFileSize(attachment.size)} • {attachment.type.toUpperCase()}
+                            </p>
+                          </div>
+                          {isSelected && (
+                            <CheckCircle size={18} className="text-primary flex-shrink-0" weight="fill" />
+                          )}
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+
+              {selectedAttachments.length > 0 && (
+                <Card className="glass-effect bg-muted/30">
+                  <CardContent className="p-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-semibold">סה"כ גודל קבצים שיישלחו:</span>
+                      <span className={cn(
+                        "font-mono",
+                        defaultAttachments
+                          .filter(a => selectedAttachments.includes(a.name))
+                          .reduce((sum, a) => sum + a.size, 0) > 10 * 1024 * 1024 
+                          && "text-warning font-semibold"
+                      )}>
+                        {formatFileSize(
+                          defaultAttachments
+                            .filter(a => selectedAttachments.includes(a.name))
+                            .reduce((sum, a) => sum + a.size, 0)
+                        )}
+                      </span>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
+
+            <Separator />
+
             <div className="space-y-4 p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -612,7 +783,7 @@ export function EmailReportDialog({
         includePassword,
         password
       }}
-      attachments={defaultAttachments}
+      attachments={defaultAttachments.filter(a => selectedAttachments.includes(a.name))}
       reportTitle={reportTitle}
     />
   </>
