@@ -416,3 +416,38 @@ export interface BrandingSettings {
   updatedAt: string
   isDefault: boolean
 }
+
+export interface ValuationResult {
+  method: 'comparable-sales' | 'cost-approach' | 'income-approach' | 'hybrid'
+  estimatedValue: number
+  confidence: number
+  valueRange: { min: number; max: number }
+  calculations: ValuationCalculation[]
+  reconciliation?: string
+  methodology: string
+  assumptions: string[]
+  limitations: string[]
+  qualityChecks?: ValuationQualityCheck[]
+  calculatedAt?: string
+}
+
+export interface ValuationQualityCheck {
+  severity: 'info' | 'warning' | 'error'
+  code:
+    | 'missing-input'
+    | 'low-sample'
+    | 'high-variation'
+    | 'outlier'
+    | 'large-adjustment'
+    | 'parameter-out-of-range'
+    | 'method-divergence'
+  message: string
+}
+
+export interface ValuationCalculation {
+  step: string
+  description: string
+  formula: string
+  inputs: Record<string, number | string>
+  result: number
+}

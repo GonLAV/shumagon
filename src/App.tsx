@@ -9,7 +9,11 @@ import { MarketInsights } from '@/components/MarketInsights'
 import { ClientPortal } from '@/components/ClientPortal'
 import { ClientPortalManagement } from '@/components/ClientPortalManagement'
 import { BusinessManagement } from '@/components/BusinessManagement'
-import { House, ChartBar, Users, FileText, UserCircle, CurrencyDollar, Flask, Palette } from '@phosphor-icons/react'
+import { PropertyDigitalTwin } from '@/components/PropertyDigitalTwin'
+import { LiveDataConnections } from '@/components/LiveDataConnections'
+import { TeamCollaboration } from '@/components/TeamCollaboration'
+import { DevelopmentRightsCalculator } from '@/components/DevelopmentRightsCalculator'
+import { House, ChartBar, Users, UserCircle, CurrencyDollar, Flask, Palette, Cube, Database, UsersThree, Calculator } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { AppHeader } from '@/components/app/AppHeader'
 import { PropertiesTab } from '@/components/app/PropertiesTab'
@@ -86,7 +90,7 @@ function App() {
 
       <main className="container mx-auto px-6 py-8 relative">
         <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-          <TabsList className="mb-8 glass-effect p-1.5">
+          <TabsList className="mb-8 glass-effect p-1.5 grid grid-cols-6 lg:grid-cols-12 gap-1">
             <TabsTrigger value="dashboard" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <House size={18} weight="duotone" />
               <span className="hidden sm:inline">לוח בקרה</span>
@@ -113,11 +117,27 @@ function App() {
             </TabsTrigger>
             <TabsTrigger value="tester" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Flask size={18} weight="duotone" />
-              <span className="hidden sm:inline">בדיקת מנוע שמאות</span>
+              <span className="hidden sm:inline">בדיקת מנוע</span>
             </TabsTrigger>
             <TabsTrigger value="branding" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Palette size={18} weight="duotone" />
               <span className="hidden sm:inline">מיתוג PDF</span>
+            </TabsTrigger>
+            <TabsTrigger value="digital-twin" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Cube size={18} weight="duotone" />
+              <span className="hidden sm:inline">תאום דיגיטלי</span>
+            </TabsTrigger>
+            <TabsTrigger value="data-sources" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Database size={18} weight="duotone" />
+              <span className="hidden sm:inline">מקורות נתונים</span>
+            </TabsTrigger>
+            <TabsTrigger value="team" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <UsersThree size={18} weight="duotone" />
+              <span className="hidden sm:inline">צוות</span>
+            </TabsTrigger>
+            <TabsTrigger value="development" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Calculator size={18} weight="duotone" />
+              <span className="hidden sm:inline">זכויות בנייה</span>
             </TabsTrigger>
           </TabsList>
 
@@ -185,6 +205,28 @@ function App() {
 
           <TabsContent value="branding" className="mt-0">
             <BrandingSettingsTab />
+          </TabsContent>
+
+          <TabsContent value="digital-twin" className="mt-0">
+            {properties && properties.length > 0 ? (
+              <PropertyDigitalTwin property={properties[0]} />
+            ) : (
+              <div className="text-center text-muted-foreground py-12">
+                אין נכסים להצגה
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="data-sources" className="mt-0">
+            <LiveDataConnections />
+          </TabsContent>
+
+          <TabsContent value="team" className="mt-0">
+            <TeamCollaboration />
+          </TabsContent>
+
+          <TabsContent value="development" className="mt-0">
+            <DevelopmentRightsCalculator />
           </TabsContent>
         </Tabs>
       </main>

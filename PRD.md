@@ -354,6 +354,117 @@ This is a professional tool requiring multiple sophisticated features: property 
   - Data masking for sensitive information
   - Security reports and analytics
 
+### Property Digital Twin (Simplex3D Core Feature)
+- **Functionality**: Complete digital replica of each property with permanent ID, full history, 3D model, documents, valuations, inspections, and lifecycle events stored in one unified profile
+- **Purpose**: Create a single source of truth for each property that accumulates knowledge over time, making future appraisals 50-70% faster
+- **Trigger**: Automatically created on first property entry; accessible via "תאום דיגיטלי" tab
+- **Progression**: Property created → System generates unique Digital Twin ID → All data accumulated (valuations, inspections, photos, documents, AR sessions, floor plans, market data) → Timeline view shows complete history → Reuse data for subsequent appraisals → Export complete digital profile
+- **Success criteria**:
+  - Unique permanent ID (DT-XXXXXX format)
+  - Complete timeline of all property events with timestamps
+  - Version control for all documents and valuations
+  - 3D model integration with update history
+  - Photo gallery with date stamps and comparison tools
+  - All AR sessions and measurements stored
+  - Market data snapshots over time
+  - Automatic data reuse reduces appraisal time 50%+
+  - Export complete digital twin as archive
+  - Ownership transfer tracking
+  - Renovation/modification history
+  - Legal status changes logged
+
+### Live Data Connections & Integration Hub (Simplex3D Core Feature)
+- **Functionality**: Real-time data feeds from government registries, planning databases, market platforms, GIS systems, and financial institutions with automatic updates and validation
+- **Purpose**: Ensure appraisals use most current, accurate data while eliminating manual data entry and reducing errors
+- **Trigger**: Automatic on property address entry; manual refresh available; configured in "מקורות נתונים" settings
+- **Progression**: Enter property address → System queries connected data sources → Pulls land registry data, planning status, zoning, recent transactions, tax assessment → Validates data consistency → Highlights conflicts → Auto-updates property profile → Logs data source and timestamp
+- **Success criteria**:
+  - Integration with: Land Registry (טאבו), Planning Administration (תכנון ובנייה), Tax Authority (מיסוי), Municipal databases
+  - Market data from major platforms (Madlan, Yad2, OnMap)
+  - GIS integration for maps and spatial data
+  - Real-time validation and conflict detection
+  - Data freshness indicators (updated: X hours ago)
+  - Manual override capability with audit trail
+  - Automatic background refresh (configurable: daily/weekly)
+  - Data source attribution in reports
+  - Connection health monitoring
+  - Fallback to manual entry if API unavailable
+
+### Team Collaboration & Workflow Management (Simplex3D Feature)
+- **Functionality**: Multi-user workspace with role-based access, task assignment, internal commenting, approval workflows, and real-time collaboration on appraisals
+- **Purpose**: Enable appraisal teams to work efficiently with clear responsibilities, prevent duplicate work, and maintain quality control
+- **Trigger**: Click "צוות" tab; assign tasks from property detail; @mention team members in comments
+- **Progression**: Create property → Assign to appraiser → Appraiser completes inspection → Uploads to system → Senior appraiser reviews → Leaves comments → Junior revises → Senior approves → Report generated → Manager signs off → Client notified
+- **Success criteria**:
+  - Role system: Admin, Senior Appraiser, Junior Appraiser, Inspector, Assistant, Viewer
+  - Task assignment with due dates and priorities
+  - Internal commenting system with @mentions
+  - Approval workflow (draft → review → approved → published)
+  - Real-time notifications for team actions
+  - Activity stream showing who did what
+  - Workload dashboard showing team capacity
+  - Lock mechanism preventing simultaneous editing
+  - "Claim" and "Release" for properties
+  - Team performance analytics
+  - Internal notes separate from client-facing content
+
+### Bank & Stakeholder Portal Access (Simplex3D Feature)
+- **Functionality**: Secure portal access for banks, lawyers, insurance companies, and other stakeholders with read-only permissions, custom views, and automated notifications
+- **Purpose**: Streamline approval processes, reduce email exchanges, and provide stakeholders instant access to appraisal status and documents
+- **Trigger**: Appraiser grants access from property detail; stakeholder receives invitation link; portal accessible at /stakeholder-portal
+- **Progression**: Appraiser completes appraisal → Clicks "שתף עם בנק/עו״ד" → Enters stakeholder email and role → System generates secure access link with expiry → Stakeholder receives email → Clicks link → Views appraisal summary, documents, and status → Downloads report → Requests clarifications → Appraiser responds → Stakeholder approves/rejects
+- **Success criteria**:
+  - Role-based access: Bank, Lawyer, Insurance, Court, Tax Authority
+  - Read-only access with no edit permissions
+  - Custom dashboard showing relevant information per role
+  - Document download tracking (who downloaded what, when)
+  - Clarification request system with threaded discussions
+  - Status notifications (completed, updated, expired)
+  - Time-limited access (expiry dates)
+  - Secure authentication with one-time links
+  - Audit trail of stakeholder actions
+  - Bulk sharing for multiple stakeholders
+  - Approval/rejection workflow with reasoning
+
+### Development Rights & Zoning Calculator (Simplex3D Feature)
+- **Functionality**: Advanced calculator for building rights analysis including floor area ratio (FAR), coverage, height limits, setbacks, parking requirements, and land value extraction based on development potential
+- **Purpose**: Accurately assess property value considering development potential, future planning scenarios, and land value component
+- **Trigger**: Click "זכויות בנייה" tab in property detail; automatic calculation when zoning data available
+- **Progression**: Enter lot size → System fetches zoning designation → Displays permitted uses → Calculate max buildable area (FAR × lot size) → Account for coverage limits → Height restrictions → Setback requirements → Parking spaces required → Calculate land value by residual method (development value - construction costs) → Show current vs. potential utilization → Generate development scenarios
+- **Success criteria**:
+  - Zoning data for all Israeli municipalities
+  - FAR (יחס בניה) calculation with bonuses
+  - Coverage ratio (אחוז כיסוי) validation
+  - Height limit calculations (floors and meters)
+  - Setback requirements (נסיגות) from all boundaries
+  - Parking requirement calculator per use type
+  - Land value extraction using residual method
+  - Current vs. potential utilization percentage
+  - Development scenario builder (residential/commercial/mixed)
+  - Value uplift from zoning changes
+  - Planning probability assessment
+  - Time-to-development estimation
+  - Feasibility analysis with construction costs
+
+### Automated Workflow & Smart Checklists (Simplex3D Feature)
+- **Functionality**: Intelligent workflow engine with customizable checklists, automated task generation, deadline tracking, and completion validation ensuring no steps are missed
+- **Purpose**: Standardize appraisal process, ensure compliance, reduce errors, and improve efficiency through automation
+- **Trigger**: Automatic on property creation; configurable templates per appraisal type; accessible via "זרימת עבודה" panel
+- **Progression**: Create new appraisal → System loads checklist template based on property type → Auto-generates tasks (schedule inspection, collect documents, find comparables, perform valuation, write report, review, sign) → Assigns to team members → Tracks progress → Sends reminders before deadlines → Validates completion requirements → Blocks progression if critical steps incomplete → Final validation before report release
+- **Success criteria**:
+  - Pre-built templates: Residential, Commercial, Land, Complex, Court-ordered, Bank appraisal
+  - Customizable checklist items per template
+  - Task dependencies (can't complete step 5 until step 3 done)
+  - Automatic deadline calculation from target completion date
+  - Email/in-app reminders (3 days, 1 day, overdue)
+  - Completion validation (e.g., can't mark "photos uploaded" if no photos)
+  - Progress indicator (7/12 tasks complete - 58%)
+  - Blocking rules preventing report generation if incomplete
+  - Skip/defer capability with justification
+  - Template builder for custom workflows
+  - Analytics on process bottlenecks
+  - Time tracking per task
+
 ## Edge Case Handling
 
 - **No Comparable Properties Found**: Display message with suggestions to expand search radius or adjust criteria, allow manual comparable entry
