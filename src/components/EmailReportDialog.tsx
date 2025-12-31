@@ -35,6 +35,7 @@ import {
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { EmailAttachmentPreview } from '@/components/EmailAttachmentPreview'
+import { FileUploadDropzone, type UploadedFile } from '@/components/FileUploadDropzone'
 import { cn } from '@/lib/utils'
 
 interface EmailReportDialogProps {
@@ -63,6 +64,7 @@ export interface EmailData {
   sendCopy: boolean
   scheduleDate?: Date
   selectedAttachments?: string[]
+  customAttachments?: UploadedFile[]
 }
 
 interface EmailTemplate {
@@ -137,6 +139,7 @@ export function EmailReportDialog({
   const [selectedAttachments, setSelectedAttachments] = useState<string[]>(
     attachments.map(a => a.name)
   )
+  const [customAttachments, setCustomAttachments] = useState<UploadedFile[]>([])
 
   const applyTemplate = (templateId: string) => {
     const template = emailTemplates?.find(t => t.id === templateId)
@@ -263,8 +266,14 @@ export function EmailReportDialog({
       return
     }
 
-    if (selectedAttachments.length === 0) {
+    if (selectedAttachments.length === 0 && customAttachments.length === 0) {
       toast.error('נא לבחור לפחות קובץ אחד לשליחה')
+      return
+    }
+
+    const incompleteUploads = customAttachments.filter(f => f.status !== 'complete')
+    if (incompleteUploads.length > 0) {
+      toast.error('נא להמתין לסיום העלאת כל הקבצים')
       return
     }
 
@@ -280,7 +289,8 @@ export function EmailReportDialog({
         includePassword,
         password: includePassword ? password : undefined,
         sendCopy,
-        selectedAttachments
+        selectedAttachments,
+        customAttachments: customAttachments.filter(f => f.status === 'complete')
       }
 
       await onSend(emailData)
@@ -293,7 +303,7 @@ export function EmailReportDialog({
           reportTitle,
           reportType,
           status: 'sent',
-          attachmentCount: selectedAttachments.length
+          attachmentCount: selectedAttachments.length + customAttachments.length
         },
         ...(current || []).slice(0, 49)
       ])
@@ -587,7 +597,7 @@ export function EmailReportDialog({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Paperclip size={20} weight="duotone" className="text-primary" />
-                  <Label className="text-base font-semibold">קבצים מצורפים</Label>
+                  <Label className="text-base font-semibold">דוחות ממערכת</Label>
                   <Badge variant="secondary" className="mr-2">
                     {selectedAttachments.length} מתוך {attachments.length}
                   </Badge>
@@ -670,7 +680,7 @@ export function EmailReportDialog({
                 <Card className="glass-effect bg-muted/30">
                   <CardContent className="p-3">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-semibold">סה"כ גודל קבצים שיישלחו:</span>
+                      <span className="font-semibold">סה"כ גודל דוחות ממערכת:</span>
                       <span className={cn(
                         "font-mono",
                         defaultAttachments
@@ -688,6 +698,33 @@ export function EmailReportDialog({
                   </CardContent>
                 </Card>
               )}
+            </div>
+
+            <Separator />
+
+            <div className="space-y-3">
+              <Label className="text-base font-semibold flex items-center gap-2">
+                <Paperclip size={20} weight="duotone" className="text-accent" />
+                צרף קבצים נוספים
+                <Badge variant="outline" className="mr-2 font-normal">
+                  אופציונלי
+                </Badge>
+              </Label>
+              <p className="text-sm text-muted-foreground">
+                גרור ושחרר קבצים נוספים לצירוף להודעה (מסמכים, תמונות, דוחות)
+              </p>
+              
+              <FileUploadDropzone
+                uploadedFiles={customAttachments}
+                onFilesAdded={(files) => {
+                  setCustomAttachments(prev => [...prev, ...files])
+                }}
+                onFileRemoved={(fileId) => {
+                  setCustomAttachments(prev => prev.filter(f => f.id !== fileId))
+                }}
+                maxFiles={10}
+                maxFileSize={10 * 1024 * 1024}
+              />
             </div>
 
             <Separator />
@@ -747,6 +784,67 @@ export function EmailReportDialog({
                 </Label>
               </div>
             </div>
+
+            {(selectedAttachments.length > 0 || customAttachments.length > 0) && (
+              <Card className="glass-effect bg-primary/5 border-primary/20">
+                <CardContent className="p-4">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex items-center justify-between font-semibold">
+                      <span>סיכום קבצים לשליחה</span>
+                      <Badge variant="default">
+                        {selectedAttachments.length + customAttachments.filter(f => f.status === 'complete').length} קבצים
+                      </Badge>
+                    </div>
+                    <Separator className="bg-primary/20" />
+                    <div className="flex items-center justify-between text-muted-foreground">
+                      <span>דוחות ממערכת:</span>
+                      <span className="font-mono">
+                        {formatFileSize(
+                          defaultAttachments
+                            .filter(a => selectedAttachments.includes(a.name))
+                            .reduce((sum, a) => sum + a.size, 0)
+                        )}
+                      </span>
+                    </div>
+                    {customAttachments.filter(f => f.status === 'complete').length > 0 && (
+                      <div className="flex items-center justify-between text-muted-foreground">
+                        <span>קבצים נוספים:</span>
+                        <span className="font-mono">
+                          {formatFileSize(
+                            customAttachments
+                              .filter(f => f.status === 'complete')
+                              .reduce((sum, f) => sum + f.size, 0)
+                          )}
+                        </span>
+                      </div>
+                    )}
+                    <Separator className="bg-primary/20" />
+                    <div className="flex items-center justify-between font-semibold">
+                      <span>סה"כ גודל:</span>
+                      <span className={cn(
+                        "font-mono",
+                        (defaultAttachments
+                          .filter(a => selectedAttachments.includes(a.name))
+                          .reduce((sum, a) => sum + a.size, 0) + 
+                          customAttachments
+                            .filter(f => f.status === 'complete')
+                            .reduce((sum, f) => sum + f.size, 0)) > 20 * 1024 * 1024 
+                          && "text-warning"
+                      )}>
+                        {formatFileSize(
+                          defaultAttachments
+                            .filter(a => selectedAttachments.includes(a.name))
+                            .reduce((sum, a) => sum + a.size, 0) + 
+                          customAttachments
+                            .filter(f => f.status === 'complete')
+                            .reduce((sum, f) => sum + f.size, 0)
+                        )}
+                      </span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </ScrollArea>
 
@@ -784,6 +882,7 @@ export function EmailReportDialog({
         password
       }}
       attachments={defaultAttachments.filter(a => selectedAttachments.includes(a.name))}
+      customAttachments={customAttachments.filter(f => f.status === 'complete')}
       reportTitle={reportTitle}
     />
   </>

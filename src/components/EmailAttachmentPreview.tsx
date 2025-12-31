@@ -22,10 +22,16 @@ import {
   CheckCircle,
   WarningCircle,
   EnvelopeSimple,
-  User
+  User,
+  FileDoc,
+  FileXls,
+  FileImage,
+  FileZip,
+  File as FileIcon
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
+import type { UploadedFile } from '@/components/FileUploadDropzone'
 
 interface EmailAttachmentPreviewProps {
   open: boolean
@@ -40,6 +46,7 @@ interface EmailAttachmentPreviewProps {
     password?: string
   }
   attachments: AttachmentInfo[]
+  customAttachments?: UploadedFile[]
   reportTitle: string
 }
 
@@ -57,17 +64,26 @@ const formatFileSize = (bytes: number): string => {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
-const getFileIcon = (type: AttachmentInfo['type']) => {
-  switch (type) {
-    case 'pdf':
-      return <FilePdf size={24} weight="duotone" className="text-destructive" />
-    case 'csv':
-      return <FileText size={24} weight="duotone" className="text-success" />
-    case 'excel':
-      return <FileText size={24} weight="duotone" className="text-success" />
-    default:
-      return <Paperclip size={24} weight="duotone" />
+const getFileIcon = (type: string) => {
+  if (type.includes('pdf') || type === 'pdf') {
+    return <FilePdf size={24} weight="duotone" className="text-destructive" />
   }
+  if (type.includes('csv') || type === 'csv') {
+    return <FileText size={24} weight="duotone" className="text-success" />
+  }
+  if (type.includes('excel') || type.includes('spreadsheet') || type === 'excel') {
+    return <FileXls size={24} weight="duotone" className="text-success" />
+  }
+  if (type.includes('word') || type.includes('document')) {
+    return <FileDoc size={24} weight="duotone" className="text-blue-500" />
+  }
+  if (type.includes('image')) {
+    return <FileImage size={24} weight="duotone" className="text-purple-500" />
+  }
+  if (type.includes('zip')) {
+    return <FileZip size={24} weight="duotone" className="text-warning" />
+  }
+  return <Paperclip size={24} weight="duotone" />
 }
 
 export function EmailAttachmentPreview({
@@ -75,11 +91,15 @@ export function EmailAttachmentPreview({
   onOpenChange,
   emailData,
   attachments,
+  customAttachments = [],
   reportTitle
 }: EmailAttachmentPreviewProps) {
-  const [selectedPreview, setSelectedPreview] = useState<AttachmentInfo | null>(null)
+  const [selectedPreview, setSelectedPreview] = useState<AttachmentInfo | UploadedFile | null>(null)
+  
+  const totalAttachments = attachments.length + customAttachments.filter(f => f.status === 'complete').length
+  const totalSize = attachments.reduce((sum, a) => sum + a.size, 0) + 
+                   customAttachments.filter(f => f.status === 'complete').reduce((sum, f) => sum + f.size, 0)
 
-  const totalSize = attachments.reduce((sum, att) => sum + att.size, 0)
   const hasPasswordProtection = emailData.includePassword || attachments.some(a => a.isPasswordProtected)
   const totalRecipients = emailData.to.length + emailData.cc.length + emailData.bcc.length
 
@@ -105,7 +125,7 @@ export function EmailAttachmentPreview({
               </TabsTrigger>
               <TabsTrigger value="attachments" className="gap-2">
                 <Paperclip size={18} />
-                קבצים מצורפים ({attachments.length})
+                קבצים מצורפים ({totalAttachments})
               </TabsTrigger>
               <TabsTrigger value="recipients" className="gap-2">
                 <User size={18} />
@@ -218,89 +238,129 @@ export function EmailAttachmentPreview({
             <TabsContent value="attachments" className="mt-4">
               <ScrollArea className="h-[500px] pr-4">
                 <div className="space-y-4">
-                  <div className="grid gap-3">
-                    {attachments.map((attachment, index) => (
-                      <Card
-                        key={index}
-                        className={cn(
-                          "glass-effect cursor-pointer transition-all hover:border-primary/50",
-                          selectedPreview?.name === attachment.name && "border-primary ring-1 ring-primary/20"
-                        )}
-                        onClick={() => setSelectedPreview(attachment)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-4">
-                            <div className="flex-shrink-0">
-                              {getFileIcon(attachment.type)}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <p className="text-sm font-semibold truncate">
-                                  {attachment.name}
-                                </p>
-                                {attachment.isPasswordProtected && (
-                                  <Lock size={14} className="text-warning flex-shrink-0" />
-                                )}
+                  {attachments.length > 0 && (
+                    <div>
+                      <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <FilePdf size={16} weight="duotone" className="text-primary" />
+                        דוחות ממערכת ({attachments.length})
+                      </h3>
+                      <div className="grid gap-3">
+                        {attachments.map((attachment, index) => (
+                          <Card
+                            key={index}
+                            className={cn(
+                              "glass-effect cursor-pointer transition-all hover:border-primary/50",
+                              selectedPreview?.name === attachment.name && "border-primary ring-1 ring-primary/20"
+                            )}
+                            onClick={() => setSelectedPreview(attachment)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div className="flex-shrink-0">
+                                  {getFileIcon(attachment.type)}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center gap-2">
+                                    <p className="text-sm font-semibold truncate">
+                                      {attachment.name}
+                                    </p>
+                                    {attachment.isPasswordProtected && (
+                                      <Lock size={14} className="text-warning flex-shrink-0" />
+                                    )}
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatFileSize(attachment.size)} • {attachment.type.toUpperCase()}
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSelectedPreview(attachment)
+                                  }}
+                                >
+                                  <Eye size={16} />
+                                </Button>
                               </div>
-                              <p className="text-xs text-muted-foreground">
-                                {formatFileSize(attachment.size)} • {attachment.type.toUpperCase()}
-                              </p>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setSelectedPreview(attachment)
-                              }}
-                            >
-                              <Eye size={16} />
-                            </Button>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {customAttachments.filter(f => f.status === 'complete').length > 0 && (
+                    <div>
+                      <Separator className="my-4" />
+                      <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+                        <Paperclip size={16} weight="duotone" className="text-accent" />
+                        קבצים נוספים ({customAttachments.filter(f => f.status === 'complete').length})
+                      </h3>
+                      <div className="grid gap-3">
+                        {customAttachments.filter(f => f.status === 'complete').map((file) => (
+                          <Card
+                            key={file.id}
+                            className={cn(
+                              "glass-effect cursor-pointer transition-all hover:border-primary/50",
+                              selectedPreview && 'id' in selectedPreview && selectedPreview.id === file.id && "border-primary ring-1 ring-primary/20"
+                            )}
+                            onClick={() => setSelectedPreview(file)}
+                          >
+                            <CardContent className="p-4">
+                              <div className="flex items-center gap-4">
+                                <div className="flex-shrink-0">
+                                  {getFileIcon(file.type)}
+                                </div>
+                                {file.preview && (
+                                  <div className="flex-shrink-0 w-12 h-12 rounded overflow-hidden border border-border">
+                                    <img 
+                                      src={file.preview} 
+                                      alt={file.name}
+                                      className="w-full h-full object-cover"
+                                    />
+                                  </div>
+                                )}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-semibold truncate">
+                                    {file.name}
+                                  </p>
+                                  <p className="text-xs text-muted-foreground">
+                                    {formatFileSize(file.size)} • {file.type.split('/')[1].toUpperCase()}
+                                  </p>
+                                </div>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    setSelectedPreview(file)
+                                  }}
+                                >
+                                  <Eye size={16} />
+                                </Button>
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   <Card className="glass-effect bg-muted/30">
                     <CardContent className="p-4">
-                      <div className="flex items-center justify-between text-sm">
-                        <span className="font-semibold">סה"כ גודל קבצים:</span>
-                        <span className={cn(
-                          "font-mono",
-                          totalSize > 10 * 1024 * 1024 && "text-warning font-semibold"
-                        )}>
-                          {formatFileSize(totalSize)}
-                        </span>
-                      </div>
-                      {totalSize > 10 * 1024 * 1024 && (
-                        <div className="flex items-start gap-2 mt-3 p-3 bg-warning/10 rounded-lg">
-                          <WarningCircle size={18} className="text-warning mt-0.5 flex-shrink-0" />
-                          <p className="text-xs text-muted-foreground">
-                            הקבצים גדולים מ-10MB. חלק משרתי האימייל עשויים לחסום או להאט את המשלוח.
-                          </p>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">סה"כ קבצים:</span>
+                          <Badge variant="secondary">{totalAttachments}</Badge>
                         </div>
-                      )}
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold">סה"כ גודל:</span>
+                          <span className="font-mono">{formatFileSize(totalSize)}</span>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
-
-                  {selectedPreview && selectedPreview.preview && (
-                    <Card className="glass-effect border-primary/30">
-                      <CardHeader>
-                        <CardTitle className="text-base flex items-center gap-2">
-                          <Eye size={18} className="text-primary" />
-                          תצוגה מקדימה: {selectedPreview.name}
-                        </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="bg-background rounded-lg border p-4 min-h-[200px]">
-                          <pre className="text-xs whitespace-pre-wrap">
-                            {selectedPreview.preview}
-                          </pre>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  )}
                 </div>
               </ScrollArea>
             </TabsContent>
