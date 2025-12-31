@@ -363,9 +363,14 @@ export function LiveDataConnections() {
             <h2 className="text-2xl font-bold bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent mb-2">
               מקורות נתונים ממשלתיים
             </h2>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground mb-3">
               חיבורים לבסיסי נתונים ממשלתיים, מסחריים ומרחביים - נתונים אמיתיים מישראל
             </p>
+            <div className="flex items-center gap-2 p-3 glass-effect rounded-lg border border-success/30">
+              <CheckCircle size={20} weight="fill" className="text-success" />
+              <span className="text-sm font-medium text-success">שמאות אוטומטית מחוברת</span>
+              <Badge className="bg-success/20 text-success border-success mr-auto">פעיל</Badge>
+            </div>
           </div>
           <Button onClick={handleRefreshAll} className="gap-2">
             <ArrowsClockwise size={16} weight="bold" />

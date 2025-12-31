@@ -20,7 +20,8 @@ import {
   Package,
   CheckCircle,
   Sparkle,
-  Camera
+  Camera,
+  Database
 } from '@phosphor-icons/react'
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { toast } from 'sonner'
@@ -33,6 +34,7 @@ import { ARWalkthrough } from './ARWalkthrough'
 import { ARSessionsViewer } from './ARSessionsViewer'
 import { AdvancedMarketComparison } from './AdvancedMarketComparison'
 import { ReportGenerator } from './ReportGenerator'
+import { AutoValuationEngine } from './AutoValuationEngine'
 
 interface PropertyDetailProps {
   property: Property
@@ -118,12 +120,16 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-        <TabsList className="grid w-full grid-cols-6 lg:grid-cols-11">
+        <TabsList className="grid w-full grid-cols-6 lg:grid-cols-12">
           <TabsTrigger value="details">פרטי נכס</TabsTrigger>
           <TabsTrigger value="valuation">שומה</TabsTrigger>
           <TabsTrigger value="ai-valuation" className="gap-2">
             <Sparkle size={14} weight="fill" />
             AI שומה
+          </TabsTrigger>
+          <TabsTrigger value="auto-valuation" className="gap-2">
+            <Database size={14} weight="bold" />
+            שמאות אוטומטית
           </TabsTrigger>
           <TabsTrigger value="comparables">נכסים דומים</TabsTrigger>
           <TabsTrigger value="advanced-search" className="gap-2">
@@ -277,6 +283,25 @@ export function PropertyDetail({ property, clients, onBack, onEdit, onSave, onDe
               const updatedProperty = { ...property, valuationData }
               onSave(updatedProperty)
               toast.success('השומה עודכנה בהצלחה')
+            }}
+          />
+        </TabsContent>
+
+        <TabsContent value="auto-valuation" className="mt-6">
+          <AutoValuationEngine
+            property={property}
+            onValuationComplete={(result) => {
+              const valuationData = {
+                estimatedValue: result.estimatedValue,
+                valueRange: result.valueRange,
+                confidence: result.confidenceScore,
+                method: 'hybrid' as const,
+                comparables: [],
+                notes: `שמאות אוטומטית מבוססת נתונים ממשלתיים - ציון איכות נתונים: ${result.dataQuality}%`
+              }
+              const updatedProperty = { ...property, valuationData }
+              onSave(updatedProperty)
+              toast.success('השמאות האוטומטית הושלמה ונשמרה')
             }}
           />
         </TabsContent>

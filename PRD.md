@@ -120,6 +120,59 @@ This is a professional tool requiring multiple sophisticated features: property 
   - Grid layout with organized sections for easy configuration
   - Informational card explaining that settings apply to future PDF exports only
 
+### Automatic Property Valuation with Live Government Data (NEW - Industry-Leading Innovation)
+- **Functionality**: Fully automated property valuation engine that connects directly to Israeli government APIs and databases to fetch real-time land registry, planning, tax, municipal, GIS, and market transaction data, then applies sophisticated algorithms to calculate accurate property valuations with transparent breakdown and confidence scoring
+- **Purpose**: Revolutionize property valuation by eliminating manual data entry and research, providing appraisers with instant, data-driven valuations based on authoritative government sources, significantly reducing appraisal time from hours to minutes while increasing accuracy and defensibility
+- **Trigger**: Click "שמאות אוטומטית" tab in property detail view
+- **Progression**: 
+  - Open property → Navigate to "שמאות אוטומטית" tab → Click "הפעל שמאות אוטומטית" → System automatically connects to 6 government data sources in parallel → Shows real-time progress (10% Tabu, 25% Planning, 40% Tax, 55% Market, 70% GIS, 85% AI Analysis) → AI engine analyzes all data and calculates valuation → Displays comprehensive results with 4 sub-tabs (Summary, Breakdown, Factors, Data) → Option to save valuation to property record
+- **Success criteria**:
+  - **Automated Data Retrieval**: Connects to 6 Israeli government and market data sources:
+    * Land Registry (Tabu) - ownership, encumbrances, legal status
+    * Planning Administration (iplan) - building rights, zoning, permits, violations
+    * Tax Authority - assessed values, arnona, improvement tax
+    * Municipal databases - infrastructure, services, development plans
+    * GIS systems (GovMap) - coordinates, elevation, environmental data, viewshed
+    * Market transaction data - recent comparable sales from land registry
+  - **Real-time Progress Tracking**: Live progress bar with current step description (connecting, fetching, analyzing)
+  - **Comprehensive Valuation Result**:
+    * Estimated value with confidence score (0-95%)
+    * Value range (min-max based on variance)
+    * Data quality score showing completeness of government data
+    * Price per square meter calculation
+  - **Intelligent Calculation Engine**:
+    * Base value from tax assessed value adjusted by market multiplier
+    * Location adjustment based on GIS walkability score and accessibility
+    * Condition adjustment using property condition rating
+    * Planning adjustment for high FAR (Floor Area Ratio) opportunities
+    * Market trend adjustment from recent transaction analysis
+    * All adjustments shown with positive/negative impact
+  - **Multi-Tab Results Display**:
+    * Summary tab: Overall valuation, confidence/quality scores, data source checklist, warnings, recommendations
+    * Breakdown tab: Itemized calculation showing base value + all adjustments = final value
+    * Factors tab: Detailed cards for each factor (location, market trend, building rights, condition) with % impact, data source, and description
+    * Data tab: Raw government data organized by source (Tabu, Planning, Tax, Market Transactions)
+  - **Data Source Verification**: Visual checklist showing which government sources successfully provided data
+  - **Intelligent Warnings System**:
+    * Flags encumbrances on property
+    * Identifies building violations
+    * Alerts if property in flood zone
+    * Highlights legal status issues
+  - **Smart Recommendations**:
+    * Suggests additional research if data quality < 60%
+    * Identifies future planning changes that may affect value
+    * Notes nearby development projects
+    * Confirms high data quality when > 80%
+  - **Government Data Display**:
+    * Tabu section: Parcel ID (gush/helka), ownership type, encumbrance count
+    * Planning section: Plan number, building percentage, permitted height
+    * Tax section: Tax assessed value, annual arnona
+    * Market section: List of recent transactions with prices and dates
+  - **Save to Property**: Updates property record with valuation data, confidence score, and notes about data sources
+  - **Performance**: Complete valuation in 5-10 seconds including all API calls
+  - **Error Handling**: Graceful degradation if some data sources unavailable, shows which sources succeeded
+  - **Professional UI**: Glass-morphism cards, gradient headings, color-coded adjustments (green/red), success badges
+
 ### Market Trends Analytics
 - **Functionality**: Visual analytics showing price trends, days on market, price per sqm by neighborhood
 - **Purpose**: Provide market context and support valuation decisions
