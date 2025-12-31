@@ -99,6 +99,53 @@ This is a professional tool requiring multiple sophisticated features: property 
 - **Progression**: 
   - Configure company details (name, tagline, phone, email, website, license number) → Upload company logo (PNG/JPG up to 2MB) with position and size options → Select brand colors (primary, header background/text, footer background/text) using color pickers → Choose fonts from comprehensive dropdown with live preview showing font name, sample text, and visual hierarchy → Configure header settings (enable/disable, show logo, show company name, show tagline, border options) → Configure footer settings (enable/disable, show page numbers, show company name, show contact info, border options) → Click "שמור" to save settings → All future PDF exports automatically use these branding settings
 - **Success criteria**:
+  - Company information fields save to persistent storage
+  - Logo upload with preview, file size validation, and positioning options
+  - Color pickers with hex input and visual preview
+  - 25+ professional Google Fonts with live preview showing hierarchy
+  - Real-time preview of branding changes
+  - Header/footer customization with toggle controls
+  - Settings persist across sessions using useKV
+  - All PDF exports (valuation tests, reports, portfolio analysis) automatically apply saved branding
+  - One-click application of predefined theme presets (Corporate Blue, Legal Gray, Modern Purple, Luxury Gold)
+  - Export/import branding configurations for backup or sharing across team
+
+### Bulk Property Valuation for Portfolio Analysis (NEW - Multi-Asset Management)
+- **Functionality**: Automated bulk valuation system that processes multiple properties simultaneously using AI-powered comparable sales analysis, cost approach, or income approach, with comprehensive portfolio statistics and professional PDF export
+- **Purpose**: Enable property managers, investors, and appraisers to value entire portfolios efficiently, analyze portfolio performance, and generate comprehensive multi-property reports for clients or internal analysis
+- **Trigger**: Click "שומה מרובה" tab in main navigation
+- **Progression**: 
+  - View all eligible properties (must have address, built area) → Select individual properties or "Select All" → Configure valuation settings (method: auto/comparable-sales/cost-approach/income-approach, search radius 0.5-10km, similarity threshold 50-100%) → Click "התחל שומה" → AI processes each property sequentially with real-time progress bar → View completed valuations with status indicators (completed/processing/error) → Review portfolio statistics (total value, average value, confidence scores, price per sqm, value ranges, property type distribution) → Switch between summary table view and detailed results → Export comprehensive portfolio PDF report with all properties and analytics
+- **Success criteria**:
+  - Bulk selection with checkbox interface and select-all functionality
+  - Properties filter automatically to show only eligible ones (complete data)
+  - Three valuation methods supported with configurable parameters
+  - Sequential processing with visual progress indication (0-100%)
+  - Real-time status updates for each property (pending→processing→completed/error)
+  - AI generates realistic comparable properties for each asset using GPT-4
+  - Processing time tracked per property
+  - Portfolio statistics automatically calculated:
+    * Total portfolio value
+    * Average property value
+    * Average confidence score
+    * Average price per square meter
+    * Value range (min/max)
+    * Property type distribution breakdown
+  - Results display with color-coded status badges
+  - Summary table view with sortable columns (address, type, area, valuation, price/sqm, confidence, status)
+  - Detailed view with expandable cards showing full valuation breakdown and comparables
+  - Automatic property data updates with valuation results saved to persistent storage
+  - Professional PDF export with:
+    * Executive summary with portfolio statistics
+    * Property type distribution chart
+    * Detailed property cards with valuations
+    * Formatted currency and metrics
+    * Legal disclaimer
+    * Multi-page pagination
+  - Error handling with specific error messages per property
+  - Toast notifications for process completion
+  - Responsive design with glass-effect cards and smooth animations
+- **Success criteria**:
   - Complete company information management (name, tagline, contact details)
   - Logo upload with image validation (file type, size limit 2MB)
   - Logo preview with options for position (left/center/right) and size (small/medium/large)

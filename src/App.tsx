@@ -13,12 +13,13 @@ import { PropertyDigitalTwin } from '@/components/PropertyDigitalTwin'
 import { LiveDataConnections } from '@/components/LiveDataConnections'
 import { TeamCollaboration } from '@/components/TeamCollaboration'
 import { DevelopmentRightsCalculator } from '@/components/DevelopmentRightsCalculator'
-import { House, ChartBar, Users, UserCircle, CurrencyDollar, Flask, Palette, Cube, Database, UsersThree, Calculator } from '@phosphor-icons/react'
+import { House, ChartBar, Users, UserCircle, CurrencyDollar, Flask, Palette, Cube, Database, UsersThree, Calculator, ListChecks } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { AppHeader } from '@/components/app/AppHeader'
 import { PropertiesTab } from '@/components/app/PropertiesTab'
 import { ValuationEngineTester } from '@/components/ValuationEngineTester'
 import { BrandingSettingsTab } from '@/components/BrandingSettingsTab'
+import { BulkValuation } from '@/components/BulkValuation'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -90,7 +91,7 @@ function App() {
 
       <main className="container mx-auto px-6 py-8 relative">
         <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-          <TabsList className="mb-8 glass-effect p-1.5 grid grid-cols-6 lg:grid-cols-12 gap-1">
+          <TabsList className="mb-8 glass-effect p-1.5 grid grid-cols-6 lg:grid-cols-13 gap-1">
             <TabsTrigger value="dashboard" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <House size={18} weight="duotone" />
               <span className="hidden sm:inline">לוח בקרה</span>
@@ -106,6 +107,10 @@ function App() {
             <TabsTrigger value="insights" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <ChartBar size={18} weight="duotone" />
               <span className="hidden sm:inline">ניתוח שוק</span>
+            </TabsTrigger>
+            <TabsTrigger value="bulk" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ListChecks size={18} weight="duotone" />
+              <span className="hidden sm:inline">שומה מרובה</span>
             </TabsTrigger>
             <TabsTrigger value="business" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <CurrencyDollar size={18} weight="duotone" />
@@ -182,6 +187,13 @@ function App() {
 
           <TabsContent value="insights" className="mt-0">
             <MarketInsights properties={properties || []} />
+          </TabsContent>
+
+          <TabsContent value="bulk" className="mt-0">
+            <BulkValuation 
+              properties={properties || []} 
+              onUpdateProperty={handleSaveProperty}
+            />
           </TabsContent>
 
           <TabsContent value="business" className="mt-0">
