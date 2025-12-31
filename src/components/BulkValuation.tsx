@@ -22,12 +22,17 @@ import {
   Warning,
   TrendUp,
   Buildings,
-  FileText
+  FileText,
+  FileCsv,
+  FileXls,
+  CaretDown
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
 import { ValuationEngine } from '@/lib/valuationEngine'
 import { exportBulkValuationPDF } from '@/lib/bulkPdfExport'
+import { exportToCSV, exportToExcel, exportDetailedCSV } from '@/lib/bulkExportUtils'
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu'
 
 interface BulkValuationProps {
   properties: Property[]
@@ -262,6 +267,48 @@ Format: {"comparables": [...]}`
     toast.success('הדוח יוצא בהצלחה')
   }
 
+  const handleExportCSV = () => {
+    if (!portfolioStats) {
+      toast.error('אין תוצאות לייצוא')
+      return
+    }
+
+    try {
+      exportToCSV(valuationResults, portfolioStats)
+      toast.success('קובץ CSV יוצא בהצלחה')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'שגיאה בייצוא CSV')
+    }
+  }
+
+  const handleExportExcel = () => {
+    if (!portfolioStats) {
+      toast.error('אין תוצאות לייצוא')
+      return
+    }
+
+    try {
+      exportToExcel(valuationResults, portfolioStats)
+      toast.success('קובץ Excel יוצא בהצלחה')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'שגיאה בייצוא Excel')
+    }
+  }
+
+  const handleExportDetailedCSV = () => {
+    if (valuationResults.filter(r => r.status === 'completed').length === 0) {
+      toast.error('אין תוצאות לייצוא')
+      return
+    }
+
+    try {
+      exportDetailedCSV(valuationResults)
+      toast.success('דוח מפורט CSV יוצא בהצלחה')
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'שגיאה בייצוא CSV')
+    }
+  }
+
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('he-IL', {
       style: 'currency',
@@ -297,10 +344,34 @@ Format: {"comparables": [...]}`
           </p>
         </div>
         {valuationResults.length > 0 && (
-          <Button onClick={handleExportPDF} className="gap-2">
-            <Download size={20} weight="bold" />
-            ייצא דוח תיק
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="gap-2">
+                <Download size={20} weight="bold" />
+                ייצוא תוצאות
+                <CaretDown size={16} weight="bold" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={handleExportPDF} className="gap-2 cursor-pointer">
+                <FileText size={18} weight="duotone" />
+                ייצוא PDF מלא
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleExportCSV} className="gap-2 cursor-pointer">
+                <FileCsv size={18} weight="duotone" />
+                ייצוא CSV - סיכום
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportDetailedCSV} className="gap-2 cursor-pointer">
+                <FileCsv size={18} weight="duotone" />
+                ייצוא CSV - מפורט
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleExportExcel} className="gap-2 cursor-pointer">
+                <FileXls size={18} weight="duotone" />
+                ייצוא Excel
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
 
@@ -535,10 +606,22 @@ Format: {"comparables": [...]}`
       {valuationResults.length > 0 && (
         <Card className="glass-effect">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText size={24} weight="duotone" />
-              תוצאות מפורטות
-            </CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle className="flex items-center gap-2">
+                <FileText size={24} weight="duotone" />
+                תוצאות מפורטות
+              </CardTitle>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" onClick={handleExportCSV} className="gap-2">
+                  <FileCsv size={16} weight="duotone" />
+                  CSV
+                </Button>
+                <Button variant="outline" size="sm" onClick={handleExportExcel} className="gap-2">
+                  <FileXls size={16} weight="duotone" />
+                  Excel
+                </Button>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="summary">
@@ -548,6 +631,20 @@ Format: {"comparables": [...]}`
               </TabsList>
 
               <TabsContent value="summary">
+                <div className="mb-4 p-4 bg-muted/50 rounded-lg border">
+                  <div className="text-sm space-y-2">
+                    <div className="font-medium flex items-center gap-2">
+                      <Download size={16} weight="duotone" />
+                      אפשרויות ייצוא
+                    </div>
+                    <div className="text-muted-foreground space-y-1">
+                      <div>• <strong>CSV סיכום</strong> - טבלה מסודרת עם כל הנכסים וסטטיסטיקות תיק</div>
+                      <div>• <strong>CSV מפורט</strong> - דוח מלא כולל כל הנכסים הדומים לכל נכס</div>
+                      <div>• <strong>Excel</strong> - קובץ מעוצב להמשך עיבוד באקסל</div>
+                      <div>• <strong>PDF</strong> - דוח מלא עם גרפים ומיתוג מותאם</div>
+                    </div>
+                  </div>
+                </div>
                 <Table>
                   <TableHeader>
                     <TableRow>
