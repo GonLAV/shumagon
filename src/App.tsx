@@ -262,15 +262,13 @@ function App() {
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-background flex w-full flex-row-reverse" dir="rtl">
-        <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
-
         <AppSidebar activeView={activeTab} onNavigate={setActiveTab} />
 
         <div className="flex-1 flex flex-col relative">
           <AppHeader onCreateNew={handleCreateNew} />
 
-          <main className="flex-1 overflow-auto px-6 py-8">
-            <div className="container mx-auto">
+          <main className="flex-1 overflow-auto px-6 py-6">
+            <div className="container mx-auto max-w-7xl">
               {renderContent()}
             </div>
           </main>

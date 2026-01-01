@@ -2,8 +2,7 @@ import type { Property, Client } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { House, FileText, Clock, CheckCircle, TrendUp, Plus, Sparkle, Lightning } from '@phosphor-icons/react'
-import { motion } from 'framer-motion'
+import { House, FileText, Clock, CheckCircle, TrendUp, Plus } from '@phosphor-icons/react'
 
 interface DashboardProps {
   properties: Property[]
@@ -26,112 +25,83 @@ export function Dashboard({ properties, clients, onSelectProperty, onCreateNew }
     .slice(0, 6)
 
   return (
-    <div className="space-y-8">
-      <motion.div 
-        className="flex items-center justify-between"
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-bold tracking-tight mb-2 bg-gradient-to-r from-foreground to-foreground/60 bg-clip-text text-transparent">לוח בקרה</h2>
-          <p className="text-muted-foreground">סקירה מהירה של כל הפעילות</p>
+          <h2 className="text-3xl font-semibold tracking-tight text-foreground">לוח בקרה</h2>
+          <p className="text-muted-foreground mt-1">סקירה מהירה של כל הפעילות</p>
         </div>
-        <Button onClick={onCreateNew} size="lg" className="gap-2 bg-accent hover:bg-accent/90 text-accent-foreground glow-accent">
-          <Lightning size={20} weight="fill" />
+        <Button onClick={onCreateNew} size="lg" className="gap-2">
+          <Plus size={20} weight="bold" />
           שומה חדשה
         </Button>
-      </motion.div>
+      </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatCard
-          icon={<House size={28} weight="duotone" />}
+          icon={<House size={24} weight="duotone" />}
           title="סך נכסים"
           value={stats.total}
-          color="from-primary to-primary/70"
-          delay={0}
+          color="bg-blue-50 text-blue-600"
         />
         <StatCard
-          icon={<Clock size={28} weight="duotone" />}
+          icon={<Clock size={24} weight="duotone" />}
           title="בעבודה"
           value={stats.inProgress}
-          color="from-accent to-accent/70"
-          delay={0.1}
+          color="bg-amber-50 text-amber-600"
         />
         <StatCard
-          icon={<CheckCircle size={28} weight="duotone" />}
+          icon={<CheckCircle size={24} weight="duotone" />}
           title="הושלמו"
           value={stats.completed}
-          color="from-success to-success/70"
-          delay={0.2}
+          color="bg-green-50 text-green-600"
         />
         <StatCard
-          icon={<TrendUp size={28} weight="duotone" />}
+          icon={<TrendUp size={24} weight="duotone" />}
           title="סך שווי"
           value={`₪${(stats.totalValue / 1000000).toFixed(1)}M`}
-          color="from-warning to-warning/70"
-          delay={0.3}
+          color="bg-purple-50 text-purple-600"
         />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <motion.div 
-          className="lg:col-span-2"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.4 }}
-        >
-          <Card className="glass-effect border-border/50">
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <Card className="shadow-card">
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-right text-2xl">נכסים אחרונים</CardTitle>
-                <Sparkle size={20} weight="duotone" className="text-primary" />
-              </div>
+              <CardTitle className="text-right text-xl">נכסים אחרונים</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {recentProperties.map((property, i) => {
+              <div className="space-y-2">
+                {recentProperties.map((property) => {
                   const client = clients.find(c => c.id === property.clientId)
                   return (
-                    <motion.div
+                    <PropertyRow
                       key={property.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.5 + i * 0.05 }}
-                    >
-                      <PropertyRow
-                        property={property}
-                        client={client}
-                        onClick={() => onSelectProperty(property)}
-                      />
-                    </motion.div>
+                      property={property}
+                      client={client}
+                      onClick={() => onSelectProperty(property)}
+                    />
                   )
                 })}
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card className="glass-effect border-border/50">
+        <div>
+          <Card className="shadow-card">
             <CardHeader>
-              <CardTitle className="text-right text-2xl">לקוחות פעילים</CardTitle>
+              <CardTitle className="text-right text-xl">לקוחות פעילים</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {clients.slice(0, 8).map((client, i) => (
-                  <motion.div 
+              <div className="space-y-2">
+                {clients.slice(0, 8).map((client) => (
+                  <div 
                     key={client.id} 
-                    className="flex items-center justify-between py-3 border-b border-border/30 last:border-0 hover:bg-muted/30 px-2 rounded-lg transition-colors"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 0.6 + i * 0.05 }}
+                    className="flex items-center justify-between py-2.5 border-b border-border last:border-0 hover:bg-muted/50 px-2 rounded transition-colors"
                   >
                     <div className="flex items-center gap-2">
-                      <div className="text-sm font-mono text-muted-foreground bg-secondary/50 px-2 py-1 rounded">
+                      <div className="text-sm font-mono text-muted-foreground bg-muted px-2 py-0.5 rounded">
                         {client.properties.length}
                       </div>
                       <div className="text-xs text-muted-foreground">נכסים</div>
@@ -142,45 +112,37 @@ export function Dashboard({ properties, clients, onSelectProperty, onCreateNew }
                         <div className="text-xs text-muted-foreground">{client.company}</div>
                       )}
                     </div>
-                  </motion.div>
+                  </div>
                 ))}
               </div>
             </CardContent>
           </Card>
-        </motion.div>
+        </div>
       </div>
     </div>
   )
 }
 
-function StatCard({ icon, title, value, color, delay }: { 
+function StatCard({ icon, title, value, color }: { 
   icon: React.ReactNode
   title: string
   value: string | number
   color: string
-  delay: number
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay }}
-    >
-      <Card className="glass-effect border-border/50 overflow-hidden group hover:scale-105 transition-transform cursor-pointer">
-        <CardContent className="p-6 relative">
-          <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-5 group-hover:opacity-10 transition-opacity`} />
-          <div className="relative flex items-center justify-between">
-            <div className={`bg-gradient-to-br ${color} text-white p-3.5 rounded-xl group-hover:scale-110 transition-transform`}>
-              {icon}
-            </div>
-            <div className="text-right flex-1 mr-4">
-              <p className="text-sm font-medium text-muted-foreground mb-1">{title}</p>
-              <p className="text-4xl font-bold font-mono bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">{value}</p>
-            </div>
+    <Card className="shadow-card hover:shadow-card-hover transition-shadow">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between">
+          <div className={`${color} p-3 rounded-lg`}>
+            {icon}
           </div>
-        </CardContent>
-      </Card>
-    </motion.div>
+          <div className="text-right flex-1 mr-4">
+            <p className="text-sm font-medium text-muted-foreground mb-0.5">{title}</p>
+            <p className="text-3xl font-semibold font-mono text-foreground">{value}</p>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
   )
 }
 
@@ -190,10 +152,10 @@ function PropertyRow({ property, client, onClick }: {
   onClick: () => void
 }) {
   const statusColors = {
-    draft: 'bg-muted/50 text-muted-foreground border-muted',
-    'in-progress': 'bg-accent/20 text-accent border-accent/50',
-    completed: 'bg-primary/20 text-primary border-primary/50',
-    sent: 'bg-success/20 text-success border-success/50'
+    draft: 'bg-gray-100 text-gray-700 border-gray-200',
+    'in-progress': 'bg-amber-100 text-amber-700 border-amber-200',
+    completed: 'bg-blue-100 text-blue-700 border-blue-200',
+    sent: 'bg-green-100 text-green-700 border-green-200'
   }
 
   const statusLabels = {
@@ -204,28 +166,26 @@ function PropertyRow({ property, client, onClick }: {
   }
 
   return (
-    <motion.div
+    <div
       onClick={onClick}
-      className="flex items-center justify-between p-4 rounded-xl bg-secondary/30 hover:bg-secondary/50 cursor-pointer transition-all group hover:scale-[1.01]"
-      whileHover={{ x: -4 }}
-      whileTap={{ scale: 0.98 }}
+      className="flex items-center justify-between p-3 rounded-lg bg-muted/40 hover:bg-muted/70 cursor-pointer transition-all"
     >
       <div className="flex items-center gap-3">
-        <Badge className={`${statusColors[property.status]} border px-3 py-1 text-xs font-semibold`}>
+        <Badge className={`${statusColors[property.status]} border px-2.5 py-0.5 text-xs font-medium`}>
           {statusLabels[property.status]}
         </Badge>
         {property.valuationData && (
-          <div className="text-sm font-mono font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          <div className="text-sm font-mono font-semibold text-primary">
             ₪{(property.valuationData.estimatedValue / 1000000).toFixed(2)}M
           </div>
         )}
       </div>
       <div className="text-right">
-        <div className="font-semibold group-hover:text-primary transition-colors">{property.address.street}</div>
+        <div className="font-semibold text-foreground">{property.address.street}</div>
         <div className="text-sm text-muted-foreground">
           {property.address.city} • <span className="text-foreground/70">{client?.name || 'ללא לקוח'}</span>
         </div>
       </div>
-    </motion.div>
+    </div>
   )
 }

@@ -3,9 +3,9 @@
 A comprehensive real estate appraisal platform for professional appraisers with advanced 3D visualization, AI-powered analysis, floor plan design, investment forecasting, environmental quality assessment, advanced market comparison tools, and professional report generation - surpassing Simplex3D and Quicker.co.il with cutting-edge features they don't have - designed with a futuristic, minimalist interface inspired by Tesla and SpaceX product philosophy.
 
 **Experience Qualities**:
-1. **Futuristic & Sophisticated** - Dark, immersive interface with glowing accents, glass morphism effects, and smooth animations that feel like using cutting-edge technology from the future
-2. **Effortlessly Powerful** - Complex functionality presented through clean, minimalist design with every interaction feeling instant and intelligent
-3. **Precision & Trust** - Data-rich displays with monospace typography for numbers, gradient highlights for important values, and visual feedback that instills confidence
+1. **Clean & Professional** - Light, minimalist interface with clear typography and well-organized content that feels professional and trustworthy
+2. **Effortlessly Simple** - Complex functionality presented through clean design with intuitive navigation and clear visual hierarchy
+3. **Focused & Efficient** - Data-rich displays with excellent readability, proper spacing, and visual feedback that enables quick decision-making
 
 **Complexity Level**: Complex Application (advanced functionality, likely with multiple views)
 This is a professional tool requiring multiple sophisticated features: property database management, advanced AI-powered comparable property search and analysis with filtering/sorting/similarity scoring, automated valuation models, professional report generation with customizable sections, document management, client tracking, data visualization, 3D building visualization, sun/shade analysis, view quality analysis, floor plan designer with AI generation, investment forecasting with ROI analysis, environmental quality assessment, AR walkthrough mode with measurements/annotations/environmental sensors, collaborative AR sessions with real-time sync and group chat - all presented through an exceptionally polished, futuristic interface that makes complex tasks feel simple.
@@ -993,25 +993,25 @@ This is a professional tool requiring multiple sophisticated features: property 
 
 ## Design Direction
 
-The design should evoke **futuristic sophistication, precision, and raw power** - like a Tesla Cybertruck meets SpaceX mission control. Dark, immersive interface with glowing accents, glass morphism effects, and gradient highlights. The UI should feel like advanced technology from the future - minimalist yet powerful, with every pixel purposefully placed. Celebrate data with beautiful charts, smooth animations, and intelligent micro-interactions that respond instantly to user intent.
+The design should evoke **professional simplicity, clarity, and efficiency**. Clean, light interface with subtle shadows and clear typography. The UI should feel professional and trustworthy - minimalist yet functional, with every element serving a clear purpose. Celebrate data with clear presentation, subtle transitions, and intelligent organization that helps users work efficiently.
 
 ## Color Selection
 
-A futuristic dark theme with electric purple/blue gradients and warm amber accents, projecting innovation, precision, and power.
+A clean, professional light theme with subtle purple accents, projecting trust, clarity, and professionalism.
 
-- **Background**: Deep Space Dark `oklch(0.12 0.015 265)` - Immersive dark background creating focus and sophistication
-- **Primary Color**: Electric Purple-Blue `oklch(0.65 0.25 265)` - Bold, futuristic color for primary actions and key data, with subtle glow effects
+- **Background**: Clean White `oklch(0.98 0 0)` - Clean, bright background creating focus and clarity
+- **Primary Color**: Professional Purple `oklch(0.42 0.19 265)` - Trustworthy color for primary actions and key data
 - **Secondary Colors**: 
-  - Dark Slate `oklch(0.22 0.025 265)` - Supporting surfaces and cards with glass morphism
-  - Muted Slate `oklch(0.19 0.02 265)` - Subtle backgrounds for nested components
-- **Accent Color**: Warm Amber `oklch(0.72 0.20 85)` - High-energy color for CTAs, success states, and important values
-- **Success**: Vibrant Green `oklch(0.68 0.20 155)` - Positive actions and growth indicators
-- **Warning**: Energetic Yellow `oklch(0.75 0.18 75)` - Attention items and analytics highlights
+  - Light Gray `oklch(0.95 0 0)` - Supporting surfaces for subtle separation
+  - Muted Gray `oklch(0.96 0 0)` - Background for nested components
+- **Accent Color**: Deep Purple `oklch(0.50 0.15 265)` - Focused color for emphasis and interactive elements
+- **Success**: Professional Green `oklch(0.55 0.15 150)` - Positive actions and confirmations
+- **Warning**: Warm Amber `oklch(0.65 0.15 70)` - Attention items requiring review
 - **Foreground/Background Pairings**:
-  - Background (Deep Space `oklch(0.12 0.015 265)`): Light text `oklch(0.96 0.005 265)` - Ratio 14.5:1 ✓
-  - Primary (Electric Purple `oklch(0.65 0.25 265)`): White text `oklch(0.98 0 0)` - Ratio 7.8:1 ✓
-  - Accent (Warm Amber `oklch(0.72 0.20 85)`): Dark text `oklch(0.12 0.015 265)` - Ratio 9.2:1 ✓
-  - Card (Dark Slate `oklch(0.16 0.02 265)`): Light text `oklch(0.96 0.005 265)` - Ratio 12.3:1 ✓
+  - Background (Clean White `oklch(0.98 0 0)`): Dark text `oklch(0.15 0 0)` - Ratio 16.2:1 ✓
+  - Primary (Professional Purple `oklch(0.42 0.19 265)`): White text `oklch(0.98 0 0)` - Ratio 8.1:1 ✓
+  - Card (White `oklch(1 0 0)`): Dark text `oklch(0.15 0 0)` - Ratio 17.5:1 ✓
+  - Muted (Light Gray `oklch(0.96 0 0)`): Dark text `oklch(0.45 0 0)` - Ratio 6.8:1 ✓
 
 ## Font Selection
 
@@ -1021,22 +1021,22 @@ Typography conveys technical precision and futuristic minimalism through clean s
 - **Data/Numbers**: JetBrains Mono - Technical monospace for all numbers, IDs, measurements, and monetary values
 
 **Typographic Hierarchy**:
-- H1 (Page Title): Inter Bold / 36px / -0.02em letter spacing / 1.1 line height / gradient text effect
-- H2 (Section Headers): Inter SemiBold / 28px / -0.01em letter spacing / 1.2 line height
-- H3 (Card Titles): Inter SemiBold / 20px / normal spacing / 1.3 line height
-- Body (Content): Inter Regular / 15px / normal spacing / 1.6 line height
+- H1 (Page Title): Inter SemiBold / 30px / -0.01em letter spacing / 1.2 line height
+- H2 (Section Headers): Inter SemiBold / 24px / normal spacing / 1.3 line height
+- H3 (Card Titles): Inter SemiBold / 18px / normal spacing / 1.4 line height
+- Body (Content): Inter Regular / 14px / normal spacing / 1.6 line height
 - Small (Labels): Inter Medium / 13px / normal spacing / 1.4 line height
-- Data/Numbers: JetBrains Mono SemiBold / 16-36px / normal spacing / gradient text for emphasis
+- Data/Numbers: JetBrains Mono SemiBold / 14-32px / normal spacing
 
 ## Animations
 
-Animations should feel instant yet fluid - inspired by Tesla UI responsiveness and SpaceX precision. Every motion serves a purpose: card hover lifts (4px translate with scale 1.02), smooth page transitions (300ms with ease-out), number counting animations for stats, gradient shimmer effects on glass cards, micro-interactions on buttons (scale down on press), and satisfying checkmarks on saves. Stagger animations on lists (50ms delay per item) create rhythm. All animations use GPU-accelerated transforms for 60fps smoothness.
+Animations should be subtle and purposeful - enhancing usability without distraction. Smooth hover states (100-150ms), gentle page transitions (200ms with ease-out), and clear feedback on interactions. Keep animations minimal to maintain professional feel and performance.
 
 ## Navigation & Information Architecture
 
-**The application uses a refined sidebar navigation system** with sophisticated visual design to organize the extensive feature set into logical, easy-to-navigate categories with advanced search capabilities.
+**The application uses a clean sidebar navigation system** with professional design to organize the extensive feature set into logical, easy-to-navigate categories with search capabilities.
 
-### Sidebar Structure (8 Main Categories with Emoji Headers):
+### Sidebar Structure (8 Main Categories):
 
 1. **🎯 ראשי (Core)** - Essential daily tools
    - לוח בקרה (Dashboard) - Central workspace and overview
@@ -1080,79 +1080,60 @@ Animations should feel instant yet fluid - inspired by Tesla UI responsiveness a
    - שיתוף פעולה (Team Collaboration) - Team collaboration tools
    - מעקב שינויים (Audit Trail) - Complete activity logging and compliance
 
-### Advanced Search Functionality:
-- **Instant search bar** at top of sidebar with magnifying glass icon
-- **Smart keyword matching** searches both Hebrew labels and feature keywords
-- **Real-time filtering** shows only matching categories and features as you type
-- **Results counter** displays number of matching features found
-- **Clear button** appears when search is active for quick reset
+### Search Functionality:
+- **Search bar** at top of sidebar
+- **Keyword matching** searches Hebrew labels and feature keywords
+- **Real-time filtering** shows matching categories and features
+- **Clear button** for quick reset
 - **Empty state** with helpful message when no results found
-- **Auto-clear** search after clicking a result for clean navigation
-- **Search keywords** include: feature names, alternative terms, related concepts
 
 ### Navigation Visual Design:
-- **Premium header** with gradient brand icon (Lightning) and glowing effect
-- **Glass morphism background** with backdrop blur and subtle transparency (card/95 opacity)
-- **Gradient accents** on header and footer (primary/5 tint)
-- **Professional spacing** with generous padding and visual breathing room
-- **Emoji category headers** for quick visual scanning and modern personality
-- **Icon badges** for each menu item with rounded background on active state
-- **Smooth rounded corners** (2xl radius on buttons) throughout for modern feel
+- **Clean header** with purple brand icon
+- **White background** with clear hierarchy
+- **Emoji category headers** for quick visual scanning
+- **Simple icon badges** for each menu item
 - **Active state design**:
-  - Left-to-right gradient background (primary/15 to primary/5)
-  - Bold 3px right border in primary color
-  - Icon on rounded primary/20 background
-  - Fill weight icons (vs duotone for inactive)
-  - Large shadow with primary/20 glow
-  - Semibold font weight
+  - Solid purple background
+  - White text for contrast
+  - Fill weight icons (vs regular for inactive)
 - **Hover states**:
-  - Secondary/70 background tint
-  - Medium shadow elevation  
-  - Foreground text color
-  - Icon background fade-in
-- **Footer section** with professional plan indicator and gradient badge
-- **ScrollArea wrapper** for smooth scrolling with many categories
-- **Collapsible functionality** to icon-only mode for maximum workspace
-- **Persistent state** - remembers last viewed section across sessions
-- **RTL-optimized** for Hebrew interface with proper alignment
-- **Icon consistency** using Phosphor Icons with dynamic weights (fill/duotone)
-- **Mobile responsive** - collapses automatically on smaller screens
+  - Light gray background
+  - Smooth transitions
+- **Footer** with simple version indicator
+- **ScrollArea** for smooth scrolling
+- **Collapsible functionality** to icon-only mode
+- **RTL-optimized** for Hebrew interface
+- **Icon consistency** using Phosphor Icons
 
 ## Component Selection
 
 - **Components**:
-  - Sidebar: Shadcn Sidebar component with collapsible groups, custom styling with glass effect
-  - Card: Glass morphism effect with backdrop blur, subtle borders, gradient overlays on hover - used for all content containers
-  - Tabs: Sleek pills with smooth active indicator, glowing when selected
-  - Dialog: Full-screen overlays with backdrop blur and smooth scale-in animations
-  - Button: Primary (gradient with glow), Secondary (glass outline), sizes respond to importance
-  - Badge: Rounded with colored background/border, used for status indicators with appropriate color coding
-  - Input: Dark with subtle border, focus state glows with ring effect
-  - Progress: Gradient fill with smooth animations
-  - Motion components: Framer Motion for all list items, cards, and page transitions
+  - Sidebar: Shadcn Sidebar component with clean white background and organized groups
+  - Card: Clean white cards with subtle shadows for depth
+  - Tabs: Simple underline style with clear active indicator
+  - Dialog: Centered overlays with subtle backdrop
+  - Button: Primary (solid purple), Secondary (outlined), sizes respond to importance
+  - Badge: Rounded with appropriate color coding for status
+  - Input: Light background with clear borders, focus state with subtle ring
+  - Progress: Clean progress bars with smooth animations
   
 - **Visual Effects**:
-  - Glass morphism: backdrop-filter blur(20px) with semi-transparent backgrounds
-  - Gradient borders: Linear gradients from primary to accent
-  - Glow effects: Box shadows with primary/accent colors at 30% opacity
-  - Grid background: Subtle 30px grid pattern in background
-  - Gradient text: Large numbers and headings use gradient clip-path
-
-- **States**:
-  - Buttons: Glow effect on hover, scale(0.98) on press, disabled fades to 50% opacity
-  - Cards: Lift on hover (translateY -4px + scale 1.02), glow on active, gradient overlay fades in
-  - Inputs: Border glows primary color on focus with smooth ring animation
+  - Card shadows: Subtle elevation with clean drop shadows
+  - Transitions: Smooth 150-200ms transitions on interactive elements
+  - Hover states: Gentle background color changes and shadow increases
   
-- **Icon Selection** (Phosphor Icons with duotone weight):
-  - Lightning: Speed/premium actions
-  - Sparkle: AI features  
-  - House: Properties
-  - ChartBar: Analytics
+- **States**:
+  - Buttons: Subtle darker shade on hover, slight scale on press, disabled at 50% opacity
+  - Cards: Light shadow elevation on hover
+  - Inputs: Border color change on focus with subtle ring
+  
+- **Icon Selection** (Phosphor Icons with regular/fill weights):
+  - House: Properties and home
   - Users: Clients
-  - TrendUp/Down: Market indicators
-  - MapPin: Locations
+  - ChartBar: Analytics
+  - Plus: Add actions
   - CheckCircle: Completed items
   
-- **Spacing**: Generous whitespace with 8px base unit - cards get 24px padding, sections 32px gap, tight inline 8px
+- **Spacing**: Generous whitespace with 4px base unit - cards get 16-24px padding, sections 16-24px gap
 
-- **Mobile**: Bottom nav bar, full-width cards, collapsible sections, larger touch targets (48px), reduced animations for performance
+- **Mobile**: Bottom nav bar, full-width cards, collapsible sections, larger touch targets (44px)

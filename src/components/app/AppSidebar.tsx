@@ -1,5 +1,4 @@
 import { useState, useMemo } from 'react'
-import { useKV } from '@github/spark/hooks'
 import { 
   House, 
   ChartBar, 
@@ -26,8 +25,6 @@ import {
   X,
   ChartLineUp,
   Briefcase,
-  Star,
-  PushPin,
   Scales,
   Key,
   MapTrifold
@@ -56,17 +53,6 @@ interface AppSidebarProps {
 
 export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('')
-  const [favorites, setFavorites] = useKV<string[]>('sidebar-favorites', [])
-
-  const toggleFavorite = (itemId: string) => {
-    setFavorites((current) => {
-      const currentFavs = current || []
-      if (currentFavs.includes(itemId)) {
-        return currentFavs.filter(id => id !== itemId)
-      }
-      return [...currentFavs, itemId]
-    })
-  }
 
   const menuItems = [
     {
@@ -176,243 +162,97 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
     return menuItems.flatMap(group => group.items)
   }, [])
 
-  const favoriteItems = useMemo(() => {
-    const favs = favorites || []
-    return favs
-      .map(favId => allMenuItems.find(item => item.id === favId))
-      .filter(Boolean)
-  }, [favorites, allMenuItems])
-
-  const hasFavorites = favoriteItems.length > 0
-
   return (
-    <Sidebar collapsible="icon" side="right" className="border-r border-border/40 bg-card/95 backdrop-blur-xl">
-      <SidebarHeader className="border-b border-border/40 px-4 py-5 bg-gradient-to-b from-primary/5 to-transparent">
+    <Sidebar collapsible="icon" side="right" className="border-r border-border bg-card">
+      <SidebarHeader className="border-b border-border px-4 py-4">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-accent flex items-center justify-center glow-primary shrink-0 shadow-lg">
-            <Lightning weight="fill" className="text-primary-foreground" size={22} />
+          <div className="h-9 w-9 rounded-lg bg-primary flex items-center justify-center shrink-0">
+            <House weight="fill" className="text-primary-foreground" size={20} />
           </div>
           <div className="flex-1 min-w-0 group-data-[collapsible=icon]:hidden">
-            <h2 className="font-bold text-base tracking-tight bg-gradient-to-l from-primary via-foreground to-accent bg-clip-text text-transparent">
+            <h2 className="font-semibold text-sm text-foreground">
               AppraisalPro
             </h2>
-            <p className="text-xs text-muted-foreground/80 font-medium">
-              מערכת שמאות מתקדמת
+            <p className="text-xs text-muted-foreground">
+              מערכת שמאות
             </p>
           </div>
         </div>
 
-        <div className="mt-4 group-data-[collapsible=icon]:hidden">
+        <div className="mt-3 group-data-[collapsible=icon]:hidden">
           <div className="relative">
             <MagnifyingGlass 
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground/60 pointer-events-none transition-colors" 
-              size={18} 
-              weight="bold"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" 
+              size={16} 
             />
             <Input
               type="text"
-              placeholder="חיפוש מהיר..."
+              placeholder="חיפוש..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-11 pl-9 h-10 bg-background/60 border-border/60 rounded-xl focus:border-primary/60 focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-muted-foreground/50 text-sm"
+              className="pr-9 pl-3 h-9 text-sm"
             />
             {searchQuery && (
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute left-1.5 top-1/2 -translate-y-1/2 h-7 w-7 hover:bg-destructive/10 rounded-lg transition-colors"
+                className="absolute left-1 top-1/2 -translate-y-1/2 h-7 w-7"
                 onClick={() => setSearchQuery('')}
               >
-                <X size={16} className="text-muted-foreground hover:text-destructive transition-colors" />
+                <X size={14} className="text-muted-foreground" />
               </Button>
             )}
           </div>
-          {searchQuery && (
-            <div className="flex items-center justify-between mt-2.5 px-1">
-              <p className="text-xs text-muted-foreground/70 font-medium">
-                {filteredMenuItems.reduce((sum, group) => sum + group.items.length, 0)} תוצאות נמצאו
-              </p>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 text-xs text-primary hover:text-primary hover:bg-primary/10"
-                onClick={() => setSearchQuery('')}
-              >
-                נקה
-              </Button>
-            </div>
-          )}
         </div>
       </SidebarHeader>
 
-      <SidebarContent className="px-3 py-4">
+      <SidebarContent className="px-2 py-3">
         <ScrollArea className="h-full">
           {filteredMenuItems.length === 0 ? (
-            <div className="text-center py-16 px-4 group-data-[collapsible=icon]:hidden">
-              <div className="mx-auto mb-4 h-16 w-16 rounded-2xl bg-muted/50 flex items-center justify-center">
-                <MagnifyingGlass size={32} className="text-muted-foreground/40" weight="duotone" />
-              </div>
-              <p className="text-sm font-medium text-foreground/80 mb-1">
+            <div className="text-center py-12 px-4 group-data-[collapsible=icon]:hidden">
+              <MagnifyingGlass size={28} className="text-muted-foreground/40 mx-auto mb-2" weight="duotone" />
+              <p className="text-sm text-muted-foreground">
                 לא נמצאו תוצאות
-              </p>
-              <p className="text-xs text-muted-foreground/60">
-                נסה מילות חיפוש אחרות או נקה את החיפוש
               </p>
             </div>
           ) : (
-            <div className="space-y-6">
-              {!searchQuery && hasFavorites && (
-                <SidebarGroup>
-                  <SidebarGroupLabel className="text-xs font-bold text-muted-foreground/70 px-3 mb-2 group-data-[collapsible=icon]:hidden uppercase tracking-wider flex items-center gap-2">
-                    <Star size={14} weight="fill" className="text-accent" />
-                    מועדפים
-                  </SidebarGroupLabel>
-                  <SidebarGroupContent>
-                    <SidebarMenu className="space-y-1">
-                      {favoriteItems.map((item) => {
-                        if (!item) return null
-                        const Icon = item.icon
-                        const isActive = activeView === item.id
-                        const isFavorite = (favorites || []).includes(item.id)
-                        
-                        return (
-                          <SidebarMenuItem key={`fav-${item.id}`}>
-                            <div className="relative group/item">
-                              <SidebarMenuButton
-                                onClick={() => {
-                                  onNavigate(item.id)
-                                  setSearchQuery('')
-                                }}
-                                isActive={isActive}
-                                className={`
-                                  w-full transition-all duration-300 h-11 rounded-xl pr-11
-                                  ${isActive 
-                                    ? 'bg-gradient-to-l from-accent/20 via-accent/15 to-accent/10 text-accent border-r-[3px] border-accent shadow-lg shadow-accent/20 font-semibold' 
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70 hover:shadow-md font-medium'
-                                  }
-                                `}
-                                tooltip={item.label}
-                              >
-                                <div className={`
-                                  flex items-center justify-center w-9 h-9 rounded-lg transition-all
-                                  ${isActive 
-                                    ? 'bg-accent/25 text-accent' 
-                                    : 'bg-transparent group-hover:bg-secondary'
-                                  }
-                                `}>
-                                  <Icon 
-                                    size={20} 
-                                    weight={isActive ? 'fill' : 'duotone'}
-                                  />
-                                </div>
-                                <span className="group-data-[collapsible=icon]:hidden text-sm">
-                                  {item.label}
-                                </span>
-                              </SidebarMenuButton>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  toggleFavorite(item.id)
-                                }}
-                                className={`
-                                  absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg transition-all
-                                  group-data-[collapsible=icon]:hidden
-                                  ${isFavorite 
-                                    ? 'opacity-100 text-accent hover:text-accent/70' 
-                                    : 'opacity-0 group-hover/item:opacity-100 text-muted-foreground hover:text-accent'
-                                  }
-                                  hover:bg-accent/10
-                                `}
-                                title={isFavorite ? 'הסר ממועדפים' : 'הוסף למועדפים'}
-                              >
-                                <Star 
-                                  size={16} 
-                                  weight={isFavorite ? 'fill' : 'regular'}
-                                  className="transition-all"
-                                />
-                              </Button>
-                            </div>
-                          </SidebarMenuItem>
-                        )
-                      })}
-                    </SidebarMenu>
-                  </SidebarGroupContent>
-                </SidebarGroup>
-              )}
-
-              {filteredMenuItems.map((group, idx) => (
+            <div className="space-y-4">
+              {filteredMenuItems.map((group) => (
                 <SidebarGroup key={group.title}>
-                  <SidebarGroupLabel className="text-xs font-bold text-muted-foreground/70 px-3 mb-2 group-data-[collapsible=icon]:hidden uppercase tracking-wider">
+                  <SidebarGroupLabel className="text-xs font-semibold text-muted-foreground px-2 mb-1 group-data-[collapsible=icon]:hidden">
                     {group.title}
                   </SidebarGroupLabel>
                   <SidebarGroupContent>
-                    <SidebarMenu className="space-y-1">
+                    <SidebarMenu className="space-y-0.5">
                       {group.items.map((item) => {
                         const Icon = item.icon
                         const isActive = activeView === item.id
-                        const isFavorite = (favorites || []).includes(item.id)
                         
                         return (
                           <SidebarMenuItem key={item.id}>
-                            <div className="relative group/item">
-                              <SidebarMenuButton
-                                onClick={() => {
-                                  onNavigate(item.id)
-                                  setSearchQuery('')
-                                }}
-                                isActive={isActive}
-                                className={`
-                                  w-full transition-all duration-300 h-11 rounded-xl pr-11
-                                  ${isActive 
-                                    ? 'bg-gradient-to-l from-primary/15 via-primary/10 to-primary/5 text-primary border-r-[3px] border-primary shadow-lg shadow-primary/20 font-semibold' 
-                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70 hover:shadow-md font-medium'
-                                  }
-                                `}
-                                tooltip={item.label}
-                              >
-                                <div className={`
-                                  flex items-center justify-center w-9 h-9 rounded-lg transition-all
-                                  ${isActive 
-                                    ? 'bg-primary/20 text-primary' 
-                                    : 'bg-transparent group-hover:bg-secondary'
-                                  }
-                                `}>
-                                  <Icon 
-                                    size={20} 
-                                    weight={isActive ? 'fill' : 'duotone'}
-                                  />
-                                </div>
-                                <span className="group-data-[collapsible=icon]:hidden text-sm">
-                                  {item.label}
-                                </span>
-                              </SidebarMenuButton>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  toggleFavorite(item.id)
-                                }}
-                                className={`
-                                  absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg transition-all
-                                  group-data-[collapsible=icon]:hidden
-                                  ${isFavorite 
-                                    ? 'opacity-100 text-accent hover:text-accent/70' 
-                                    : 'opacity-0 group-hover/item:opacity-100 text-muted-foreground hover:text-accent'
-                                  }
-                                  hover:bg-accent/10
-                                `}
-                                title={isFavorite ? 'הסר ממועדפים' : 'הוסף למועדפים'}
-                              >
-                                <Star 
-                                  size={16} 
-                                  weight={isFavorite ? 'fill' : 'regular'}
-                                  className="transition-all"
-                                />
-                              </Button>
-                            </div>
+                            <SidebarMenuButton
+                              onClick={() => {
+                                onNavigate(item.id)
+                                setSearchQuery('')
+                              }}
+                              isActive={isActive}
+                              className={`
+                                w-full h-9 rounded-lg
+                                ${isActive 
+                                  ? 'bg-primary text-primary-foreground font-medium' 
+                                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
+                                }
+                              `}
+                              tooltip={item.label}
+                            >
+                              <Icon 
+                                size={18} 
+                                weight={isActive ? 'fill' : 'regular'}
+                              />
+                              <span className="group-data-[collapsible=icon]:hidden text-sm">
+                                {item.label}
+                              </span>
+                            </SidebarMenuButton>
                           </SidebarMenuItem>
                         )
                       })}
@@ -425,15 +265,9 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
         </ScrollArea>
       </SidebarContent>
 
-      <SidebarFooter className="border-t border-border/40 p-4 bg-gradient-to-t from-primary/5 to-transparent group-data-[collapsible=icon]:hidden">
-        <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-gradient-to-br from-accent/10 to-primary/10 border border-accent/20">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-accent to-primary/80 flex items-center justify-center shrink-0">
-            <Briefcase weight="fill" className="text-white" size={16} />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-xs font-bold text-foreground/90">גרסה מקצועית</p>
-            <p className="text-[10px] text-muted-foreground/70">כל הפיצ'רים פעילים</p>
-          </div>
+      <SidebarFooter className="border-t border-border p-3 group-data-[collapsible=icon]:hidden">
+        <div className="text-xs text-center text-muted-foreground">
+          גרסה מקצועית
         </div>
       </SidebarFooter>
     </Sidebar>
