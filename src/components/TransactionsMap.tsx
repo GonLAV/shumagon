@@ -84,7 +84,7 @@ const ISRAEL_MAP_POINTS: IsraelMapPoint[] = [
 export function TransactionsMap() {
   const [transactions, setTransactions] = useState<NadlanTransaction[]>([])
   const [loading, setLoading] = useState(false)
-  const [selectedCity, setSelectedCity] = useState<string>('')
+  const [selectedCity, setSelectedCity] = useState<string>('all')
   const [propertyType, setPropertyType] = useState('all')
   const [minPrice, setMinPrice] = useState('')
   const [maxPrice, setMaxPrice] = useState('')
@@ -104,7 +104,7 @@ export function TransactionsMap() {
     try {
       const params: NadlanSearchParams = {}
       
-      if (selectedCity) params.city = selectedCity
+      if (selectedCity && selectedCity !== 'all') params.city = selectedCity
       if (propertyType !== 'all') params.propertyType = propertyType
       if (minPrice) params.minPrice = parseInt(minPrice)
       if (maxPrice) params.maxPrice = parseInt(maxPrice)
@@ -443,7 +443,7 @@ export function TransactionsMap() {
                     <SelectValue placeholder="כל הערים" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">כל הערים</SelectItem>
+                    <SelectItem value="all">כל הערים</SelectItem>
                     {ISRAEL_CITIES.map(city => (
                       <SelectItem key={city} value={city}>{city}</SelectItem>
                     ))}

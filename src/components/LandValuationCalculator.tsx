@@ -76,13 +76,13 @@ export function LandValuationCalculator() {
   const [isLoadingNadlan, setIsLoadingNadlan] = useState(false)
   const [nadlanTransactions, setNadlanTransactions] = useState<NationalTransactionData[]>([])
   const [showNadlanResults, setShowNadlanResults] = useState(false)
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('')
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('all')
 
   const handleFetchNadlanTransactions = async () => {
     setIsLoadingNadlan(true)
     try {
       const cities = property.city ? [property.city] : undefined
-      const districts = selectedDistrict ? [selectedDistrict] : undefined
+      const districts = selectedDistrict && selectedDistrict !== 'all' ? [selectedDistrict] : undefined
       
       const searchParams = {
         cities,

@@ -121,13 +121,13 @@ export function OfficeValuationCalculator() {
   const [isLoadingNadlan, setIsLoadingNadlan] = useState(false)
   const [nadlanTransactions, setNadlanTransactions] = useState<NationalTransactionData[]>([])
   const [showNadlanResults, setShowNadlanResults] = useState(false)
-  const [selectedDistrict, setSelectedDistrict] = useState<string>('')
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('all')
 
   const handleFetchNadlanTransactions = async () => {
     setIsLoadingNadlan(true)
     try {
       const cities = property.city ? [property.city] : undefined
-      const districts = selectedDistrict ? [selectedDistrict] : undefined
+      const districts = selectedDistrict && selectedDistrict !== 'all' ? [selectedDistrict] : undefined
       
       const searchParams = {
         cities,
@@ -631,7 +631,7 @@ export function OfficeValuationCalculator() {
                           <SelectValue placeholder="כל המחוזות" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">כל המחוזות</SelectItem>
+                          <SelectItem value="all">כל המחוזות</SelectItem>
                           <SelectItem value="תל אביב">תל אביב</SelectItem>
                           <SelectItem value="מרכז">מרכז</SelectItem>
                           <SelectItem value="ירושלים">ירושלים</SelectItem>
@@ -652,7 +652,7 @@ export function OfficeValuationCalculator() {
                           <SelectValue placeholder="כל הערים" />
                         </SelectTrigger>
                         <SelectContent className="max-h-72">
-                          <SelectItem value="">כל הערים</SelectItem>
+                          <SelectItem value="all">כל הערים</SelectItem>
                           <SelectItem value="תל אביב-יפו">תל אביב-יפו</SelectItem>
                           <SelectItem value="רמת גן">רמת גן</SelectItem>
                           <SelectItem value="גבעתיים">גבעתיים</SelectItem>
