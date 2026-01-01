@@ -160,22 +160,22 @@ export function BettermentLevyCalculator() {
     const newTotal = newStatus.buildingRights.mainArea + newStatus.buildingRights.serviceArea
     
     if (prevTotal === 0 && newTotal === 0) {
-      toast.error('יש להזין שטחי בנייה (עיקרי ושירות) הן במצב קודם והן במצב חדש', {
-        description: 'מספר התכנית בלבד אינו מספיק - יש למלא את השטחים במ"ר'
+      toast.error('חסרים שטחי בנייה - המערכת אינה מושכת נתונים אוטומטית', {
+        description: '📋 מספרי התכניות שהזנת תקינים, אך עליך למלא ידנית את השטחים במ"ר בשני הטאבים (מצב קודם + מצב חדש)'
       })
       return null
     }
     
     if (prevTotal === 0) {
-      toast.error('יש להזין שטחי בנייה במצב קודם (תכנית ישנה)', {
-        description: 'מלא את השטח העיקרי ושטח השירות במ"ר'
+      toast.error('חסרים שטחים במצב קודם (תכנית ישנה)', {
+        description: `📐 לחץ על טאב "מצב קודם" ומלא: שטח עיקרי + שטח שירות (במ"ר). לדוגמה: אם המגרש 500 מ"ר ואחוזי הבנייה 100% → שטח עיקרי = 500 מ"ר`
       })
       return null
     }
     
     if (newTotal === 0) {
-      toast.error('יש להזין שטחי בנייה במצב חדש (תכנית משביחה)', {
-        description: 'מלא את השטח העיקרי ושטח השירות במ"ר'
+      toast.error('חסרים שטחים במצב חדש (תכנית משביחה)', {
+        description: `📐 לחץ על טאב "מצב חדש משביח" ומלא: שטח עיקרי + שטח שירות (במ"ר). השטח החדש צריך להיות גדול מהקודם`
       })
       return null
     }
@@ -184,7 +184,7 @@ export function BettermentLevyCalculator() {
     
     if (delta.totalAreaDelta <= 0) {
       toast.error('אין תוספת זכויות בנייה - לא ניתן לחשב היטל השבחה', {
-        description: `המצב החדש (${newTotal.toLocaleString('he-IL')} מ"ר) קטן או שווה למצב הקודם (${prevTotal.toLocaleString('he-IL')} מ"ר)`
+        description: `🔍 הסיבה: המצב החדש (${newTotal.toLocaleString('he-IL')} מ"ר) קטן או שווה למצב הקודם (${prevTotal.toLocaleString('he-IL')} מ"ר). לתכנית להיחשב "משביחה" היא חייבת להוסיף זכויות בנייה`
       })
       return null
     }
@@ -1246,9 +1246,29 @@ export function BettermentLevyCalculator() {
                     <div className="bg-muted/50 p-3 rounded border space-y-2">
                       <p className="text-muted-foreground"><strong>תכנית ישנה (מצב קודם):</strong> לה/במ/18/1000/א</p>
                       <p className="text-muted-foreground"><strong>תכנית חדשה (מצב משביח):</strong> 415-0792036</p>
-                      <p className="text-xs text-muted-foreground mt-2">
-                        המערכת מקבלת מספרי תכניות בכל הפורמטים המקובלים בישראל
+                      <p className="text-xs text-muted-foreground mt-2 border-t border-border pt-2">
+                        ⚠️ <strong>חשוב:</strong> המערכת מקבלת מספרי תכניות בכל הפורמטים המקובלים, 
+                        <strong className="text-warning"> אך אינה שולפת נתונים אוטומטית מהתכניות</strong>. 
+                        עליך למלא את השטחים במ"ר ידנית בכל אחד מהטאבים.
                       </p>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    <p className="font-semibold text-foreground">🔍 מאיפה לוקחים את הנתונים?</p>
+                    <div className="bg-primary/10 p-3 rounded border border-primary/30 space-y-2">
+                      <p className="text-xs text-muted-foreground">
+                        המערכת <strong>אינה מחוברת כרגע</strong> למאגרי מידע ממשלתיים (מבט, ממשק תכנון ערים).
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        <strong>לכן:</strong> בדוק את התכניות במערכות הרשמיות והזן את הנתונים ידנית.
+                      </p>
+                      <ol className="text-xs text-muted-foreground list-decimal list-inside mr-4 space-y-1">
+                        <li>היכנס למערכת מבט או ממשק תכנון ערים</li>
+                        <li>חפש את מספרי התכניות שלך</li>
+                        <li>העתק את נתוני הזכויות (אחוזי בנייה, קומות, שטחים)</li>
+                        <li>הזן אותם במחשבון</li>
+                      </ol>
                     </div>
                   </div>
 
@@ -1267,6 +1287,30 @@ export function BettermentLevyCalculator() {
           )}
         </AnimatePresence>
 
+        <Alert className="bg-warning/20 border-warning/50">
+          <Warning className="h-5 w-5 text-warning" weight="duotone" />
+          <AlertTitle className="text-base font-bold text-warning">⚠️ חשוב לדעת - המערכת אינה שולפת נתונים אוטומטית מהתכניות</AlertTitle>
+          <AlertDescription className="mt-3 space-y-3">
+            <div className="text-sm space-y-2">
+              <p className="font-semibold text-foreground">
+                מספרי התכניות שהזנת (415-0792036 ו-לה/במ/18/1000/א) תקינים ומקובלים ✓
+              </p>
+              <p className="text-muted-foreground">
+                <strong>אבל:</strong> המערכת כרגע אינה מחוברת למאגרי נתונים ממשלתיים לשליפה אוטומטית של זכויות בנייה.
+              </p>
+              <div className="p-3 bg-accent/20 border border-accent/40 rounded-lg">
+                <p className="font-semibold text-accent mb-2">📝 מה עליך לעשות:</p>
+                <ol className="space-y-1 text-xs text-muted-foreground list-decimal list-inside mr-4">
+                  <li>בדוק את התכניות במערכות הרשמיות (מבט, ממשק תכנון ערים)</li>
+                  <li>מלא <strong>ידנית</strong> את השטחים במ"ר בשני הטאבים: "מצב קודם" ו-"מצב חדש משביח"</li>
+                  <li>חשב: <strong>שטח עיקרי = גודל מגרש × אחוזי בנייה</strong></li>
+                  <li>שטח שירות בד"כ 15-25% מהשטח העיקרי</li>
+                </ol>
+              </div>
+            </div>
+          </AlertDescription>
+        </Alert>
+
         <Alert className="bg-primary/10 border-primary/30">
           <Info className="h-5 w-5 text-primary" weight="duotone" />
           <AlertTitle className="text-base font-bold">מדריך מהיר למילוי</AlertTitle>
@@ -1283,7 +1327,7 @@ export function BettermentLevyCalculator() {
                 <p className="font-semibold text-foreground">2️⃣ הזן מצב קודם וחדש</p>
                 <ul className="text-muted-foreground space-y-0.5 text-xs">
                   <li>• מספר תכנית (כל פורמט מקובל)</li>
-                  <li>• זכויות בנייה (%, קומות, שטחים)</li>
+                  <li>• <strong className="text-warning">זכויות בנייה במ"ר (חובה!)</strong></li>
                 </ul>
               </div>
               <div className="space-y-1">
@@ -1499,10 +1543,14 @@ export function BettermentLevyCalculator() {
                       </span>
                     </div>
                     {(previousStatus.buildingRights.mainArea + previousStatus.buildingRights.serviceArea) === 0 && (
-                      <Alert className="mt-3">
-                        <Warning className="h-4 w-4" weight="duotone" />
+                      <Alert className="mt-3 bg-destructive/20 border-destructive">
+                        <Warning className="h-4 w-4" weight="fill" />
                         <AlertDescription className="text-xs">
-                          <strong>שים לב:</strong> יש למלא את השטחים במ"ר. אם המגרש הוא 500 מ"ר ואחוזי הבנייה 100%, השטח העיקרי יהיה 500 מ"ר.
+                          <strong className="text-destructive">❌ חובה למלא!</strong> המערכת אינה שולפת נתונים אוטומטית. 
+                          מלא את השטחים במ"ר בהתאם לתכנית {previousStatus.planNumber || 'הישנה'}.
+                          <div className="mt-2 p-2 bg-background rounded text-muted-foreground">
+                            💡 חישוב: אם מגרש 500 מ"ר עם 100% בנייה → שטח עיקרי = 500 מ"ר
+                          </div>
                         </AlertDescription>
                       </Alert>
                     )}
@@ -1661,10 +1709,14 @@ export function BettermentLevyCalculator() {
                       </span>
                     </div>
                     {(newStatus.buildingRights.mainArea + newStatus.buildingRights.serviceArea) === 0 && (
-                      <Alert className="mt-3">
-                        <Warning className="h-4 w-4" weight="duotone" />
+                      <Alert className="mt-3 bg-destructive/20 border-destructive">
+                        <Warning className="h-4 w-4" weight="fill" />
                         <AlertDescription className="text-xs">
-                          <strong>שים לב:</strong> יש למלא את השטחים החדשים במ"ר. אם התכנית החדשה מאפשרת 800 מ"ר, הזן את המספר הזה.
+                          <strong className="text-destructive">❌ חובה למלא!</strong> המערכת אינה שולפת נתונים אוטומטית. 
+                          מלא את השטחים החדשים במ"ר בהתאם לתכנית {newStatus.planNumber || 'החדשה'}.
+                          <div className="mt-2 p-2 bg-background rounded text-muted-foreground">
+                            💡 חישוב: אם מגרש 500 מ"ר עם 160% בנייה → שטח עיקרי = 800 מ"ר
+                          </div>
                         </AlertDescription>
                       </Alert>
                     )}
