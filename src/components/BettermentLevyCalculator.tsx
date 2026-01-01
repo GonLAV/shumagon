@@ -9,10 +9,25 @@ import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { Calendar, Calculator, FileText, TrendUp, Warning, CheckCircle, Scales, Copy, Plus, Trash } from '@phosphor-icons/react'
+import { Calendar, Calculator, FileText, TrendUp, Warning, CheckCircle, Scales, Copy, Plus, Trash, Info, Book, Question } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useKV } from '@github/spark/hooks'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog'
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 
 interface PlanningStatus {
   planNumber: string
@@ -57,6 +72,8 @@ export function BettermentLevyCalculator() {
   const [comparisonMode, setComparisonMode] = useState(false)
   const [scenarios, setScenarios] = useKV<BettermentScenario[]>('betterment-scenarios', [])
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null)
+  const [showGuide, setShowGuide] = useState(false)
+  const [showDisclaimer, setShowDisclaimer] = useState(true)
 
   const [previousStatus, setPreviousStatus] = useState<PlanningStatus>({
     planNumber: '',
@@ -489,6 +506,290 @@ export function BettermentLevyCalculator() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Dialog open={showGuide} onOpenChange={setShowGuide}>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Book className="w-4 h-4" weight="duotone" />
+                  מדריך למילוי
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto" dir="rtl">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl flex items-center gap-2">
+                    <Book className="w-6 h-6 text-primary" weight="duotone" />
+                    מדריך מפורט למילוי מחשבון היטל השבחה
+                  </DialogTitle>
+                  <DialogDescription>
+                    הוראות שלב אחר שלב למילוי נכון של כל שדה במחשבון
+                  </DialogDescription>
+                </DialogHeader>
+
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1">
+                    <AccordionTrigger className="text-lg font-semibold">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-5 h-5 text-primary" weight="duotone" />
+                        מועד קובע - מה זה ואיך למלא?
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-3 text-base">
+                      <p className="font-semibold text-foreground">מהו מועד קובע?</p>
+                      <p className="text-muted-foreground">
+                        המועד הקובע הוא התאריך שבו נקבע שווי הקרקע לצורך חישוב היטל ההשבחה. 
+                        בדרך כלל זהו תאריך פרסום התכנית לעיון הציבור או תאריך אישורה.
+                      </p>
+                      <div className="bg-primary/10 p-4 rounded-lg border border-primary/30">
+                        <p className="font-semibold mb-2 text-primary">איך למצוא את המועד הקובע?</p>
+                        <ul className="space-y-2 text-sm text-muted-foreground list-disc list-inside">
+                          <li>בדוק בהחלטה על אישור התכנית - המועד יופיע בדרך כלל בפרק "הוראות כלליות"</li>
+                          <li>במקרים מסוימים זהו מועד הפקדת התכנית או מועד פרסומה ברשומות</li>
+                          <li>ניתן לפנות לוועדה המקומית לקבלת אישור על המועד הקובע</li>
+                          <li>במקרים מורכבים (שינויים בתכנית) - היוועץ בשמאי מקרקעין מוסמך</li>
+                        </ul>
+                      </div>
+                      <Alert>
+                        <Warning className="h-4 w-4" weight="duotone" />
+                        <AlertTitle>חשוב!</AlertTitle>
+                        <AlertDescription>
+                          המועד הקובע משפיע ישירות על שווי הזכויות ועל גובה ההיטל. ודא שהמועד נכון.
+                        </AlertDescription>
+                      </Alert>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-2">
+                    <AccordionTrigger className="text-lg font-semibold">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-primary" weight="duotone" />
+                        מצב קודם - תכנית ישנה
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4 text-base">
+                      <div className="space-y-3">
+                        <p className="font-semibold text-foreground">מהו "מצב קודם"?</p>
+                        <p className="text-muted-foreground">
+                          זהו המצב התכנוני שהיה קיים בנכס לפני אישור התכנית החדשה. כולל את כל הזכויות והמגבלות 
+                          שחלו על הנכס בהתאם לתכנית הקודמת.
+                        </p>
+                      </div>
+
+                      <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                        <p className="font-semibold">שדות למילוי:</p>
+                        
+                        <div className="space-y-2">
+                          <p className="font-medium text-sm">📋 מספר תכנית:</p>
+                          <p className="text-sm text-muted-foreground">
+                            הזן את מספר התכנית החלה על הנכס לפני השינוי (למשל: תב״ע/123/א)
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="font-medium text-sm">📐 אחוזי בנייה (%):</p>
+                          <p className="text-sm text-muted-foreground">
+                            אחוזי הבנייה המותרים ביחס לשטח המגרש. למשל: אם המגרש 500 מ"ר ואחוזי הבנייה 100%, 
+                            ניתן לבנות עד 500 מ"ר.
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="font-medium text-sm">🏢 מספר קומות:</p>
+                          <p className="text-sm text-muted-foreground">
+                            מספר הקומות המקסימלי המותר על פי התכנית הקודמת.
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="font-medium text-sm">📏 שטח עיקרי (מ"ר):</p>
+                          <p className="text-sm text-muted-foreground">
+                            שטח עיקרי = שטח ראשי למגורים/מסחר. לא כולל מרפסות, מחסנים וחניות.
+                            חשב: גודל מגרש × אחוזי בנייה.
+                          </p>
+                        </div>
+
+                        <div className="space-y-2">
+                          <p className="font-medium text-sm">🔧 שטח שירות (מ"ר):</p>
+                          <p className="text-sm text-muted-foreground">
+                            שטחי עזר כגון: מרפסות סגורות, מחסנים, חניות מקורות. בדוק בתכנית את אחוזי השירות המותרים.
+                          </p>
+                        </div>
+                      </div>
+
+                      <Alert className="bg-accent/10 border-accent/30">
+                        <Info className="h-4 w-4" weight="duotone" />
+                        <AlertTitle>טיפ חשוב</AlertTitle>
+                        <AlertDescription>
+                          במקרה שהנכס לא היה בנוי - הזן את הזכויות התכנוניות המקסימליות שהיו מותרות, 
+                          גם אם לא נוצלו בפועל.
+                        </AlertDescription>
+                      </Alert>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-3">
+                    <AccordionTrigger className="text-lg font-semibold">
+                      <div className="flex items-center gap-2">
+                        <TrendUp className="w-5 h-5 text-success" weight="duotone" />
+                        מצב חדש - תכנית משביחה
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4 text-base">
+                      <div className="space-y-3">
+                        <p className="font-semibold text-foreground">מהו "מצב חדש משביח"?</p>
+                        <p className="text-muted-foreground">
+                          זהו המצב התכנוני החדש לאחר אישור התכנית החדשה. התכנית נחשבת "משביחה" אם היא מוסיפה 
+                          זכויות בנייה, משנה ייעוד או משפרת את פוטנציאל הנכס.
+                        </p>
+                      </div>
+
+                      <div className="bg-success/10 p-4 rounded-lg border border-success/30 space-y-3">
+                        <p className="font-semibold text-success">מה נחשב להשבחה?</p>
+                        <ul className="space-y-2 text-sm text-muted-foreground list-disc list-inside">
+                          <li>תוספת אחוזי בנייה או קומות</li>
+                          <li>שינוי ייעוד מחקלאי למגורים/מסחר</li>
+                          <li>הוספת שימושים בעלי ערך גבוה יותר</li>
+                          <li>ביטול מגבלות תכנוניות</li>
+                          <li>אפשרות לפיצול הנכס ליחידות נוספות</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-muted/50 p-4 rounded-lg">
+                        <p className="font-semibold mb-3">כיצד למלא את השדות:</p>
+                        <p className="text-sm text-muted-foreground mb-3">
+                          מלא את אותם שדות כמו ב"מצב קודם", אך הפעם בהתאם לתכנית החדשה:
+                        </p>
+                        <ul className="space-y-1 text-sm text-muted-foreground list-disc list-inside">
+                          <li>מספר התכנית החדשה</li>
+                          <li>אחוזי בנייה חדשים (גבוהים יותר)</li>
+                          <li>מספר קומות חדש</li>
+                          <li>שטח עיקרי חדש (מחושב מהאחוזים החדשים)</li>
+                          <li>שטח שירות חדש</li>
+                        </ul>
+                      </div>
+
+                      <Alert className="bg-warning/10 border-warning/30">
+                        <Warning className="h-4 w-4" weight="duotone" />
+                        <AlertTitle>שים לב!</AlertTitle>
+                        <AlertDescription>
+                          אם השטחים במצב החדש קטנים או שווים למצב הקודם - לא תהיה השבחה ולא יחושב היטל.
+                        </AlertDescription>
+                      </Alert>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-4">
+                    <AccordionTrigger className="text-lg font-semibold">
+                      <div className="flex items-center gap-2">
+                        <Calculator className="w-5 h-5 text-primary" weight="duotone" />
+                        שווי שוק וחישוב ההיטל
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4 text-base">
+                      <div className="space-y-3">
+                        <p className="font-semibold text-foreground">איך קובעים את שווי השוק?</p>
+                        <p className="text-muted-foreground">
+                          שווי השוק נקבע על פי עסקאות דומות שבוצעו באזור במועד הקובע או בסמוך אליו.
+                        </p>
+                      </div>
+
+                      <div className="bg-primary/10 p-4 rounded-lg border border-primary/30 space-y-3">
+                        <p className="font-semibold text-primary">שימוש בכפתור "שלוף נתוני שוק":</p>
+                        <ol className="space-y-2 text-sm text-muted-foreground list-decimal list-inside">
+                          <li>ודא שמילאת את המועד הקובע</li>
+                          <li>לחץ על הכפתור "שלוף נתוני שוק למועד הקובע"</li>
+                          <li>המערכת תחפש עסקאות דומות באזור</li>
+                          <li>תוצג לך רשימת עסקאות עם מחיר למ"ר</li>
+                          <li>המערכת תחשב ממוצע משוקלל אוטומטית</li>
+                        </ol>
+                      </div>
+
+                      <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                        <p className="font-semibold">נוסחת החישוב:</p>
+                        <div className="bg-background p-3 rounded border font-mono text-sm">
+                          <div className="space-y-1 text-muted-foreground">
+                            <div>שווי השבחה = תוספת זכויות (מ"ר) × שווי למ"ר</div>
+                            <div className="mt-2">היטל השבחה = שווי ההשבחה × 50%</div>
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground mt-3">
+                          <strong>דוגמה:</strong> אם התווספו 200 מ"ר זכויות, ושווי השוק הוא 15,000 ₪/מ"ר:
+                        </p>
+                        <div className="bg-background p-3 rounded border font-mono text-sm text-accent">
+                          <div>שווי השבחה = 200 × 15,000 = 3,000,000 ₪</div>
+                          <div>היטל = 3,000,000 × 50% = 1,500,000 ₪</div>
+                        </div>
+                      </div>
+
+                      <Alert>
+                        <CheckCircle className="h-4 w-4 text-success" weight="fill" />
+                        <AlertTitle>המערכת מספקת טווחים</AlertTitle>
+                        <AlertDescription>
+                          בנוסף לחישוב הממוצע, המערכת מציגה גם טווח שמרני (85%) וטווח מקסימלי (115%) 
+                          כדי לתת תמונה מלאה יותר.
+                        </AlertDescription>
+                      </Alert>
+                    </AccordionContent>
+                  </AccordionItem>
+
+                  <AccordionItem value="item-5">
+                    <AccordionTrigger className="text-lg font-semibold">
+                      <div className="flex items-center gap-2">
+                        <Question className="w-5 h-5 text-primary" weight="duotone" />
+                        שאלות נפוצות
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4 text-base">
+                      <div className="space-y-4">
+                        <div className="border-r-4 border-primary pr-4">
+                          <p className="font-semibold mb-2">🤔 מה אם אני לא יודע את השטחים המדויקים?</p>
+                          <p className="text-sm text-muted-foreground">
+                            חשב לפי הנוסחה: שטח עיקרי = גודל מגרש × אחוזי בנייה. 
+                            שטח שירות בדרך כלל 15-25% מהשטח העיקרי.
+                          </p>
+                        </div>
+
+                        <div className="border-r-4 border-primary pr-4">
+                          <p className="font-semibold mb-2">🤔 האם המחשבון תקף משפטית?</p>
+                          <p className="text-sm text-muted-foreground">
+                            המחשבון הוא כלי עזר בלבד. לצורך הגשה רשמית לרשויות יש צורך בשומה מקצועית 
+                            של שמאי מקרקעין מוסמך.
+                          </p>
+                        </div>
+
+                        <div className="border-r-4 border-primary pr-4">
+                          <p className="font-semibold mb-2">🤔 מה ההבדל בין שיטות החישוב?</p>
+                          <p className="text-sm text-muted-foreground">
+                            בחר "סטנדרטית (50%)" לרוב המקרים. שיטות אחרות חלות במקרים מיוחדים 
+                            כגון קרקע חקלאית או התחדשות עירונית עם הנחות.
+                          </p>
+                        </div>
+
+                        <div className="border-r-4 border-primary pr-4">
+                          <p className="font-semibold mb-2">🤔 למה להשתמש במצב השוואה?</p>
+                          <p className="text-sm text-muted-foreground">
+                            מצב השוואה מאפשר לך לשמור מספר תרחישים ולהשוות ביניהם - שימושי כאשר בוחנים 
+                            מספר אפשרויות תכנוניות או משווים תכניות שונות.
+                          </p>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
+                </Accordion>
+
+                <div className="mt-6 p-4 bg-accent/10 border border-accent/30 rounded-lg">
+                  <div className="flex items-start gap-3">
+                    <Info className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" weight="duotone" />
+                    <div className="space-y-2">
+                      <p className="font-semibold text-accent">עזרה נוספת</p>
+                      <p className="text-sm text-muted-foreground">
+                        אם אתה זקוק לעזרה נוספת במילוי המחשבון, מומלץ להתייעץ עם שמאי מקרקעין מוסמך 
+                        או עם מחלקת ההנדסה בוועדה המקומית.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+
             <div className="flex items-center gap-2">
               <Label htmlFor="comparison-mode" className="text-sm font-medium cursor-pointer">
                 מצב השוואה
@@ -507,6 +808,70 @@ export function BettermentLevyCalculator() {
             )}
           </div>
         </div>
+
+        <AnimatePresence>
+          {showDisclaimer && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <Alert className="bg-gradient-to-br from-warning/20 to-destructive/10 border-warning">
+                <Warning className="h-5 w-5 text-warning" weight="duotone" />
+                <AlertTitle className="text-lg font-bold flex items-center justify-between">
+                  <span>הצהרת אחריות וכתב ויתור - חובה לקרוא!</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowDisclaimer(false)}
+                    className="h-6 text-xs"
+                  >
+                    סגור
+                  </Button>
+                </AlertTitle>
+                <AlertDescription className="mt-3 space-y-3">
+                  <div className="space-y-2 text-sm">
+                    <p className="font-semibold text-foreground">⚠️ המחשבון הוא כלי עזר בלבד:</p>
+                    <ul className="space-y-1 list-disc list-inside text-muted-foreground mr-4">
+                      <li>התוצאות מבוססות על נתונים שהוזנו על ידך ועלולות להיות שגויות</li>
+                      <li>המחשבון אינו מהווה שומה רשמית או חוות דעת שמאית</li>
+                      <li>התוצאות אינן מחייבות משפטית ולא ניתן להסתמך עליהן בפני רשויות</li>
+                      <li>לא קיימת אחריות לדיוק החישובים או לשימוש שייעשה בהם</li>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    <p className="font-semibold text-foreground">✅ לשימוש רשמי:</p>
+                    <p className="text-muted-foreground">
+                      לצורך הגשה לוועדה מקומית, בית משפט, או רשות אחרת - <strong className="text-accent">חובה</strong> לקבל 
+                      שומה מקצועית של שמאי מקרקעין מוסמך המכיר את הפרטים הספציפיים של הנכס והתכנית.
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 text-sm">
+                    <p className="font-semibold text-foreground">📋 בסיס חוקי:</p>
+                    <p className="text-muted-foreground">
+                      החישובים מבוססים על חוק התכנון והבנייה, התשכ"ה-1965, ותקנות התכנון והבנייה 
+                      (חישוב היטל השבחה והיטל ביצוע), התשכ"ח-1968. עם זאת, כל מקרה הוא ייחודי ודורש 
+                      בדיקה מקצועית.
+                    </p>
+                  </div>
+
+                  <div className="bg-destructive/20 border border-destructive/40 rounded p-3 mt-3">
+                    <p className="text-sm font-semibold text-destructive mb-1">
+                      🚨 אחריות משתמש
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      השימוש במחשבון ובתוצאותיו הוא על אחריותך הבלעדית. מומלץ להתייעץ עם יועץ משפטי 
+                      או שמאי מוסמך לפני כל פעולה משפטית או פיננסית המבוססת על התוצאות.
+                    </p>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         <Card className="glass-effect p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
