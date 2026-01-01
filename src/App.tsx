@@ -31,6 +31,7 @@ import { AIInsights } from '@/components/AIInsights'
 import { TransactionImporter } from '@/components/TransactionImporter'
 import { AutomatedReports } from '@/components/AutomatedReports'
 import { ProfessionalCalculators } from '@/components/ProfessionalCalculators'
+import { MultiUnitDistributionCalculator } from '@/components/MultiUnitDistributionCalculator'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -199,6 +200,10 @@ function App() {
               <Calculator size={18} weight="duotone" />
               <span className="hidden sm:inline">מחשבונים</span>
             </TabsTrigger>
+            <TabsTrigger value="distribution" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Buildings size={18} weight="duotone" />
+              <span className="hidden sm:inline">חלוקת יחידות</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="dashboard" className="mt-0">
@@ -338,6 +343,10 @@ function App() {
 
           <TabsContent value="calculators" className="mt-0">
             <ProfessionalCalculators />
+          </TabsContent>
+
+          <TabsContent value="distribution" className="mt-0">
+            <MultiUnitDistributionCalculator />
           </TabsContent>
         </Tabs>
       </main>
