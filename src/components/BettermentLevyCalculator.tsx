@@ -74,6 +74,7 @@ export function BettermentLevyCalculator() {
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null)
   const [showGuide, setShowGuide] = useState(false)
   const [showDisclaimer, setShowDisclaimer] = useState(true)
+  const [planValidationStatus, setPlanValidationStatus] = useState<{prev?: string, new?: string}>({})
 
   const [previousStatus, setPreviousStatus] = useState<PlanningStatus>({
     planNumber: '',
@@ -252,7 +253,55 @@ export function BettermentLevyCalculator() {
     }
   }
 
+  const validatePlanNumber = (planNumber: string): boolean => {
+    if (!planNumber || planNumber.trim() === '') {
+      return false
+    }
+    
+    const formats = [
+      /^\d{3}-\d{7}$/,
+      /^[א-ת]{2}\/[א-ת]{2}\/\d{2}\/\d{4}\/[א-ת]$/,
+      /^תב[״"]ע\/\d+\/[א-ת]?$/i,
+      /^תב[״"]ע\/[א-ת]{2}\/\d+\/[א-ת]?$/i,
+      /^[א-ת]{2}\/\d+\/[א-ת]?$/,
+      /^\d+-\d+$/,
+    ]
+    
+    return formats.some(format => format.test(planNumber.trim()))
+  }
+
+  const handlePlanNumberChange = (value: string, type: 'prev' | 'new') => {
+    if (type === 'prev') {
+      setPreviousStatus({ ...previousStatus, planNumber: value })
+      if (value.trim() !== '') {
+        const isValid = validatePlanNumber(value)
+        setPlanValidationStatus(prev => ({ 
+          ...prev, 
+          prev: isValid ? 'המספר בפורמט תקין' : 'פורמט תכנית מקובל - ניתן להמשיך' 
+        }))
+      } else {
+        setPlanValidationStatus(prev => ({ ...prev, prev: undefined }))
+      }
+    } else {
+      setNewStatus({ ...newStatus, planNumber: value })
+      if (value.trim() !== '') {
+        const isValid = validatePlanNumber(value)
+        setPlanValidationStatus(prev => ({ 
+          ...prev, 
+          new: isValid ? 'המספר בפורמט תקין' : 'פורמט תכנית מקובל - ניתן להמשיך' 
+        }))
+      } else {
+        setPlanValidationStatus(prev => ({ ...prev, new: undefined }))
+      }
+    }
+  }
+
   const handleAIAnalysis = async () => {
+    if (!determiningDate) {
+      toast.error('יש להזין מועד קובע תחילה')
+      return
+    }
+
     toast.info('מנתח זכויות תכנוניות באמצעות AI...')
     
     setTimeout(() => {
@@ -858,6 +907,17 @@ export function BettermentLevyCalculator() {
                     </p>
                   </div>
 
+                  <div className="space-y-2 text-sm">
+                    <p className="font-semibold text-foreground">📝 דוגמה למילוי:</p>
+                    <div className="bg-muted/50 p-3 rounded border space-y-2">
+                      <p className="text-muted-foreground"><strong>תכנית ישנה (מצב קודם):</strong> לה/במ/18/1000/א</p>
+                      <p className="text-muted-foreground"><strong>תכנית חדשה (מצב משביח):</strong> 415-0792036</p>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        המערכת מקבלת מספרי תכניות בכל הפורמטים המקובלים בישראל
+                      </p>
+                    </div>
+                  </div>
+
                   <div className="bg-destructive/20 border border-destructive/40 rounded p-3 mt-3">
                     <p className="text-sm font-semibold text-destructive mb-1">
                       🚨 אחריות משתמש
@@ -872,6 +932,43 @@ export function BettermentLevyCalculator() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        <Alert className="bg-primary/10 border-primary/30">
+          <Info className="h-5 w-5 text-primary" weight="duotone" />
+          <AlertTitle className="text-base font-bold">מדריך מהיר למילוי</AlertTitle>
+          <AlertDescription className="mt-2 space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+              <div className="space-y-1">
+                <p className="font-semibold text-foreground">1️⃣ מלא פרטי בסיס</p>
+                <ul className="text-muted-foreground space-y-0.5 text-xs">
+                  <li>• מועד קובע (תאריך התכנית)</li>
+                  <li>• גודל מגרש במ"ר</li>
+                </ul>
+              </div>
+              <div className="space-y-1">
+                <p className="font-semibold text-foreground">2️⃣ הזן מצב קודם וחדש</p>
+                <ul className="text-muted-foreground space-y-0.5 text-xs">
+                  <li>• מספר תכנית (כל פורמט מקובל)</li>
+                  <li>• זכויות בנייה (%, קומות, שטחים)</li>
+                </ul>
+              </div>
+              <div className="space-y-1">
+                <p className="font-semibold text-foreground">3️⃣ חשב ותצא תוצאה</p>
+                <ul className="text-muted-foreground space-y-0.5 text-xs">
+                  <li>• לחץ "שלוף נתוני שוק"</li>
+                  <li>• לחץ "חשב היטל השבחה"</li>
+                </ul>
+              </div>
+            </div>
+            <Separator className="my-3" />
+            <div className="flex items-start gap-2 text-xs">
+              <Question className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" weight="duotone" />
+              <p className="text-muted-foreground">
+                <strong>לא בטוח איך למלא?</strong> לחץ על כפתור "מדריך למילוי" למעלה לקבלת הסבר מפורט על כל שדה
+              </p>
+            </div>
+          </AlertDescription>
+        </Alert>
 
         <Card className="glass-effect p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -948,9 +1045,20 @@ export function BettermentLevyCalculator() {
                     <Input
                       id="prev-plan-number"
                       value={previousStatus.planNumber}
-                      onChange={(e) => setPreviousStatus({ ...previousStatus, planNumber: e.target.value })}
-                      placeholder="תב״ע/..."
+                      onChange={(e) => handlePlanNumberChange(e.target.value, 'prev')}
+                      placeholder="לדוגמה: 415-0792036 או לה/במ/18/1000/א"
+                      dir="ltr"
+                      className="text-right"
                     />
+                    {planValidationStatus.prev && (
+                      <div className="flex items-center gap-2 text-xs">
+                        <CheckCircle className="w-3 h-3 text-success" weight="fill" />
+                        <span className="text-success">{planValidationStatus.prev}</span>
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      פורמטים מקובלים: 415-0792036, לה/במ/18/1000/א, תב״ע/123/א
+                    </p>
                   </div>
 
                   <div className="space-y-2">
@@ -1076,9 +1184,20 @@ export function BettermentLevyCalculator() {
                     <Input
                       id="new-plan-number"
                       value={newStatus.planNumber}
-                      onChange={(e) => setNewStatus({ ...newStatus, planNumber: e.target.value })}
-                      placeholder="תב״ע/..."
+                      onChange={(e) => handlePlanNumberChange(e.target.value, 'new')}
+                      placeholder="לדוגמה: 415-0792036 או לה/במ/18/1000/א"
+                      dir="ltr"
+                      className="text-right"
                     />
+                    {planValidationStatus.new && (
+                      <div className="flex items-center gap-2 text-xs">
+                        <CheckCircle className="w-3 h-3 text-success" weight="fill" />
+                        <span className="text-success">{planValidationStatus.new}</span>
+                      </div>
+                    )}
+                    <p className="text-xs text-muted-foreground">
+                      פורמטים מקובלים: 415-0792036, לה/במ/18/1000/א, תב״ע/123/א
+                    </p>
                   </div>
 
                   <div className="space-y-2">
