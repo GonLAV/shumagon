@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Switch } from '@/components/ui/switch'
 import { ArrowRight, FloppyDisk, Sparkle } from '@phosphor-icons/react'
 import { toast } from 'sonner'
+import { PropertyTypePresetsSelector } from '@/components/PropertyTypePresetsSelector'
 
 interface PropertyFormProps {
   property: Property | null
@@ -100,6 +101,35 @@ export function PropertyForm({ property, clients, onSave, onCancel }: PropertyFo
     toast.success(property ? 'הנכס עודכן בהצלחה' : 'הנכס נוצר בהצלחה')
   }
 
+  const handleApplyPreset = (presetData: {
+    type: PropertyType
+    typicalRooms: number
+    estimatedValue?: { min: number; max: number; avg: number }
+    pricePerSqm?: { min: number; max: number; avg: number }
+  }) => {
+    setFormData({
+      ...formData,
+      type: presetData.type,
+      details: {
+        ...formData.details!,
+        rooms: presetData.typicalRooms
+      },
+      valuationData: presetData.estimatedValue ? {
+        estimatedValue: presetData.estimatedValue.avg,
+        valueRange: {
+          min: presetData.estimatedValue.min,
+          max: presetData.estimatedValue.max
+        },
+        confidence: 0.75,
+        method: 'comparable-sales',
+        comparables: [],
+        notes: `הערכה אוטומטית מבוססת פריסטים של ${formData.address?.city || 'אזור'}`
+      } : formData.valuationData
+    })
+    
+    toast.success('הפריסט הוחל בהצלחה')
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center justify-between">
@@ -115,6 +145,14 @@ export function PropertyForm({ property, clients, onSave, onCancel }: PropertyFo
         </div>
         <h2 className="text-2xl font-bold">{property ? 'עריכת נכס' : 'נכס חדש'}</h2>
       </div>
+
+      <PropertyTypePresetsSelector
+        selectedType={formData.type}
+        selectedCity={formData.address?.city}
+        selectedNeighborhood={formData.address?.neighborhood}
+        builtArea={formData.details?.builtArea}
+        onApplyPreset={handleApplyPreset}
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
