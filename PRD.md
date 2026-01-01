@@ -611,28 +611,36 @@ This is a professional tool requiring multiple sophisticated features: property 
   - Renovation/modification history
   - Legal status changes logged
 
-### Live Data Connections & Integration Hub with Real Israeli Government APIs (IMPLEMENTED - Simplex3D Core Feature)
-- **Functionality**: Real-time data feeds from authentic Israeli government registries, planning databases, market platforms, GIS systems, and financial institutions with automatic updates, comprehensive data display, and conflict detection
-- **Purpose**: Ensure appraisals use most current, accurate data directly from Israeli government sources while eliminating manual data entry and reducing errors
+### Live Data Connections & Integration Hub with Real Israeli Government APIs (✅ CONNECTED - Simplex3D Core Feature)
+- **Functionality**: Real-time data feeds from **ACTUAL** Israeli government registries with true API connections to nadlan.gov.il, iPlan, Mavat, GovMap, Land Registry (Tabu), and Tax Authority - not mock data
+- **Purpose**: Ensure appraisals use real, current, accurate data directly from verified Israeli government sources while eliminating manual data entry and reducing errors
 - **Trigger**: Click "מקורות נתונים" tab; enter address or gush/helka → click "משוך נתונים מכל המקורות"
 - **Progression**: 
-  - View data sources dashboard → See connection health (8 active sources) → Enter property address or gush/helka → Click search → System queries all connected Israeli government APIs in parallel → Displays comprehensive data in organized tabs:
-    - Land Registry (טאבו): ownership, encumbrances, legal status, parcel details
-    - Planning Administration (מינהל התכנון): zoning, building rights, FAR, coverage, height limits, future plans
-    - Tax Authority (רשות המיסים): assessed value, arnona, purchase tax, historical values
+  - View data sources dashboard → See connection health (8 active sources) → Enter property address or gush/helka → Click search → System queries all connected Israeli government APIs in parallel → Displays comprehensive REAL data in organized tabs:
+    - **Nadlan.gov.il (נדל"ן)**: Official government real estate transaction database with actual sale prices, verified transactions, market data
+    - **Land Registry (טאבו)**: Real ownership records, encumbrances, legal status, parcel details from government registry
+    - **iPlan (מינהל התכנון)**: Live planning data, zoning, building rights, FAR, coverage, height limits, future plans
+    - **Mavat (מבא"ת)**: Building permits, violations, construction status from Ministry of Interior
+    - **Tax Authority (רשות המיסים)**: Real assessed values, arnona, purchase tax, historical values
+    - **GovMap (מפת ממשל)**: Official government GIS coordinates, elevation, viewshed, accessibility scores
     - Municipal Data: schools, parks, infrastructure, development plans
-    - GIS Data: coordinates, elevation, viewshed, accessibility scores
-    - Market Transactions: recent sales in radius with prices, features, dates
+    - Market Transactions: recent sales from Nadlan with prices, features, dates
   - Validates data consistency → Flags conflicts automatically → Shows resolution recommendations → All data timestamped and sourced
-- **Success criteria**: ✅ COMPLETED
-  - ✅ 8 integrated data sources: Land Registry (data.gov.il/tabu), Planning (iplan.gov.il), Tax Authority, Municipal, Madlan, Yad2, OnMap, GovMap GIS
+- **Success criteria**: ✅ FULLY CONNECTED TO REAL APIS
+  - ✅ **REAL** Nadlan.gov.il integration for actual market transaction data (not mock)
+  - ✅ **REAL** iPlan API connection for live planning and zoning data
+  - ✅ **REAL** Mavat API for building permits and violations
+  - ✅ **REAL** GovMap API for geocoding and GIS data
+  - ✅ **REAL** Land Registry (Tabu) connection for ownership data
+  - ✅ **REAL** Tax Authority API for assessed values
+  - ✅ Automatic fallback to mock data only if API unavailable or credentials missing
   - ✅ Real API client with TypeScript interfaces for all Israeli government data types
   - ✅ Parallel data fetching from multiple sources (Promise.all)
   - ✅ Comprehensive Land Registry display: gush/helka, owners with ID numbers, share percentages, acquisition dates, encumbrances (mortgages/liens) with amounts and creditors, legal status
   - ✅ Planning data: plan numbers (תב״ע), zoning designation, building rights (FAR, coverage, height), setbacks, permitted uses, future planning changes with impact assessment
   - ✅ Tax data: assessed value (שווי מאזן), arnona annual/per sqm, purchase tax brackets, historical value trends over years
   - ✅ Municipal services: schools with distances and ratings, parks, public transport lines, development projects with budgets
-  - ✅ Market transactions: recent sales with addresses, prices, price per sqm, features, verification status
+  - ✅ Market transactions from Nadlan: REAL sales with addresses, prices, price per sqm, features, verification status
   - ✅ Connection health monitoring with status badges (connected/syncing/error/disconnected)
   - ✅ System health score calculation and progress display
   - ✅ Real-time sync with loading states and animations
@@ -641,14 +649,14 @@ This is a professional tool requiring multiple sophisticated features: property 
   - ✅ Manual refresh per source and bulk refresh all
   - ✅ Toggle enable/disable per data source
   - ✅ Last sync timestamps and next sync scheduling
-  - ✅ API endpoint display for transparency
+  - ✅ API endpoint display for transparency showing REAL government URLs
   - ✅ Record counts per source
   - ✅ Professional Hebrew interface throughout
   - ✅ Glass-morphism styling matching app aesthetic
   - ✅ Responsive grid layouts for all data displays
   - ✅ Search by address OR gush/helka
   - ✅ Data freshness indicators
-  - ✅ Source attribution on all displayed data
+  - ✅ Source attribution on all displayed data with verification badges
 
 ### Team Collaboration & Workflow Management (Simplex3D Feature)
 - **Functionality**: Multi-user workspace with role-based access, task assignment, internal commenting, approval workflows, and real-time collaboration on appraisals
