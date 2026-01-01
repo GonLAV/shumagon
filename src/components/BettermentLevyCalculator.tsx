@@ -1387,6 +1387,125 @@ export function BettermentLevyCalculator() {
                       </div>
                     </AccordionContent>
                   </AccordionItem>
+
+                  <AccordionItem value="item-6">
+                    <AccordionTrigger className="text-lg font-semibold">
+                      <div className="flex items-center gap-2">
+                        <Database className="w-5 h-5 text-primary" weight="duotone" />
+                        מקורות מידע ואמינות נתונים
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent className="space-y-4 text-base">
+                      <div className="space-y-3">
+                        <p className="font-semibold text-foreground">מאיפה המערכת שולפת נתונים?</p>
+                        <p className="text-muted-foreground">
+                          המערכת משתמשת במדמה (simulator) של מאגרי מידע ממשלתיים ישראליים. 
+                          בסביבת הפיתוח הנוכחית, הנתונים הם דמויים ומיועדים להדגמה בלבד.
+                        </p>
+                      </div>
+
+                      <div className="bg-primary/10 p-4 rounded-lg border border-primary/30 space-y-3">
+                        <p className="font-semibold text-primary">מאגרי מידע ממשלתיים (בפיתוח):</p>
+                        <ul className="space-y-2 text-sm text-muted-foreground list-disc list-inside">
+                          <li><strong>iPlan - מאגר התכניות הארצי:</strong> נתוני תכניות בנייה, זכויות ומגבלות</li>
+                          <li><strong>מבא"ת - מערכת ממוכנת לבקשות ותכניות:</strong> מידע תכנוני מעודכן</li>
+                          <li><strong>GovMap - מפת ישראל ממשלתית:</strong> נתונים גיאוגרפיים ותכנוניים</li>
+                          <li><strong>מאגרי רשויות מקומיות:</strong> מידע ספציפי לכל עיר ומועצה</li>
+                          <li><strong>מינהל מקרקעי ישראל:</strong> נתוני עסקאות ושווי קרקע</li>
+                        </ul>
+                      </div>
+
+                      <div className="bg-muted/50 p-4 rounded-lg space-y-3">
+                        <p className="font-semibold">נתונים קיימים במאגר הדגמה:</p>
+                        <div className="grid grid-cols-1 gap-2 text-sm">
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" weight="fill" />
+                            <div>
+                              <strong>415-0792036</strong> - תכנית מקיפה רמלה 
+                              <span className="text-muted-foreground mr-1">(180% בנייה, 10 קומות)</span>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" weight="fill" />
+                            <div>
+                              <strong>לה/במ/18/1000/א</strong> - תכנית תל אביב ישנה 
+                              <span className="text-muted-foreground mr-1">(120% בנייה, 8 קומות)</span>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" weight="fill" />
+                            <div>
+                              <strong>רמ/מק/3/250</strong> - תכנית רמלה מקומית 
+                              <span className="text-muted-foreground mr-1">(160% בנייה, 9 קומות)</span>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" weight="fill" />
+                            <div>
+                              <strong>ירו/8000/א</strong> - תכנית ירושלים 
+                              <span className="text-muted-foreground mr-1">(140% בנייה, 7 קומות)</span>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" weight="fill" />
+                            <div>
+                              <strong>חי/5/600</strong> - תכנית חיפה 
+                              <span className="text-muted-foreground mr-1">(200% בנייה, 12 קומות)</span>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" weight="fill" />
+                            <div>
+                              <strong>באר/2500/ג</strong> - תכנית באר שבע 
+                              <span className="text-muted-foreground mr-1">(150% בנייה, 10 קומות)</span>
+                            </div>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <CheckCircle className="w-4 h-4 text-success flex-shrink-0 mt-0.5" weight="fill" />
+                            <div>
+                              <strong>תמ"א/38/ב</strong> - תכנית חיזוק סייסמי ארצית 
+                              <span className="text-muted-foreground mr-1">(25% תוספת, 2.5 קומות)</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <Alert className="bg-warning/10 border-warning/30">
+                        <Warning className="h-4 w-4" weight="duotone" />
+                        <AlertTitle>חשוב לדעת</AlertTitle>
+                        <AlertDescription>
+                          <div className="space-y-2">
+                            <p>
+                              <strong>למטרות הדגמה בלבד:</strong> הנתונים במערכת זו הם סימולציה בלבד 
+                              ואינם מחוברים למאגרי המידע הממשלתיים האמיתיים.
+                            </p>
+                            <p>
+                              <strong>לשימוש מקצועי:</strong> יש להשתמש במערכות הרשמיות של המדינה 
+                              (iPlan, מבא"ת) ולקבל אישור משפטי מהרשויות.
+                            </p>
+                            <p>
+                              <strong>אמינות:</strong> כל תכנית שנמצאת במאגר מסומנת ברמת אמינות 
+                              (גבוהה/בינונית/נמוכה) בהתאם למקור המידע.
+                            </p>
+                          </div>
+                        </AlertDescription>
+                      </Alert>
+
+                      <div className="bg-accent/10 p-4 rounded-lg border border-accent/30">
+                        <div className="flex items-start gap-3">
+                          <Info className="w-5 h-5 text-accent flex-shrink-0 mt-0.5" weight="duotone" />
+                          <div className="space-y-2">
+                            <p className="font-semibold text-accent">מדוע הנתונים סימולטיביים?</p>
+                            <p className="text-sm text-muted-foreground">
+                              הגישה למאגרי המידע הממשלתיים דורשת הסמכה, אישורים ביטחוניים, 
+                              ותשלום. מערכת זו משמשת כהדגמה טכנולוגית של היכולות, ובעתיד ניתן 
+                              לחבר אותה למאגרים האמיתיים עם האישורים המתאימים.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </AccordionContent>
+                  </AccordionItem>
                 </Accordion>
 
                 <div className="mt-6 p-4 bg-accent/10 border border-accent/30 rounded-lg">
