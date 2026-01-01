@@ -142,6 +142,7 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
         { id: 'audit', label: 'מעקב שינויים', icon: ClockCounterClockwise, keywords: ['לוג', 'היסטוריה', 'שינויים', 'ביקורת', 'audit'] },
         { id: 'api-settings', label: 'הגדרות API', icon: Key, keywords: ['אימות', 'מפתחות', 'API', 'הגדרות', 'חיבורים', 'iPlan', 'Mavat', 'GovMap', 'ממשלה', 'אבטחה'] },
         { id: 'api-analytics', label: 'ניתוח שימוש ב-API', icon: ChartBar, keywords: ['API', 'בקשות', 'עלויות', 'ניתוח', 'סטטיסטיקה', 'מעקב', 'שימוש', 'analytics'] },
+        { id: 'api-quota', label: 'ניהול מכסות API', icon: Briefcase, keywords: ['API', 'מכסות', 'quota', 'throttling', 'הגבלות', 'שליטה', 'ניהול', 'תקציב', 'בקשות'] },
         { id: 'historical-search', label: 'חיפוש היסטורי', icon: MagnifyingGlass, keywords: ['חיפוש', 'היסטוריה', 'רשומות', 'ארכיון', 'נתונים קודמים', 'היטל', 'תכניות'] },
       ]
     }

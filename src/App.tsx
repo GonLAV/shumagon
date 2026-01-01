@@ -39,6 +39,7 @@ import { PropertyHistoricalSearch } from '@/components/PropertyHistoricalSearch'
 import { MarketDataSync } from '@/components/MarketDataSync'
 import { APIAuthSettings } from '@/components/APIAuthSettings'
 import { APIUsageAnalytics } from '@/components/APIUsageAnalytics'
+import { APIQuotaManager } from '@/components/APIQuotaManager'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -223,6 +224,8 @@ function App() {
         return <APIAuthSettings />
       case 'api-analytics':
         return <APIUsageAnalytics />
+      case 'api-quota':
+        return <APIQuotaManager />
       default:
         return (
           <Dashboard
