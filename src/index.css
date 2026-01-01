@@ -120,4 +120,12 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
   }
+
+  .sidebar-gradient {
+    background: linear-gradient(to bottom, 
+      oklch(0.16 0.02 265) 0%, 
+      oklch(0.14 0.02 265) 50%,
+      oklch(0.16 0.02 265) 100%
+    );
+  }
 }

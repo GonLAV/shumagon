@@ -740,59 +740,88 @@ Animations should feel instant yet fluid - inspired by Tesla UI responsiveness a
 
 ## Navigation & Information Architecture
 
-**The application uses a structured sidebar navigation system** to organize the extensive feature set into logical, easy-to-navigate categories. This replaces the previous horizontal tab system to provide better scalability and clearer organization.
+**The application uses a refined sidebar navigation system** with sophisticated visual design to organize the extensive feature set into logical, easy-to-navigate categories with advanced search capabilities.
 
-### Sidebar Structure (7 Main Categories):
+### Sidebar Structure (8 Main Categories with Emoji Headers):
 
-1. **ראשי (Core)** - Essential daily tools
+1. **🎯 ראשי (Core)** - Essential daily tools
    - לוח בקרה (Dashboard) - Central workspace and overview
-   - נכסים (Properties) - Property database and management
+   - נכסים (Properties) - Property database and management  
    - לקוחות (Clients) - Client relationship management
 
-2. **שומות וניתוח (Valuations & Analysis)** - Professional calculation tools
+2. **🧮 שומות וחישובים (Valuations & Calculations)** - Professional calculation tools
    - מחשבונים מקצועיים (Professional Calculators) - All calculation methodologies
    - שומה מרובה (Bulk Valuation) - Portfolio batch processing
+   - חלוקת יחידות (Unit Distribution) - Unit value allocation with auto-balancing
+   - זכויות בנייה (Development Rights) - Development rights calculator
    - בדיקת מנוע שומה (Valuation Engine Tester) - Testing environment
-   - תובנות AI (AI Insights) - AI-powered analysis and insights
+
+3. **📊 ניתוח ותובנות (Analysis & Insights)** - Intelligence and analytics
    - ניתוח שוק (Market Insights) - Market trends and analytics
-
-3. **דוחות ומסמכים (Reports & Documents)** - Report generation and export
-   - דוחות תקניים (Standardized Reports) - Regulatory compliant documentation
+   - תובנות AI (AI Insights) - AI-powered analysis and predictions
    - דוחות מגמות (Automated Reports) - Trend analysis reports
-   - מיתוג PDF (PDF Branding) - Custom report branding and templates
 
-4. **ניהול תיקים (Case Management)** - Complex property management
+4. **📄 דוחות ומסמכים (Reports & Documents)** - Report generation and export
+   - דוחות תקניים (Standardized Reports) - Regulatory compliant documentation
+   - מיתוג ועיצוב (Branding & Design) - Custom report branding and templates
+
+5. **📁 ניהול תיקים ופרויקטים (Case & Project Management)** - Complex property management
    - ניהול תיקים (Case Management) - File and project management
    - ריבוי יחידות (Multi-Unit) - Multi-unit building management
-   - חלוקת יחידות (Unit Distribution) - Unit value allocation calculator
-   - זכויות בנייה (Development Rights) - Development rights calculator
 
-5. **תקשורת ומעקב (Communication & Follow-up)** - Client engagement
+6. **📧 תקשורת ומעקב (Communication & Follow-up)** - Client engagement
    - דוחות שנשלחו (Email History) - Sent reports tracking
    - רצפי מעקב (Email Sequences) - Automated follow-up campaigns
    - פורטל לקוחות (Client Portal) - Client access portal management
 
-6. **טכנולוגיות מתקדמות (Advanced Technologies)** - Cutting-edge features
-   - תאום דיגיטלי (Digital Twin) - Property digital twin visualization
-   - מקורות נתונים (Data Sources) - Live government data connections
+7. **🚀 טכנולוגיות מתקדמות (Advanced Technologies)** - Cutting-edge features
+   - תאום דיגיטלי 3D (Digital Twin 3D) - Property digital twin visualization
+   - מקורות נתונים חיים (Live Data Sources) - Live government data connections
    - ייבוא עסקאות (Transaction Import) - Automated transaction import
 
-7. **ניהול עסקי (Business Management)** - Business operations
-   - ניהול עסקי (Business Management) - Financial oversight and invoicing
-   - צוות והרשאות (Team Management) - Permissions and role management
+8. **💼 ניהול עסקי (Business Management)** - Business operations
+   - ניתוח עסקי (Business Analysis) - Financial oversight and analytics
+   - ניהול צוות (Team Management) - Permissions and role management
    - שיתוף פעולה (Team Collaboration) - Team collaboration tools
-   - Audit Trail - Complete activity logging and compliance
+   - מעקב שינויים (Audit Trail) - Complete activity logging and compliance
 
-### Navigation Design Principles:
-- **Glass morphism sidebar** with subtle backdrop blur and border
-- **Collapsible functionality** to maximize workspace when needed
-- **Category labels** in muted text with clear visual hierarchy
-- **Active state highlighting** with primary color and duotone icons
+### Advanced Search Functionality:
+- **Instant search bar** at top of sidebar with magnifying glass icon
+- **Smart keyword matching** searches both Hebrew labels and feature keywords
+- **Real-time filtering** shows only matching categories and features as you type
+- **Results counter** displays number of matching features found
+- **Clear button** appears when search is active for quick reset
+- **Empty state** with helpful message when no results found
+- **Auto-clear** search after clicking a result for clean navigation
+- **Search keywords** include: feature names, alternative terms, related concepts
+
+### Navigation Visual Design:
+- **Premium header** with gradient brand icon (Lightning) and glowing effect
+- **Glass morphism background** with backdrop blur and subtle transparency (card/95 opacity)
+- **Gradient accents** on header and footer (primary/5 tint)
+- **Professional spacing** with generous padding and visual breathing room
+- **Emoji category headers** for quick visual scanning and modern personality
+- **Icon badges** for each menu item with rounded background on active state
+- **Smooth rounded corners** (2xl radius on buttons) throughout for modern feel
+- **Active state design**:
+  - Left-to-right gradient background (primary/15 to primary/5)
+  - Bold 3px right border in primary color
+  - Icon on rounded primary/20 background
+  - Fill weight icons (vs duotone for inactive)
+  - Large shadow with primary/20 glow
+  - Semibold font weight
+- **Hover states**:
+  - Secondary/70 background tint
+  - Medium shadow elevation  
+  - Foreground text color
+  - Icon background fade-in
+- **Footer section** with professional plan indicator and gradient badge
+- **ScrollArea wrapper** for smooth scrolling with many categories
+- **Collapsible functionality** to icon-only mode for maximum workspace
 - **Persistent state** - remembers last viewed section across sessions
 - **RTL-optimized** for Hebrew interface with proper alignment
-- **Smooth transitions** between views with fade animations
-- **Icon consistency** using Phosphor Icons duotone weight throughout
-- **Mobile responsive** - collapses to icon-only mode on smaller screens
+- **Icon consistency** using Phosphor Icons with dynamic weights (fill/duotone)
+- **Mobile responsive** - collapses automatically on smaller screens
 
 ## Component Selection
 
