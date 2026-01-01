@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
 import { 
   Calculator, 
   ListChecks, 
@@ -12,7 +13,9 @@ import {
   TrendDown,
   CheckCircle,
   XCircle,
-  Info
+  Info,
+  ArrowLeft,
+  Flask
 } from '@phosphor-icons/react'
 import { 
   CalculatorValidationEngine, 
@@ -24,8 +27,17 @@ import { InteractiveWeightedCalculator } from '@/components/InteractiveWeightedC
 import { CostApproachCalculator } from '@/components/CostApproachCalculator'
 import { IncomeCapitalizationCalculator } from '@/components/IncomeCapitalizationCalculator'
 import { DepreciationCalculator } from '@/components/DepreciationCalculator'
+import { BulkValuation } from '@/components/BulkValuation'
+import { MultiUnitDistributionCalculator } from '@/components/MultiUnitDistributionCalculator'
+import { DevelopmentRightsCalculator } from '@/components/DevelopmentRightsCalculator'
+import { ValuationEngineTester } from '@/components/ValuationEngineTester'
 
-export function ProfessionalCalculators() {
+interface ProfessionalCalculatorsProps {
+  properties?: any[]
+  onUpdateProperty?: (property: any) => void
+}
+
+export function ProfessionalCalculators({ properties = [], onUpdateProperty }: ProfessionalCalculatorsProps) {
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([])
   const [showValidation, setShowValidation] = useState(false)
 
@@ -112,37 +124,51 @@ export function ProfessionalCalculators() {
         </Card>
       )}
 
-      <Tabs defaultValue="overview" dir="rtl">
-        <TabsList className="grid w-full grid-cols-7">
-          <TabsTrigger value="overview" className="gap-2">
-            <Info size={18} weight="duotone" />
-            סקירה
-          </TabsTrigger>
-          <TabsTrigger value="adjustment" className="gap-2">
-            <ListChecks size={18} weight="duotone" />
-            התאמות
-          </TabsTrigger>
-          <TabsTrigger value="weighted" className="gap-2">
-            <Calculator size={18} weight="duotone" />
-            ממוצע משוקלל
-          </TabsTrigger>
-          <TabsTrigger value="cost" className="gap-2">
-            <CurrencyDollar size={18} weight="duotone" />
-            שיטת עלות
-          </TabsTrigger>
-          <TabsTrigger value="depreciation" className="gap-2">
-            <TrendDown size={18} weight="duotone" />
-            פחת
-          </TabsTrigger>
-          <TabsTrigger value="income" className="gap-2">
-            <TrendUp size={18} weight="duotone" />
-            היוון
-          </TabsTrigger>
-          <TabsTrigger value="multiunit" className="gap-2">
-            <Buildings size={18} weight="duotone" />
-            ריבוי יחידות
-          </TabsTrigger>
-        </TabsList>
+      <Tabs defaultValue="overview" dir="rtl" className="w-full">
+        <div className="border-b border-border mb-4 overflow-x-auto">
+          <TabsList className="inline-flex h-auto gap-1 bg-transparent w-full justify-start">
+            <TabsTrigger value="overview" className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3">
+              <Info size={18} weight="duotone" />
+              <span className="hidden sm:inline">סקירה</span>
+            </TabsTrigger>
+            <TabsTrigger value="adjustment" className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3">
+              <ListChecks size={18} weight="duotone" />
+              <span className="hidden sm:inline">התאמות</span>
+            </TabsTrigger>
+            <TabsTrigger value="weighted" className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3">
+              <Calculator size={18} weight="duotone" />
+              <span className="hidden sm:inline">ממוצע משוקלל</span>
+            </TabsTrigger>
+            <TabsTrigger value="cost" className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3">
+              <CurrencyDollar size={18} weight="duotone" />
+              <span className="hidden sm:inline">עלות</span>
+            </TabsTrigger>
+            <TabsTrigger value="depreciation" className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3">
+              <TrendDown size={18} weight="duotone" />
+              <span className="hidden sm:inline">פחת</span>
+            </TabsTrigger>
+            <TabsTrigger value="income" className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3">
+              <TrendUp size={18} weight="duotone" />
+              <span className="hidden sm:inline">היוון</span>
+            </TabsTrigger>
+            <TabsTrigger value="bulk" className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3">
+              <ListChecks size={18} weight="duotone" />
+              <span className="hidden sm:inline">שומה מרובה</span>
+            </TabsTrigger>
+            <TabsTrigger value="distribution" className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3">
+              <Buildings size={18} weight="duotone" />
+              <span className="hidden sm:inline">חלוקה</span>
+            </TabsTrigger>
+            <TabsTrigger value="development" className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3">
+              <TrendUp size={18} weight="duotone" />
+              <span className="hidden sm:inline">זכויות</span>
+            </TabsTrigger>
+            <TabsTrigger value="tester" className="gap-2 data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-4 py-3">
+              <Flask size={18} weight="duotone" />
+              <span className="hidden sm:inline">בדיקות</span>
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="overview" className="space-y-6">
           <Card>
@@ -253,9 +279,33 @@ export function ProfessionalCalculators() {
                     <div className="flex items-center gap-3">
                       <Buildings size={24} weight="duotone" className="text-primary" />
                       <div>
-                        <h4 className="font-medium">ריבוי יחידות</h4>
+                        <h4 className="font-medium">חלוקת יחידות ושומה מרובה</h4>
                         <p className="text-sm text-muted-foreground">
-                          חלוקת שווי בניין ליחידות עם איזון אוטומטי
+                          חלוקת שווי בניין ליחידות + שומה מרובה לפורטפוליו
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg border bg-card">
+                    <div className="flex items-center gap-3">
+                      <TrendUp size={24} weight="duotone" className="text-accent" />
+                      <div>
+                        <h4 className="font-medium">זכויות בנייה</h4>
+                        <p className="text-sm text-muted-foreground">
+                          חישוב זכויות בנייה ופוטנציאל פיתוח
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg border bg-card">
+                    <div className="flex items-center gap-3">
+                      <Flask size={24} weight="duotone" className="text-warning" />
+                      <div>
+                        <h4 className="font-medium">בדיקת מנוע שומה</h4>
+                        <p className="text-sm text-muted-foreground">
+                          בדיקות ותיקוף אלגוריתמי חישוב
                         </p>
                       </div>
                     </div>
@@ -324,22 +374,23 @@ export function ProfessionalCalculators() {
           <IncomeCapitalizationCalculator />
         </TabsContent>
 
-        <TabsContent value="multiunit">
-          <Card>
-            <CardHeader>
-              <CardTitle>מחשבון ריבוי יחידות</CardTitle>
-              <CardDescription>
-                פיצול שווי בניין ליחידות עם איזון אוטומטי
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="p-6 rounded-lg bg-muted/30 border-2 border-dashed">
-                <p className="text-center text-muted-foreground">
-                  ממשק מחשבון ריבוי יחידות - בפיתוח
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+        <TabsContent value="bulk">
+          <BulkValuation 
+            properties={properties}
+            onUpdateProperty={onUpdateProperty || (() => {})}
+          />
+        </TabsContent>
+
+        <TabsContent value="distribution">
+          <MultiUnitDistributionCalculator />
+        </TabsContent>
+
+        <TabsContent value="development">
+          <DevelopmentRightsCalculator />
+        </TabsContent>
+
+        <TabsContent value="tester">
+          <ValuationEngineTester />
         </TabsContent>
       </Tabs>
     </div>

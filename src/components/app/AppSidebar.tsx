@@ -5,22 +5,12 @@ import {
   Users, 
   UserCircle, 
   CurrencyDollar, 
-  Flask, 
   Palette, 
-  Cube, 
-  Database, 
-  UsersThree, 
   Calculator, 
-  ListChecks, 
-  EnvelopeSimple, 
   Lightning, 
   FolderOpen, 
   FileText, 
   Buildings, 
-  ClockCounterClockwise, 
-  ShieldCheck, 
-  Robot, 
-  CloudArrowDown,
   MagnifyingGlass,
   X,
   ChartLineUp,
@@ -56,7 +46,7 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
 
   const menuItems = [
     {
-      title: '🎯 ראשי',
+      title: 'ראשי',
       items: [
         { id: 'dashboard', label: 'לוח בקרה', icon: House, keywords: ['בית', 'דשבורד', 'סטטיסטיקות', 'ראשי'] },
         { id: 'properties', label: 'נכסים', icon: Buildings, keywords: ['דירות', 'בתים', 'מקרקעין', 'רכוש'] },
@@ -64,80 +54,38 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
       ]
     },
     {
-      title: '🧮 שומות וחישובים',
+      title: 'שומות',
       items: [
         { id: 'quicker', label: 'QUICKER - שומה מהירה', icon: Lightning, keywords: ['מהיר', 'פשוט', 'בסיסי', 'חישוב', 'שטח', 'מחיר'] },
-        { id: 'calculators', label: 'מחשבונים מקצועיים', icon: Calculator, keywords: ['חישוב', 'התאמות', 'נוסחאות', 'השוואה'] },
-        { id: 'office-valuation', label: 'שווי משרדים (נדל"ן)', icon: Briefcase, keywords: ['משרדים', 'מסחרי', 'NOI', 'היוון', 'חלל עבודה', 'אופיס', 'nadlan'] },
-        { id: 'residential-valuation', label: 'שווי דירות מגורים (נדל"ן)', icon: House, keywords: ['דירות', 'מגורים', 'דיור', 'nadlan', 'נדלן'] },
-        { id: 'commercial-valuation', label: 'שווי נכסי מסחר (נדל"ן)', icon: Briefcase, keywords: ['מסחר', 'חנויות', 'מסעדות', 'nadlan', 'נדלן'] },
-        { id: 'land-valuation', label: 'שווי קרקעות (נדל"ן)', icon: ChartLineUp, keywords: ['קרקע', 'מגרש', 'זכויות בנייה', 'nadlan', 'נדלן'] },
+        { id: 'residential-valuation', label: 'שווי דירות מגורים', icon: House, keywords: ['דירות', 'מגורים', 'דיור', 'nadlan', 'נדלן'] },
+        { id: 'commercial-valuation', label: 'שווי נכסי מסחר', icon: Briefcase, keywords: ['מסחר', 'חנויות', 'מסעדות', 'nadlan', 'נדלן', 'משרדים', 'מסחרי', 'NOI', 'היוון', 'חלל עבודה', 'אופיס'] },
+        { id: 'land-valuation', label: 'שווי קרקעות', icon: ChartLineUp, keywords: ['קרקע', 'מגרש', 'זכויות בנייה', 'nadlan', 'נדלן'] },
         { id: 'betterment-levy', label: 'היטל השבחה', icon: Scales, keywords: ['היטל', 'השבחה', 'תכנון', 'זכויות', 'תב"ע', 'מועד קובע'] },
-        { id: 'bulk', label: 'שומה מרובה', icon: ListChecks, keywords: ['תיק', 'פורטפוליו', 'מספר נכסים', 'בולק'] },
-        { id: 'distribution', label: 'חלוקת יחידות', icon: Buildings, keywords: ['פיצול', 'איזון', 'משקל', 'חלוקה', 'בניין'] },
-        { id: 'development', label: 'זכויות בנייה', icon: ChartLineUp, keywords: ['תכנון', 'תמ"א', 'פינוי בינוי', 'בניה', 'זכויות'] },
-        { id: 'tester', label: 'בדיקת מנוע שומה', icon: Flask, keywords: ['בדיקה', 'טסט', 'ולידציה', 'מנוע'] },
+        { id: 'calculators', label: 'מחשבונים נוספים', icon: Calculator, keywords: ['חישוב', 'התאמות', 'נוסחאות', 'השוואה', 'בולק', 'מרובה', 'פורטפוליו', 'חלוקה', 'פיצול', 'בניין', 'דירות', 'יחידות', 'תמ"א', 'פינוי בינוי'] },
       ]
     },
     {
-      title: '📊 ניתוח ותובנות',
+      title: 'ניתוח שוק',
       items: [
-        { id: 'insights', label: 'ניתוח שוק', icon: ChartBar, keywords: ['מגמות', 'סטטיסטיקות', 'נתונים', 'גרפים', 'שוק'] },
+        { id: 'insights', label: 'ניתוח ותובנות', icon: ChartBar, keywords: ['מגמות', 'סטטיסטיקות', 'נתונים', 'גרפים', 'שוק', 'AI', 'בינה מלאכותית', 'חיזוי'] },
         { id: 'transactions-map', label: 'מפת עסקאות ארצית', icon: MapTrifold, keywords: ['מפה', 'עסקאות', 'ישראל', 'גאוגרפי', 'מיקום', 'אזורי', 'ארצי', 'נדלן', 'ממשלה'] },
-        { id: 'ai-insights', label: 'תובנות AI', icon: Robot, keywords: ['בינה מלאכותית', 'חיזוי', 'המלצות', 'אוטומטי'] },
-        { id: 'automated-reports', label: 'דוחות מגמות', icon: ChartLineUp, keywords: ['מגמות', 'אוטומטי', 'שבועי', 'חודשי', 'טרנד'] },
+        { id: 'rental-analysis', label: 'ניתוח שכירות', icon: Calculator, keywords: ['שכירות', 'חישוב', 'התאמות', 'השוואה', 'מחיר', 'דמי שכירות', 'נתונים', 'מאגר', 'עסקאות'] },
       ]
     },
     {
-      title: '📄 דוחות ומסמכים',
-      items: [
-        { id: 'standardized', label: 'דוחות תקניים', icon: FileText, keywords: ['תקן', 'רשמי', 'בנק', 'בית משפט', 'דוח'] },
-        { id: 'branding', label: 'מיתוג ועיצוב', icon: Palette, keywords: ['עיצוב', 'לוגו', 'צבעים', 'גופנים', 'PDF'] },
-      ]
-    },
-    {
-      title: '📁 ניהול תיקים ופרויקטים',
+      title: 'ניהול',
       items: [
         { id: 'cases', label: 'ניהול תיקים', icon: FolderOpen, keywords: ['פרויקטים', 'תיקים', 'מעקב', 'סטטוס', 'משימות'] },
-        { id: 'multi-unit', label: 'ריבוי יחידות', icon: Buildings, keywords: ['בניין', 'דירות', 'יחידות', 'משותף', 'מרובה'] },
+        { id: 'standardized', label: 'דוחות תקניים', icon: FileText, keywords: ['תקן', 'רשמי', 'בנק', 'בית משפט', 'דוח', 'מסמכים'] },
+        { id: 'portal', label: 'פורטל לקוחות', icon: UserCircle, keywords: ['לקוח', 'גישה', 'שיתוף', 'צפייה', 'פורטל', 'תקשורת', 'מייל', 'דוחות'] },
+        { id: 'business', label: 'ניהול עסקי', icon: CurrencyDollar, keywords: ['הכנסות', 'הוצאות', 'רווחיות', 'כסף', 'עסק', 'צוות', 'הרשאות'] },
       ]
     },
     {
-      title: '📧 תקשורת ומעקב',
+      title: 'הגדרות',
       items: [
-        { id: 'email', label: 'דוחות שנשלחו', icon: EnvelopeSimple, keywords: ['מייל', 'אימייל', 'שליחה', 'היסטוריה'] },
-        { id: 'sequences', label: 'רצפי מעקב', icon: Lightning, keywords: ['אוטומציה', 'תזכורות', 'מעקב', 'פולואפ', 'רצף'] },
-        { id: 'portal', label: 'פורטל לקוחות', icon: UserCircle, keywords: ['לקוח', 'גישה', 'שיתוף', 'צפייה', 'פורטל'] },
-      ]
-    },
-    {
-      title: '🏘️ נתוני שכירות',
-      items: [
-        { id: 'rental-data', label: 'ניהול נתוני שכירות', icon: Database, keywords: ['שכירות', 'דמי שכירות', 'נתונים', 'מאגר', 'עסקאות'] },
-        { id: 'rental-analysis', label: 'ניתוח שכירות', icon: Calculator, keywords: ['שכירות', 'חישוב', 'התאמות', 'השוואה', 'מחיר'] },
-      ]
-    },
-    {
-      title: '🚀 טכנולוגיות מתקדמות',
-      items: [
-        { id: 'real-building-rights', label: 'זכויות בנייה אמיתיות', icon: Buildings, keywords: ['iPlan', 'מבא"ת', 'Mavat', 'זכויות', 'תכנון', 'היתרים', 'ממשלה', 'API', 'אמיתי', 'גוש', 'חלקה'] },
-        { id: 'digital-twin', label: 'תאום דיגיטלי 3D', icon: Cube, keywords: ['3D', 'מודל', 'וירטואלי', 'תלת מימד'] },
-        { id: 'data-sources', label: 'מקורות נתונים חיים', icon: Database, keywords: ['API', 'ממשלתי', 'חיבורים', 'נתונים', 'לייב'] },
-        { id: 'import', label: 'ייבוא עסקאות', icon: CloudArrowDown, keywords: ['העלאה', 'CSV', 'אקסל', 'ייבוא', 'ייצוא'] },
-        { id: 'market-sync', label: 'סנכרון נתוני שוק', icon: Database, keywords: ['סנכרון', 'אוטומטי', 'עסקאות', 'שוק', 'ממשלה', 'רשם', 'מיסים'] },
-      ]
-    },
-    {
-      title: '💼 ניהול עסקי',
-      items: [
-        { id: 'business', label: 'ניתוח עסקי', icon: CurrencyDollar, keywords: ['הכנסות', 'הוצאות', 'רווחיות', 'כסף', 'עסק'] },
-        { id: 'team-manage', label: 'ניהול צוות', icon: ShieldCheck, keywords: ['משתמשים', 'הרשאות', 'ניהול', 'גישה', 'צוות'] },
-        { id: 'team', label: 'שיתוף פעולה', icon: UsersThree, keywords: ['צוות', 'משותף', 'שיתופי', 'קולבורציה'] },
-        { id: 'audit', label: 'מעקב שינויים', icon: ClockCounterClockwise, keywords: ['לוג', 'היסטוריה', 'שינויים', 'ביקורת', 'audit'] },
-        { id: 'api-settings', label: 'הגדרות API', icon: Key, keywords: ['אימות', 'מפתחות', 'API', 'הגדרות', 'חיבורים', 'iPlan', 'Mavat', 'GovMap', 'ממשלה', 'אבטחה'] },
-        { id: 'api-analytics', label: 'ניתוח שימוש ב-API', icon: ChartBar, keywords: ['API', 'בקשות', 'עלויות', 'ניתוח', 'סטטיסטיקה', 'מעקב', 'שימוש', 'analytics'] },
-        { id: 'api-quota', label: 'ניהול מכסות API', icon: Briefcase, keywords: ['API', 'מכסות', 'quota', 'throttling', 'הגבלות', 'שליטה', 'ניהול', 'תקציב', 'בקשות'] },
-        { id: 'historical-search', label: 'חיפוש היסטורי', icon: MagnifyingGlass, keywords: ['חיפוש', 'היסטוריה', 'רשומות', 'ארכיון', 'נתונים קודמים', 'היטל', 'תכניות'] },
+        { id: 'branding', label: 'מיתוג ועיצוב', icon: Palette, keywords: ['עיצוב', 'לוגו', 'צבעים', 'גופנים', 'PDF'] },
+        { id: 'api-settings', label: 'חיבורי נתונים', icon: Key, keywords: ['אימות', 'מפתחות', 'API', 'הגדרות', 'חיבורים', 'iPlan', 'Mavat', 'GovMap', 'ממשלה', 'אבטחה', 'נדל"ן', 'סנכרון', 'ייבוא', 'ממשלתי', 'זכויות בנייה', 'תכנון', 'היתרים'] },
       ]
     }
   ]

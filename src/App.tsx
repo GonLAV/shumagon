@@ -214,7 +214,12 @@ function App() {
       case 'automated-reports':
         return <AutomatedReports />
       case 'calculators':
-        return <ProfessionalCalculators />
+        return (
+          <ProfessionalCalculators 
+            properties={properties || []}
+            onUpdateProperty={handleSaveProperty}
+          />
+        )
       case 'distribution':
         return <MultiUnitDistributionCalculator />
       case 'rental-data':
