@@ -156,10 +156,36 @@ export function BettermentLevyCalculator() {
   }
 
   const calculateBettermentValue = () => {
+    const prevTotal = previousStatus.buildingRights.mainArea + previousStatus.buildingRights.serviceArea
+    const newTotal = newStatus.buildingRights.mainArea + newStatus.buildingRights.serviceArea
+    
+    if (prevTotal === 0 && newTotal === 0) {
+      toast.error('יש להזין שטחי בנייה (עיקרי ושירות) הן במצב קודם והן במצב חדש', {
+        description: 'מספר התכנית בלבד אינו מספיק - יש למלא את השטחים במ"ר'
+      })
+      return null
+    }
+    
+    if (prevTotal === 0) {
+      toast.error('יש להזין שטחי בנייה במצב קודם (תכנית ישנה)', {
+        description: 'מלא את השטח העיקרי ושטח השירות במ"ר'
+      })
+      return null
+    }
+    
+    if (newTotal === 0) {
+      toast.error('יש להזין שטחי בנייה במצב חדש (תכנית משביחה)', {
+        description: 'מלא את השטח העיקרי ושטח השירות במ"ר'
+      })
+      return null
+    }
+    
     const delta = calculateDelta()
     
     if (delta.totalAreaDelta <= 0) {
-      toast.error('אין תוספת זכויות בנייה - לא ניתן לחשב היטל השבחה')
+      toast.error('אין תוספת זכויות בנייה - לא ניתן לחשב היטל השבחה', {
+        description: `המצב החדש (${newTotal.toLocaleString('he-IL')} מ"ר) קטן או שווה למצב הקודם (${prevTotal.toLocaleString('he-IL')} מ"ר)`
+      })
       return null
     }
 
@@ -1472,8 +1498,31 @@ export function BettermentLevyCalculator() {
                         {(previousStatus.buildingRights.mainArea + previousStatus.buildingRights.serviceArea).toLocaleString('he-IL')} מ"ר
                       </span>
                     </div>
+                    {(previousStatus.buildingRights.mainArea + previousStatus.buildingRights.serviceArea) === 0 && (
+                      <Alert className="mt-3">
+                        <Warning className="h-4 w-4" weight="duotone" />
+                        <AlertDescription className="text-xs">
+                          <strong>שים לב:</strong> יש למלא את השטחים במ"ר. אם המגרש הוא 500 מ"ר ואחוזי הבנייה 100%, השטח העיקרי יהיה 500 מ"ר.
+                        </AlertDescription>
+                      </Alert>
+                    )}
                   </div>
                 </div>
+
+                <Alert className="bg-accent/10 border-accent/30">
+                  <Info className="h-4 w-4" weight="duotone" />
+                  <AlertTitle className="text-sm font-bold">💡 איך לחשב את השטחים?</AlertTitle>
+                  <AlertDescription className="mt-2 text-xs space-y-2">
+                    <div className="space-y-1">
+                      <p><strong>שטח עיקרי =</strong> גודל המגרש (מ"ר) × אחוזי בנייה ÷ 100</p>
+                      <p className="text-muted-foreground">דוגמה: מגרש 500 מ"ר עם 100% בנייה = 500 מ"ר שטח עיקרי</p>
+                    </div>
+                    <div className="space-y-1 mt-2">
+                      <p><strong>שטח שירות =</strong> בדרך כלל 15%-25% מהשטח העיקרי</p>
+                      <p className="text-muted-foreground">דוגמה: 500 מ"ר עיקרי × 20% = 100 מ"ר שירות</p>
+                    </div>
+                  </AlertDescription>
+                </Alert>
               </div>
             </Card>
           </TabsContent>
@@ -1611,8 +1660,41 @@ export function BettermentLevyCalculator() {
                         {(newStatus.buildingRights.mainArea + newStatus.buildingRights.serviceArea).toLocaleString('he-IL')} מ"ר
                       </span>
                     </div>
+                    {(newStatus.buildingRights.mainArea + newStatus.buildingRights.serviceArea) === 0 && (
+                      <Alert className="mt-3">
+                        <Warning className="h-4 w-4" weight="duotone" />
+                        <AlertDescription className="text-xs">
+                          <strong>שים לב:</strong> יש למלא את השטחים החדשים במ"ר. אם התכנית החדשה מאפשרת 800 מ"ר, הזן את המספר הזה.
+                        </AlertDescription>
+                      </Alert>
+                    )}
+                    {(previousStatus.buildingRights.mainArea + previousStatus.buildingRights.serviceArea) > 0 && 
+                     (newStatus.buildingRights.mainArea + newStatus.buildingRights.serviceArea) > 0 && (
+                      <div className="mt-3 p-3 bg-primary/20 border border-primary/40 rounded">
+                        <div className="flex items-center gap-2 text-xs">
+                          <CheckCircle className="w-4 h-4 text-primary" weight="fill" />
+                          <span className="text-primary font-semibold">
+                            תוספת זכויות: +{((newStatus.buildingRights.mainArea + newStatus.buildingRights.serviceArea) - (previousStatus.buildingRights.mainArea + previousStatus.buildingRights.serviceArea)).toLocaleString('he-IL')} מ"ר
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
+
+                <Alert className="bg-accent/10 border-accent/30">
+                  <Info className="h-4 w-4" weight="duotone" />
+                  <AlertTitle className="text-sm font-bold">💡 איך לחשב את השטחים החדשים?</AlertTitle>
+                  <AlertDescription className="mt-2 text-xs space-y-2">
+                    <div className="space-y-1">
+                      <p><strong>שטח עיקרי חדש =</strong> גודל המגרש (מ"ר) × אחוזי בנייה חדשים ÷ 100</p>
+                      <p className="text-muted-foreground">דוגמה: מגרש 500 מ"ר עם 160% בנייה = 800 מ"ר שטח עיקרי</p>
+                    </div>
+                    <div className="space-y-1 mt-2">
+                      <p><strong>בדוק:</strong> השטח החדש חייב להיות גדול מהשטח הקודם כדי שתהיה השבחה</p>
+                    </div>
+                  </AlertDescription>
+                </Alert>
               </div>
             </Card>
           </TabsContent>
