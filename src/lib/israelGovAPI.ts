@@ -191,6 +191,8 @@ export interface MarketTransactionData {
   price: number
   pricePerSqm: number
   address: string
+  city?: string
+  neighborhood?: string
   propertyType: string
   rooms: number
   area: number
@@ -495,6 +497,12 @@ class IsraeliGovernmentAPI {
     const transactions: MarketTransactionData[] = []
     const count = Math.floor(Math.random() * 15) + 10
     
+    const cities = ['תל אביב', 'ירושלים', 'חיפה', 'באר שבע', 'ראשון לציון', 'פתח תקווה']
+    const neighborhoods = [
+      'צפון ישן', 'נווה צדק', 'רמת אביב', 'פלורנטין', 'שכונה ג׳',
+      'רמת שרת', 'מרכז העיר', 'הדר', 'נאות אפקה', 'גן העיר'
+    ]
+    
     for (let i = 0; i < count; i++) {
       const daysAgo = Math.floor(Math.random() * months * 30)
       const date = new Date()
@@ -502,13 +510,17 @@ class IsraeliGovernmentAPI {
       
       const area = 60 + Math.floor(Math.random() * 80)
       const pricePerSqm = 18000 + Math.floor(Math.random() * 8000)
+      const city = cities[Math.floor(Math.random() * cities.length)]
+      const neighborhood = neighborhoods[Math.floor(Math.random() * neighborhoods.length)]
       
       transactions.push({
         transactionId: `TX-${Date.now()}-${i}`,
         transactionDate: date.toISOString().split('T')[0],
         price: area * pricePerSqm,
         pricePerSqm,
-        address: `רחוב הרצל ${10 + i}, תל אביב`,
+        address: `רחוב הרצל ${10 + i}, ${city}`,
+        city,
+        neighborhood,
         propertyType: 'apartment',
         rooms: 2 + Math.floor(Math.random() * 3),
         area,

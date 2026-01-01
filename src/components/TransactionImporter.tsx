@@ -440,6 +440,101 @@ function TransactionList({
   onReject: (id: string) => void
   showActions?: boolean
 }) {
+  const [showFilters, setShowFilters] = useState(false)
+  const [filters, setFilters] = useState({
+    propertyType: 'all' as 'all' | 'apartment' | 'house' | 'commercial' | 'land',
+    dateFrom: '',
+    dateTo: '',
+    city: '',
+    neighborhood: '',
+    minPrice: '',
+    maxPrice: '',
+    minArea: '',
+    maxArea: '',
+    minRooms: '',
+    maxRooms: '',
+    verified: false
+  })
+
+  const filteredTransactions = transactions.filter(transaction => {
+    if (filters.propertyType !== 'all' && transaction.propertyType !== filters.propertyType) {
+      return false
+    }
+
+    if (filters.dateFrom) {
+      const transDate = new Date(transaction.transactionDate)
+      const fromDate = new Date(filters.dateFrom)
+      if (transDate < fromDate) return false
+    }
+
+    if (filters.dateTo) {
+      const transDate = new Date(transaction.transactionDate)
+      const toDate = new Date(filters.dateTo)
+      if (transDate > toDate) return false
+    }
+
+    if (filters.city && !transaction.city?.includes(filters.city)) {
+      return false
+    }
+
+    if (filters.neighborhood && !transaction.neighborhood?.includes(filters.neighborhood)) {
+      return false
+    }
+
+    if (filters.minPrice && transaction.price < parseFloat(filters.minPrice)) {
+      return false
+    }
+
+    if (filters.maxPrice && transaction.price > parseFloat(filters.maxPrice)) {
+      return false
+    }
+
+    if (filters.minArea && transaction.area < parseFloat(filters.minArea)) {
+      return false
+    }
+
+    if (filters.maxArea && transaction.area > parseFloat(filters.maxArea)) {
+      return false
+    }
+
+    if (filters.minRooms && transaction.rooms < parseFloat(filters.minRooms)) {
+      return false
+    }
+
+    if (filters.maxRooms && transaction.rooms > parseFloat(filters.maxRooms)) {
+      return false
+    }
+
+    if (filters.verified && !transaction.verified) {
+      return false
+    }
+
+    return true
+  })
+
+  const handleResetFilters = () => {
+    setFilters({
+      propertyType: 'all',
+      dateFrom: '',
+      dateTo: '',
+      city: '',
+      neighborhood: '',
+      minPrice: '',
+      maxPrice: '',
+      minArea: '',
+      maxArea: '',
+      minRooms: '',
+      maxRooms: '',
+      verified: false
+    })
+  }
+
+  const activeFiltersCount = Object.entries(filters).filter(([key, value]) => {
+    if (key === 'propertyType') return value !== 'all'
+    if (typeof value === 'boolean') return value
+    return value !== ''
+  }).length
+
   if (transactions.length === 0) {
     return (
       <Card>
@@ -452,109 +547,304 @@ function TransactionList({
   }
 
   return (
-    <div className="space-y-3">
-      {transactions.map(transaction => (
-        <Card key={transaction.importId}>
-          <CardContent className="p-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 space-y-2">
-                <div className="flex items-center gap-2">
-                  <h4 className="font-semibold">{transaction.address}</h4>
-                  <Badge variant={
-                    transaction.status === 'approved' ? 'default' : 
-                    transaction.status === 'pending' ? 'outline' : 
-                    'destructive'
-                  }>
-                    {transaction.status === 'approved' ? 'אושר' : 
-                     transaction.status === 'pending' ? 'ממתין' : 'נדחה'}
-                  </Badge>
-                  {transaction.verified && (
-                    <Badge variant="outline" className="bg-success/10 text-success">
-                      <CheckCircle size={12} weight="fill" className="ml-1" />
-                      מאומת
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <CardTitle className="text-base">סינון מתקדם</CardTitle>
+              {activeFiltersCount > 0 && (
+                <Badge variant="secondary">
+                  {activeFiltersCount} פילטרים פעילים
+                </Badge>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              {activeFiltersCount > 0 && (
+                <Button
+                  onClick={handleResetFilters}
+                  variant="ghost"
+                  size="sm"
+                  className="gap-2"
+                >
+                  <XCircle size={16} weight="duotone" />
+                  אפס סינון
+                </Button>
+              )}
+              <Button
+                onClick={() => setShowFilters(!showFilters)}
+                variant="outline"
+                size="sm"
+                className="gap-2"
+              >
+                <Funnel size={16} weight="duotone" />
+                {showFilters ? 'הסתר' : 'הצג'} סינון
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+
+        {showFilters && (
+          <CardContent className="space-y-4 pt-0">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="property-type">סוג נכס</Label>
+                <Select
+                  value={filters.propertyType}
+                  onValueChange={(value: any) => setFilters({ ...filters, propertyType: value })}
+                >
+                  <SelectTrigger id="property-type">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">כל הסוגים</SelectItem>
+                    <SelectItem value="apartment">דירה</SelectItem>
+                    <SelectItem value="house">בית פרטי</SelectItem>
+                    <SelectItem value="commercial">מסחרי</SelectItem>
+                    <SelectItem value="land">קרקע</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="date-from">תאריך מ-</Label>
+                <Input
+                  id="date-from"
+                  type="date"
+                  value={filters.dateFrom}
+                  onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="date-to">תאריך עד</Label>
+                <Input
+                  id="date-to"
+                  type="date"
+                  value={filters.dateTo}
+                  onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="city">עיר</Label>
+                <Input
+                  id="city"
+                  value={filters.city}
+                  onChange={(e) => setFilters({ ...filters, city: e.target.value })}
+                  placeholder="תל אביב, ירושלים..."
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="neighborhood">שכונה</Label>
+                <Input
+                  id="neighborhood"
+                  value={filters.neighborhood}
+                  onChange={(e) => setFilters({ ...filters, neighborhood: e.target.value })}
+                  placeholder="צפון ישן, נווה צדק..."
+                />
+              </div>
+            </div>
+
+            <Separator />
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="min-price">מחיר מינימום</Label>
+                <Input
+                  id="min-price"
+                  type="number"
+                  value={filters.minPrice}
+                  onChange={(e) => setFilters({ ...filters, minPrice: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="max-price">מחיר מקסימום</Label>
+                <Input
+                  id="max-price"
+                  type="number"
+                  value={filters.maxPrice}
+                  onChange={(e) => setFilters({ ...filters, maxPrice: e.target.value })}
+                  placeholder="10,000,000"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="min-area">שטח מינימום (מ״ר)</Label>
+                <Input
+                  id="min-area"
+                  type="number"
+                  value={filters.minArea}
+                  onChange={(e) => setFilters({ ...filters, minArea: e.target.value })}
+                  placeholder="0"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="max-area">שטח מקסימום (מ״ר)</Label>
+                <Input
+                  id="max-area"
+                  type="number"
+                  value={filters.maxArea}
+                  onChange={(e) => setFilters({ ...filters, maxArea: e.target.value })}
+                  placeholder="500"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="min-rooms">חדרים מינימום</Label>
+                <Input
+                  id="min-rooms"
+                  type="number"
+                  value={filters.minRooms}
+                  onChange={(e) => setFilters({ ...filters, minRooms: e.target.value })}
+                  placeholder="1"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="max-rooms">חדרים מקסימום</Label>
+                <Input
+                  id="max-rooms"
+                  type="number"
+                  value={filters.maxRooms}
+                  onChange={(e) => setFilters({ ...filters, maxRooms: e.target.value })}
+                  placeholder="10"
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="verified"
+                checked={filters.verified}
+                onCheckedChange={(checked) => setFilters({ ...filters, verified: checked === true })}
+              />
+              <Label htmlFor="verified" className="cursor-pointer">
+                רק עסקאות מאומתות
+              </Label>
+            </div>
+          </CardContent>
+        )}
+      </Card>
+
+      <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <span>מציג {filteredTransactions.length} מתוך {transactions.length} עסקאות</span>
+      </div>
+
+      <div className="space-y-3">
+        {filteredTransactions.map(transaction => (
+          <Card key={transaction.importId}>
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1 space-y-2">
+                  <div className="flex items-center gap-2">
+                    <h4 className="font-semibold">{transaction.address}</h4>
+                    <Badge variant={
+                      transaction.status === 'approved' ? 'default' : 
+                      transaction.status === 'pending' ? 'outline' : 
+                      'destructive'
+                    }>
+                      {transaction.status === 'approved' ? 'אושר' : 
+                       transaction.status === 'pending' ? 'ממתין' : 'נדחה'}
                     </Badge>
+                    {transaction.verified && (
+                      <Badge variant="outline" className="bg-success/10 text-success">
+                        <CheckCircle size={12} weight="fill" className="ml-1" />
+                        מאומת
+                      </Badge>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
+                    <div>
+                      <span className="text-muted-foreground">מחיר:</span>
+                      <div className="font-semibold">
+                        ₪{(transaction.price / 1000000).toFixed(2)}M
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">מחיר למ״ר:</span>
+                      <div className="font-semibold">
+                        ₪{transaction.pricePerSqm.toLocaleString('he-IL')}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">שטח:</span>
+                      <div className="font-semibold">{transaction.area} מ״ר</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">חדרים:</span>
+                      <div className="font-semibold">{transaction.rooms}</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">קומה:</span>
+                      <div className="font-semibold">
+                        {transaction.floor} מתוך {transaction.totalFloors}
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">מצב:</span>
+                      <div className="font-semibold">{transaction.condition}</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">גיל:</span>
+                      <div className="font-semibold">{transaction.age} שנים</div>
+                    </div>
+                    <div>
+                      <span className="text-muted-foreground">תאריך:</span>
+                      <div className="font-semibold">
+                        {new Date(transaction.transactionDate).toLocaleDateString('he-IL')}
+                      </div>
+                    </div>
+                  </div>
+
+                  {transaction.features && transaction.features.length > 0 && (
+                    <div className="flex gap-1 flex-wrap">
+                      {transaction.features.map((feature, idx) => (
+                        <Badge key={idx} variant="secondary" className="text-xs">
+                          {feature}
+                        </Badge>
+                      ))}
+                    </div>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                  <div>
-                    <span className="text-muted-foreground">מחיר:</span>
-                    <div className="font-semibold">
-                      ₪{(transaction.price / 1000000).toFixed(2)}M
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">מחיר למ״ר:</span>
-                    <div className="font-semibold">
-                      ₪{transaction.pricePerSqm.toLocaleString('he-IL')}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">שטח:</span>
-                    <div className="font-semibold">{transaction.area} מ״ר</div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">חדרים:</span>
-                    <div className="font-semibold">{transaction.rooms}</div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">קומה:</span>
-                    <div className="font-semibold">
-                      {transaction.floor} מתוך {transaction.totalFloors}
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">מצב:</span>
-                    <div className="font-semibold">{transaction.condition}</div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">גיל:</span>
-                    <div className="font-semibold">{transaction.age} שנים</div>
-                  </div>
-                  <div>
-                    <span className="text-muted-foreground">תאריך:</span>
-                    <div className="font-semibold">
-                      {new Date(transaction.transactionDate).toLocaleDateString('he-IL')}
-                    </div>
-                  </div>
-                </div>
-
-                {transaction.features && transaction.features.length > 0 && (
-                  <div className="flex gap-1 flex-wrap">
-                    {transaction.features.map((feature, idx) => (
-                      <Badge key={idx} variant="secondary" className="text-xs">
-                        {feature}
-                      </Badge>
-                    ))}
+                {showActions && transaction.status === 'pending' && (
+                  <div className="flex gap-2">
+                    <Button
+                      onClick={() => onApprove(transaction.importId)}
+                      size="sm"
+                      className="gap-2"
+                    >
+                      <CheckCircle size={16} weight="duotone" />
+                      אשר
+                    </Button>
+                    <Button
+                      onClick={() => onReject(transaction.importId)}
+                      size="sm"
+                      variant="outline"
+                      className="gap-2"
+                    >
+                      <XCircle size={16} weight="duotone" />
+                      דחה
+                    </Button>
                   </div>
                 )}
               </div>
-
-              {showActions && transaction.status === 'pending' && (
-                <div className="flex gap-2">
-                  <Button
-                    onClick={() => onApprove(transaction.importId)}
-                    size="sm"
-                    className="gap-2"
-                  >
-                    <CheckCircle size={16} weight="duotone" />
-                    אשר
-                  </Button>
-                  <Button
-                    onClick={() => onReject(transaction.importId)}
-                    size="sm"
-                    variant="outline"
-                    className="gap-2"
-                  >
-                    <XCircle size={16} weight="duotone" />
-                    דחה
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+            </CardContent>
+          </Card>
+        ))}
+      </div>
     </div>
   )
 }
