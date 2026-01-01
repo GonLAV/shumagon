@@ -138,6 +138,7 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
         { id: 'team-manage', label: 'ניהול צוות', icon: ShieldCheck, keywords: ['משתמשים', 'הרשאות', 'ניהול', 'גישה', 'צוות'] },
         { id: 'team', label: 'שיתוף פעולה', icon: UsersThree, keywords: ['צוות', 'משותף', 'שיתופי', 'קולבורציה'] },
         { id: 'audit', label: 'מעקב שינויים', icon: ClockCounterClockwise, keywords: ['לוג', 'היסטוריה', 'שינויים', 'ביקורת', 'audit'] },
+        { id: 'historical-search', label: 'חיפוש היסטורי', icon: MagnifyingGlass, keywords: ['חיפוש', 'היסטוריה', 'רשומות', 'ארכיון', 'נתונים קודמים', 'היטל', 'תכניות'] },
       ]
     }
   ]

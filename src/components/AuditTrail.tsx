@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { ClockCounterClockwise, MagnifyingGlass, Lock, LockOpen, Download, Eye, GitBranch } from '@phosphor-icons/react'
+import { ClockCounterClockwise, MagnifyingGlass, Lock, LockOpen, Download, Eye, GitBranch, X } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 const actionLabels = {
@@ -46,6 +46,8 @@ export function AuditTrail() {
   const [filterEntity, setFilterEntity] = useState<string>('all')
   const [filterAction, setFilterAction] = useState<string>('all')
   const [searchQuery, setSearchQuery] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
   const [selectedLog, setSelectedLog] = useState<ChangeLog | null>(null)
   const [compareVersions, setCompareVersions] = useState<{ before: any; after: any } | null>(null)
 
@@ -117,7 +119,12 @@ export function AuditTrail() {
     const matchesSearch = searchQuery === '' ||
       log.entityName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       log.userName.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesEntity && matchesAction && matchesSearch
+    
+    const logDate = new Date(log.timestamp)
+    const matchesDateFrom = !dateFrom || logDate >= new Date(dateFrom)
+    const matchesDateTo = !dateTo || logDate <= new Date(dateTo + 'T23:59:59')
+    
+    return matchesEntity && matchesAction && matchesSearch && matchesDateFrom && matchesDateTo
   })
 
   const stats = {
@@ -193,42 +200,80 @@ export function AuditTrail() {
       </div>
 
       <Card className="glass-effect p-6">
-        <div className="flex items-center gap-4 mb-6">
-          <div className="flex-1">
-            <Input
-              placeholder="חיפוש לפי שם ישות, משתמש..."
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-            />
+        <div className="space-y-4 mb-6">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <Input
+                placeholder="חיפוש לפי שם ישות, משתמש..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Select value={filterEntity} onValueChange={setFilterEntity}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">כל הישויות</SelectItem>
+                <SelectItem value="case">תיקים</SelectItem>
+                <SelectItem value="property">נכסים</SelectItem>
+                <SelectItem value="report">דוחות</SelectItem>
+                <SelectItem value="client">לקוחות</SelectItem>
+                <SelectItem value="invoice">חשבוניות</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filterAction} onValueChange={setFilterAction}>
+              <SelectTrigger className="w-40">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">כל הפעולות</SelectItem>
+                <SelectItem value="created">נוצר</SelectItem>
+                <SelectItem value="updated">עודכן</SelectItem>
+                <SelectItem value="deleted">נמחק</SelectItem>
+                <SelectItem value="locked">ננעל</SelectItem>
+                <SelectItem value="unlocked">נעילה בוטלה</SelectItem>
+                <SelectItem value="signed">נחתם</SelectItem>
+                <SelectItem value="exported">יוצא</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <Select value={filterEntity} onValueChange={setFilterEntity}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">כל הישויות</SelectItem>
-              <SelectItem value="case">תיקים</SelectItem>
-              <SelectItem value="property">נכסים</SelectItem>
-              <SelectItem value="report">דוחות</SelectItem>
-              <SelectItem value="client">לקוחות</SelectItem>
-              <SelectItem value="invoice">חשבוניות</SelectItem>
-            </SelectContent>
-          </Select>
-          <Select value={filterAction} onValueChange={setFilterAction}>
-            <SelectTrigger className="w-40">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">כל הפעולות</SelectItem>
-              <SelectItem value="created">נוצר</SelectItem>
-              <SelectItem value="updated">עודכן</SelectItem>
-              <SelectItem value="deleted">נמחק</SelectItem>
-              <SelectItem value="locked">ננעל</SelectItem>
-              <SelectItem value="unlocked">נעילה בוטלה</SelectItem>
-              <SelectItem value="signed">נחתם</SelectItem>
-              <SelectItem value="exported">יוצא</SelectItem>
-            </SelectContent>
-          </Select>
+
+          <div className="flex items-center gap-4">
+            <div className="flex-1 grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">מתאריך</label>
+                <Input
+                  type="date"
+                  value={dateFrom}
+                  onChange={e => setDateFrom(e.target.value)}
+                />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs text-muted-foreground">עד תאריך</label>
+                <Input
+                  type="date"
+                  value={dateTo}
+                  onChange={e => setDateTo(e.target.value)}
+                />
+              </div>
+            </div>
+            {(dateFrom || dateTo || searchQuery || filterEntity !== 'all' || filterAction !== 'all') && (
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setSearchQuery('')
+                  setDateFrom('')
+                  setDateTo('')
+                  setFilterEntity('all')
+                  setFilterAction('all')
+                }}
+              >
+                <X className="ml-2" />
+                נקה סננים
+              </Button>
+            )}
+          </div>
         </div>
 
         <ScrollArea className="h-[600px]">
