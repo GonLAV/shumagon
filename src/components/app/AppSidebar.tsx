@@ -115,6 +115,13 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
       ]
     },
     {
+      title: '🏘️ נתוני שכירות',
+      items: [
+        { id: 'rental-data', label: 'ניהול נתוני שכירות', icon: Database, keywords: ['שכירות', 'דמי שכירות', 'נתונים', 'מאגר', 'עסקאות'] },
+        { id: 'rental-analysis', label: 'ניתוח שכירות', icon: Calculator, keywords: ['שכירות', 'חישוב', 'התאמות', 'השוואה', 'מחיר'] },
+      ]
+    },
+    {
       title: '🚀 טכנולוגיות מתקדמות',
       items: [
         { id: 'digital-twin', label: 'תאום דיגיטלי 3D', icon: Cube, keywords: ['3D', 'מודל', 'וירטואלי', 'תלת מימד'] },

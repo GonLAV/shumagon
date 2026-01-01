@@ -32,6 +32,8 @@ import { ProfessionalCalculators } from '@/components/ProfessionalCalculators'
 import { MultiUnitDistributionCalculator } from '@/components/MultiUnitDistributionCalculator'
 import { AppSidebar } from '@/components/app/AppSidebar'
 import { SidebarProvider } from '@/components/ui/sidebar'
+import { RentalDataManager } from '@/components/RentalDataManager'
+import { RentalAnalyzer } from '@/components/RentalAnalyzer'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -202,6 +204,10 @@ function App() {
         return <ProfessionalCalculators />
       case 'distribution':
         return <MultiUnitDistributionCalculator />
+      case 'rental-data':
+        return <RentalDataManager />
+      case 'rental-analysis':
+        return <RentalAnalyzer />
       default:
         return (
           <Dashboard
