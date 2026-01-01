@@ -29,7 +29,8 @@ import {
   Star,
   PushPin,
   Scales,
-  Key
+  Key,
+  MapTrifold
 } from '@phosphor-icons/react'
 import { 
   Sidebar, 
@@ -96,6 +97,7 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
       title: '📊 ניתוח ותובנות',
       items: [
         { id: 'insights', label: 'ניתוח שוק', icon: ChartBar, keywords: ['מגמות', 'סטטיסטיקות', 'נתונים', 'גרפים', 'שוק'] },
+        { id: 'transactions-map', label: 'מפת עסקאות ארצית', icon: MapTrifold, keywords: ['מפה', 'עסקאות', 'ישראל', 'גאוגרפי', 'מיקום', 'אזורי', 'ארצי', 'נדלן', 'ממשלה'] },
         { id: 'ai-insights', label: 'תובנות AI', icon: Robot, keywords: ['בינה מלאכותית', 'חיזוי', 'המלצות', 'אוטומטי'] },
         { id: 'automated-reports', label: 'דוחות מגמות', icon: ChartLineUp, keywords: ['מגמות', 'אוטומטי', 'שבועי', 'חודשי', 'טרנד'] },
       ]

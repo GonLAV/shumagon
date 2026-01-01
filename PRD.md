@@ -161,6 +161,70 @@ This is a professional tool requiring multiple sophisticated features: property 
   - ✅ Optional auto-calculate mode for real-time updates
   - ✅ Monthly and annual income display
   - ✅ Gross vs. net monthly income comparison
+
+### National Transactions Map (NEW - Geographic Market Intelligence) ✅ COMPLETED
+- **Functionality**: Interactive nationwide map of Israel displaying real estate transactions from all cities across the country, with clustering, filtering, and detailed transaction information
+- **Purpose**: Provide geographic visualization of market activity across Israel, enabling appraisers to understand regional pricing patterns, identify market hotspots, and analyze transaction density by location
+- **Trigger**: Navigate to "מפת עסקאות ארצית" from the main sidebar under "ניתוח ותובנות"
+- **Progression**: View map with all transactions → Apply filters (city, property type, price range, area range, time period) → Cluster/uncluster transactions by city → Click on transaction markers → View detailed transaction info → Search for specific patterns → Export data
+- **Success criteria**: ✅ FULLY IMPLEMENTED
+  - ✅ D3.js-powered interactive map of Israel with proper geographic projection
+  - ✅ Real-time transaction data from nadlan.gov.il API covering all major Israeli cities
+  - ✅ 30+ cities included with accurate lat/lng coordinates:
+    * Major cities: Tel Aviv, Jerusalem, Haifa, Beer Sheva
+    * Central: Ramat Gan, Petah Tikva, Rishon LeZion, Holon
+    * North: Haifa, Nazareth, Acre, Nahariya, Tiberias
+    * South: Beer Sheva, Ashkelon, Ashdod, Eilat
+  - ✅ Cluster mode: Groups transactions by city with count badges
+  - ✅ Individual marker mode: Shows each transaction as a separate marker
+  - ✅ Advanced filtering system:
+    * City selection (all cities or specific)
+    * Property type (apartment, house, penthouse, office, commercial, land)
+    * Price range (min/max)
+    * Area range in sqm (min/max)
+    * Time range slider (1-36 months)
+  - ✅ Real-time statistics dashboard:
+    * Total transactions count
+    * Average transaction price
+    * Average price per sqm
+    * Number of cities covered
+  - ✅ Interactive transaction details panel:
+    * Full address and city
+    * Transaction price and price per sqm
+    * Property details: area, rooms, floor, build year
+    * Amenities: parking, elevator, balcony
+    * Transaction date and verification status
+  - ✅ Scrollable transactions list with click-to-select
+  - ✅ Map controls: zoom with mouse wheel, pan with drag
+  - ✅ Visual design: 
+    * Gradient map background with Israel outline
+    * City labels on map
+    * Color-coded markers (primary for clusters, accent for individual)
+    * Hover effects and smooth animations
+  - ✅ Toggle between cluster and individual marker modes
+  - ✅ Filter reset functionality
+  - ✅ Responsive grid layout with collapsible filter panel
+  - ✅ Hebrew RTL interface
+  
+**Technical Implementation:**
+- New `TransactionsMap` component (`/components/TransactionsMap.tsx`)
+- D3.js geo projection (Mercator) centered on Israel
+- Integration with `NadlanGovAPI` for transaction data
+- City coordinates database with 30+ Israeli cities
+- Enhanced `generateFallbackTransactions()` to create nationwide data
+- Cluster algorithm using d3.group by city
+- Interactive SVG map with zoom and pan controls
+- Real-time filtering and statistics calculation
+- Color-coded transaction markers with hover effects
+- Sidebar navigation integration with MapTrifold icon
+- Search keywords: 'מפה', 'עסקאות', 'ישראל', 'גאוגרפי', 'מיקום', 'אזורי', 'ארצי'
+  
+**Data Coverage:**
+- All major Israeli cities from north to south
+- Multiple transactions per city (3-15 depending on activity)
+- Realistic price variation by city (Tel Aviv: ₪28k/sqm, Beer Sheva: ₪14k/sqm)
+- Geographic spread from Kiryat Shmona (north) to Eilat (south)
+- Accurate coordinates for proper map positioning
   
 **Technical Implementation:**
 - New `RentalYieldCalculator` class (`/lib/rentalYieldCalculator.ts`):

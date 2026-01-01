@@ -46,6 +46,7 @@ import { ResidentialValuationCalculator } from '@/components/ResidentialValuatio
 import { CommercialValuationCalculator } from '@/components/CommercialValuationCalculator'
 import { LandValuationCalculator } from '@/components/LandValuationCalculator'
 import { RealBuildingRightsViewer } from '@/components/RealBuildingRightsViewer'
+import { TransactionsMap } from '@/components/TransactionsMap'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -244,6 +245,8 @@ function App() {
         return <QuickerCalculator />
       case 'real-building-rights':
         return <RealBuildingRightsViewer />
+      case 'transactions-map':
+        return <TransactionsMap />
       default:
         return (
           <Dashboard
