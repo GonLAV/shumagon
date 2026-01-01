@@ -9,6 +9,7 @@ import {
   CurrencyDollar, 
   Buildings, 
   TrendUp,
+  TrendDown,
   CheckCircle,
   XCircle,
   Info
@@ -20,6 +21,9 @@ import {
 import type { ValidationResult, CalculatorSource } from '@/lib/calculators'
 import { InteractiveAdjustmentCalculator } from '@/components/InteractiveAdjustmentCalculator'
 import { InteractiveWeightedCalculator } from '@/components/InteractiveWeightedCalculator'
+import { CostApproachCalculator } from '@/components/CostApproachCalculator'
+import { IncomeCapitalizationCalculator } from '@/components/IncomeCapitalizationCalculator'
+import { DepreciationCalculator } from '@/components/DepreciationCalculator'
 
 export function ProfessionalCalculators() {
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([])
@@ -109,7 +113,7 @@ export function ProfessionalCalculators() {
       )}
 
       <Tabs defaultValue="overview" dir="rtl">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-7">
           <TabsTrigger value="overview" className="gap-2">
             <Info size={18} weight="duotone" />
             סקירה
@@ -125,6 +129,10 @@ export function ProfessionalCalculators() {
           <TabsTrigger value="cost" className="gap-2">
             <CurrencyDollar size={18} weight="duotone" />
             שיטת עלות
+          </TabsTrigger>
+          <TabsTrigger value="depreciation" className="gap-2">
+            <TrendDown size={18} weight="duotone" />
+            פחת
           </TabsTrigger>
           <TabsTrigger value="income" className="gap-2">
             <TrendUp size={18} weight="duotone" />
@@ -219,6 +227,18 @@ export function ProfessionalCalculators() {
 
                   <div className="p-3 rounded-lg border bg-card">
                     <div className="flex items-center gap-3">
+                      <TrendDown size={24} weight="duotone" className="text-destructive" />
+                      <div>
+                        <h4 className="font-medium">מחשבון פחת מתקדם</h4>
+                        <p className="text-sm text-muted-foreground">
+                          3 שיטות פחת שונות עם לוחות זמנים מפורטים
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="p-3 rounded-lg border bg-card">
+                    <div className="flex items-center gap-3">
                       <TrendUp size={24} weight="duotone" className="text-warning" />
                       <div>
                         <h4 className="font-medium">שיטת ההיוון</h4>
@@ -293,39 +313,15 @@ export function ProfessionalCalculators() {
         </TabsContent>
 
         <TabsContent value="cost">
-          <Card>
-            <CardHeader>
-              <CardTitle>מחשבון שיטת העלות</CardTitle>
-              <CardDescription>
-                חישוב שווי לפי עלות בנייה בניכוי פחת
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="p-6 rounded-lg bg-muted/30 border-2 border-dashed">
-                <p className="text-center text-muted-foreground">
-                  ממשק מחשבון שיטת עלות - בפיתוח
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <CostApproachCalculator />
+        </TabsContent>
+
+        <TabsContent value="depreciation">
+          <DepreciationCalculator />
         </TabsContent>
 
         <TabsContent value="income">
-          <Card>
-            <CardHeader>
-              <CardTitle>מחשבון היוון</CardTitle>
-              <CardDescription>
-                חישוב שווי נכסים מניבים לפי הכנסה נטו ושיעור היוון
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="p-6 rounded-lg bg-muted/30 border-2 border-dashed">
-                <p className="text-center text-muted-foreground">
-                  ממשק מחשבון היוון - בפיתוח
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <IncomeCapitalizationCalculator />
         </TabsContent>
 
         <TabsContent value="multiunit">
