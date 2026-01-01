@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { useKV } from '@github/spark/hooks'
 import { 
   House, 
   ChartBar, 
@@ -24,7 +25,9 @@ import {
   MagnifyingGlass,
   X,
   ChartLineUp,
-  Briefcase
+  Briefcase,
+  Star,
+  PushPin
 } from '@phosphor-icons/react'
 import { 
   Sidebar, 
@@ -50,6 +53,17 @@ interface AppSidebarProps {
 
 export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
   const [searchQuery, setSearchQuery] = useState('')
+  const [favorites, setFavorites] = useKV<string[]>('sidebar-favorites', [])
+
+  const toggleFavorite = (itemId: string) => {
+    setFavorites((current) => {
+      const currentFavs = current || []
+      if (currentFavs.includes(itemId)) {
+        return currentFavs.filter(id => id !== itemId)
+      }
+      return [...currentFavs, itemId]
+    })
+  }
 
   const menuItems = [
     {
@@ -135,6 +149,19 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
       .filter(group => group.items.length > 0)
   }, [searchQuery, menuItems])
 
+  const allMenuItems = useMemo(() => {
+    return menuItems.flatMap(group => group.items)
+  }, [menuItems])
+
+  const favoriteItems = useMemo(() => {
+    const favs = favorites || []
+    return favs
+      .map(favId => allMenuItems.find(item => item.id === favId))
+      .filter(Boolean)
+  }, [favorites, allMenuItems])
+
+  const hasFavorites = favoriteItems.length > 0
+
   return (
     <Sidebar collapsible="icon" className="border-l border-border/40 bg-card/95 backdrop-blur-xl">
       <SidebarHeader className="border-b border-border/40 px-4 py-5 bg-gradient-to-b from-primary/5 to-transparent">
@@ -211,6 +238,87 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
             </div>
           ) : (
             <div className="space-y-6">
+              {!searchQuery && hasFavorites && (
+                <SidebarGroup>
+                  <SidebarGroupLabel className="text-xs font-bold text-muted-foreground/70 px-3 mb-2 group-data-[collapsible=icon]:hidden uppercase tracking-wider flex items-center gap-2">
+                    <Star size={14} weight="fill" className="text-accent" />
+                    מועדפים
+                  </SidebarGroupLabel>
+                  <SidebarGroupContent>
+                    <SidebarMenu className="space-y-1">
+                      {favoriteItems.map((item) => {
+                        if (!item) return null
+                        const Icon = item.icon
+                        const isActive = activeView === item.id
+                        const isFavorite = (favorites || []).includes(item.id)
+                        
+                        return (
+                          <SidebarMenuItem key={`fav-${item.id}`}>
+                            <div className="relative group/item">
+                              <SidebarMenuButton
+                                onClick={() => {
+                                  onNavigate(item.id)
+                                  setSearchQuery('')
+                                }}
+                                isActive={isActive}
+                                className={`
+                                  w-full transition-all duration-300 h-11 rounded-xl pr-11
+                                  ${isActive 
+                                    ? 'bg-gradient-to-l from-accent/20 via-accent/15 to-accent/10 text-accent border-r-[3px] border-accent shadow-lg shadow-accent/20 font-semibold' 
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70 hover:shadow-md font-medium'
+                                  }
+                                `}
+                                tooltip={item.label}
+                              >
+                                <div className={`
+                                  flex items-center justify-center w-9 h-9 rounded-lg transition-all
+                                  ${isActive 
+                                    ? 'bg-accent/25 text-accent' 
+                                    : 'bg-transparent group-hover:bg-secondary'
+                                  }
+                                `}>
+                                  <Icon 
+                                    size={20} 
+                                    weight={isActive ? 'fill' : 'duotone'}
+                                  />
+                                </div>
+                                <span className="group-data-[collapsible=icon]:hidden text-sm">
+                                  {item.label}
+                                </span>
+                              </SidebarMenuButton>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toggleFavorite(item.id)
+                                }}
+                                className={`
+                                  absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg transition-all
+                                  group-data-[collapsible=icon]:hidden
+                                  ${isFavorite 
+                                    ? 'opacity-100 text-accent hover:text-accent/70' 
+                                    : 'opacity-0 group-hover/item:opacity-100 text-muted-foreground hover:text-accent'
+                                  }
+                                  hover:bg-accent/10
+                                `}
+                                title={isFavorite ? 'הסר ממועדפים' : 'הוסף למועדפים'}
+                              >
+                                <Star 
+                                  size={16} 
+                                  weight={isFavorite ? 'fill' : 'regular'}
+                                  className="transition-all"
+                                />
+                              </Button>
+                            </div>
+                          </SidebarMenuItem>
+                        )
+                      })}
+                    </SidebarMenu>
+                  </SidebarGroupContent>
+                </SidebarGroup>
+              )}
+
               {filteredMenuItems.map((group, idx) => (
                 <SidebarGroup key={group.title}>
                   <SidebarGroupLabel className="text-xs font-bold text-muted-foreground/70 px-3 mb-2 group-data-[collapsible=icon]:hidden uppercase tracking-wider">
@@ -221,40 +329,67 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
                       {group.items.map((item) => {
                         const Icon = item.icon
                         const isActive = activeView === item.id
+                        const isFavorite = (favorites || []).includes(item.id)
                         
                         return (
                           <SidebarMenuItem key={item.id}>
-                            <SidebarMenuButton
-                              onClick={() => {
-                                onNavigate(item.id)
-                                setSearchQuery('')
-                              }}
-                              isActive={isActive}
-                              className={`
-                                w-full transition-all duration-300 h-11 rounded-xl
-                                ${isActive 
-                                  ? 'bg-gradient-to-l from-primary/15 via-primary/10 to-primary/5 text-primary border-r-[3px] border-primary shadow-lg shadow-primary/20 font-semibold' 
-                                  : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70 hover:shadow-md font-medium'
-                                }
-                              `}
-                              tooltip={item.label}
-                            >
-                              <div className={`
-                                flex items-center justify-center w-9 h-9 rounded-lg transition-all
-                                ${isActive 
-                                  ? 'bg-primary/20 text-primary' 
-                                  : 'bg-transparent group-hover:bg-secondary'
-                                }
-                              `}>
-                                <Icon 
-                                  size={20} 
-                                  weight={isActive ? 'fill' : 'duotone'}
+                            <div className="relative group/item">
+                              <SidebarMenuButton
+                                onClick={() => {
+                                  onNavigate(item.id)
+                                  setSearchQuery('')
+                                }}
+                                isActive={isActive}
+                                className={`
+                                  w-full transition-all duration-300 h-11 rounded-xl pr-11
+                                  ${isActive 
+                                    ? 'bg-gradient-to-l from-primary/15 via-primary/10 to-primary/5 text-primary border-r-[3px] border-primary shadow-lg shadow-primary/20 font-semibold' 
+                                    : 'text-muted-foreground hover:text-foreground hover:bg-secondary/70 hover:shadow-md font-medium'
+                                  }
+                                `}
+                                tooltip={item.label}
+                              >
+                                <div className={`
+                                  flex items-center justify-center w-9 h-9 rounded-lg transition-all
+                                  ${isActive 
+                                    ? 'bg-primary/20 text-primary' 
+                                    : 'bg-transparent group-hover:bg-secondary'
+                                  }
+                                `}>
+                                  <Icon 
+                                    size={20} 
+                                    weight={isActive ? 'fill' : 'duotone'}
+                                  />
+                                </div>
+                                <span className="group-data-[collapsible=icon]:hidden text-sm">
+                                  {item.label}
+                                </span>
+                              </SidebarMenuButton>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  toggleFavorite(item.id)
+                                }}
+                                className={`
+                                  absolute left-1 top-1/2 -translate-y-1/2 h-8 w-8 rounded-lg transition-all
+                                  group-data-[collapsible=icon]:hidden
+                                  ${isFavorite 
+                                    ? 'opacity-100 text-accent hover:text-accent/70' 
+                                    : 'opacity-0 group-hover/item:opacity-100 text-muted-foreground hover:text-accent'
+                                  }
+                                  hover:bg-accent/10
+                                `}
+                                title={isFavorite ? 'הסר ממועדפים' : 'הוסף למועדפים'}
+                              >
+                                <Star 
+                                  size={16} 
+                                  weight={isFavorite ? 'fill' : 'regular'}
+                                  className="transition-all"
                                 />
-                              </div>
-                              <span className="group-data-[collapsible=icon]:hidden text-sm">
-                                {item.label}
-                              </span>
-                            </SidebarMenuButton>
+                              </Button>
+                            </div>
                           </SidebarMenuItem>
                         )
                       })}
