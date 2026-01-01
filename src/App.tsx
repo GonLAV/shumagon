@@ -40,6 +40,7 @@ import { MarketDataSync } from '@/components/MarketDataSync'
 import { APIAuthSettings } from '@/components/APIAuthSettings'
 import { APIUsageAnalytics } from '@/components/APIUsageAnalytics'
 import { APIQuotaManager } from '@/components/APIQuotaManager'
+import { OfficeValuationCalculator } from '@/components/OfficeValuationCalculator'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -226,6 +227,8 @@ function App() {
         return <APIUsageAnalytics />
       case 'api-quota':
         return <APIQuotaManager />
+      case 'office-valuation':
+        return <OfficeValuationCalculator />
       default:
         return (
           <Dashboard
