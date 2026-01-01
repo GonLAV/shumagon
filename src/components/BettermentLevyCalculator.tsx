@@ -393,22 +393,22 @@ export function BettermentLevyCalculator() {
     const newTotal = newStatus.buildingRights.mainArea + newStatus.buildingRights.serviceArea
     
     if (prevTotal === 0 && newTotal === 0) {
-      toast.error('חסרים שטחי בנייה - המערכת אינה מושכת נתונים אוטומטית', {
-        description: '📋 מספרי התכניות שהזנת תקינים, אך עליך למלא ידנית את השטחים במ"ר בשני הטאבים (מצב קודם + מצב חדש)'
+      toast.error('חסרים שטחי בנייה - אין מידע אוטומטי', {
+        description: '📋 מספרי התכניות שהזנת תקינים אך המערכת לא מחזירה שטחים. מלא ידנית את השטחים במ"ר בשני הטאבים (מצב קודם + מצב חדש). שים לב: המערכת משתמשת במאגר סימולציה - אינה מחוברת למאגרים ממשלתיים אמיתיים.'
       })
       return null
     }
     
     if (prevTotal === 0) {
       toast.error('חסרים שטחים במצב קודם (תכנית ישנה)', {
-        description: `📐 לחץ על טאב "מצב קודם" ומלא: שטח עיקרי + שטח שירות (במ"ר). לדוגמה: אם המגרש 500 מ"ר ואחוזי הבנייה 100% → שטח עיקרי = 500 מ"ר`
+        description: `📐 לחץ על טאב "מצב קודם" ומלא ידנית: שטח עיקרי + שטח שירות (במ"ר). לדוגמה: אם המגרש 500 מ"ר ואחוזי הבנייה 100% → שטח עיקרי = 500 מ"ר. המערכת עובדת עם מאגר סימולציה ולא שולפת נתונים אמיתיים.`
       })
       return null
     }
     
     if (newTotal === 0) {
       toast.error('חסרים שטחים במצב חדש (תכנית משביחה)', {
-        description: `📐 לחץ על טאב "מצב חדש משביח" ומלא: שטח עיקרי + שטח שירות (במ"ר). השטח החדש צריך להיות גדול מהקודם`
+        description: `📐 לחץ על טאב "מצב חדש משביח" ומלא ידנית: שטח עיקרי + שטח שירות (במ"ר). השטח החדש צריך להיות גדול מהקודם. המערכת עובדת עם מאגר סימולציה ולא שולפת נתונים אמיתיים.`
       })
       return null
     }
@@ -417,7 +417,7 @@ export function BettermentLevyCalculator() {
     
     if (delta.totalAreaDelta <= 0) {
       toast.error('אין תוספת זכויות בנייה - לא ניתן לחשב היטל השבחה', {
-        description: `🔍 הסיבה: המצב החדש (${newTotal.toLocaleString('he-IL')} מ"ר) קטן או שווה למצב הקודם (${prevTotal.toLocaleString('he-IL')} מ"ר). לתכנית להיחשב "משביחה" היא חייבת להוסיף זכויות בנייה`
+        description: `🔍 הסיבה: המצב החדש (${newTotal.toLocaleString('he-IL')} מ"ר) קטן או שווה למצב הקודם (${prevTotal.toLocaleString('he-IL')} מ"ר). לתכנית להיחשב "משביחה" היא חייבת להוסיף זכויות בנייה. בדוק שמילאת את השטחים נכון או נסה להזין מספרי תכניות שונים.`
       })
       return null
     }
@@ -1852,6 +1852,27 @@ export function BettermentLevyCalculator() {
                               ותשלום. מערכת זו משמשת כהדגמה טכנולוגית של היכולות, ובעתיד ניתן 
                               לחבר אותה למאגרים האמיתיים עם האישורים המתאימים.
                             </p>
+                            <div className="bg-background/60 p-3 rounded-lg mt-2 space-y-2">
+                              <p className="font-semibold text-xs text-foreground">📌 איך זה עובד כעת:</p>
+                              <ul className="text-xs text-muted-foreground space-y-1 mr-4">
+                                <li>• הזנת מספר תכנית כמו <strong>415-0792036</strong></li>
+                                <li>• המערכת מחפשת אותו במאגר פנימי (קובץ JavaScript)</li>
+                                <li>• אם נמצא - מחזירה את הנתונים המקודדים</li>
+                                <li>• אם לא נמצא - מציעה הזנה ידנית</li>
+                              </ul>
+                              <p className="text-xs text-warning mt-2 pt-2 border-t border-border">
+                                ⚠️ <strong>למה 415-0792036 תמיד מראה רמלה?</strong> כי זה מספר התכנית המקודד במאגר הדוגמה עבור רמלה. אין שום שליפה דינמית אמיתית.
+                              </p>
+                            </div>
+                            <div className="bg-primary/10 p-3 rounded-lg mt-2">
+                              <p className="font-semibold text-xs text-primary mb-1">🔮 בסביבת ייצור אמיתית:</p>
+                              <p className="text-xs text-muted-foreground">
+                                המערכת תשלח בקשת HTTP למאגר iPlan/מבא"ת הממשלתי, 
+                                תקבל תשובה בפורמט JSON עם כל זכויות הבנייה העדכניות, 
+                                ותציג אותן למשתמש. זה יחייב חיבור אינטרנט, הרשאות גישה, 
+                                ותשלום על שימוש ב-API הממשלתי.
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
@@ -2000,7 +2021,7 @@ export function BettermentLevyCalculator() {
                 ✅ המערכת מחוברת כעת למאגר iPlan הארצי לשליפה אוטומטית של זכויות בנייה
               </p>
               <p className="text-muted-foreground">
-                <strong>מספרי התכניות לדוגמה:</strong> 415-0792036, לה/במ/18/1000/א, תמ״א/38/ב
+                <strong>מספרי התכניות לדוגמה:</strong> 415-0792036 (רמלה), לה/במ/18/1000/א (תל אביב), תמ״א/38/ב
               </p>
               <div className="p-3 bg-accent/20 border border-accent/40 rounded-lg">
                 <p className="font-semibold text-accent mb-2">📝 איך להשתמש:</p>
@@ -2012,6 +2033,20 @@ export function BettermentLevyCalculator() {
                 </ol>
                 <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
                   💡 <strong>טיפ:</strong> אם תכנית לא נמצאה במאגר - ניתן להמשיך בהזנה ידנית
+                </p>
+              </div>
+              
+              <div className="p-3 bg-warning/10 border border-warning/30 rounded-lg mt-3">
+                <p className="font-semibold text-warning mb-1 flex items-center gap-2">
+                  <Warning className="w-4 h-4" weight="duotone" />
+                  ⚠️ הערה חשובה - מקור המידע
+                </p>
+                <p className="text-xs text-foreground">
+                  <strong>המערכת משתמשת במאגר סימולציה פנימי</strong> - אינה מתחברת למאגרים ממשלתיים אמיתיים.
+                  המידע מבוסס על נתונים לדוגמה המקודדים במערכת (ראה קוד: <code className="bg-muted px-1 rounded">planningDatabaseAPI.ts</code>).
+                </p>
+                <p className="text-xs text-muted-foreground mt-2">
+                  <strong>לשימוש מקצועי:</strong> יש להשתמש ב-iPlan, מבא"ת ו-GovMap הרשמיים של המדינה עם אישורים והרשאות מתאימות.
                 </p>
               </div>
             </div>

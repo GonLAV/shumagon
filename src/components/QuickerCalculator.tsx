@@ -108,6 +108,37 @@ export function QuickerCalculator() {
         </div>
       </div>
 
+      <div className="p-4 rounded-xl bg-info/10 border-2 border-info/30 bg-primary/5 border-primary/30">
+        <div className="flex gap-3">
+          <Info className="w-5 h-5 text-primary flex-shrink-0 mt-0.5" weight="duotone" />
+          <div className="space-y-2 text-sm">
+            <h3 className="font-bold text-foreground">💡 מהו QUICKER ומתי להשתמש בו?</h3>
+            <p className="text-muted-foreground">
+              <strong className="text-primary">QUICKER</strong> הוא מחשבון פשוט ומהיר שמבוסס על הנוסחה: 
+              <strong className="font-mono text-foreground"> שווי = שטח × מחיר למ"ר</strong>
+            </p>
+            <div className="bg-background/60 p-3 rounded-lg space-y-2">
+              <p className="font-semibold text-foreground">✅ מתאים ל:</p>
+              <ul className="text-xs text-muted-foreground space-y-1 mr-6 list-disc list-inside">
+                <li>הערכת שווי ראשונית מהירה</li>
+                <li>בדיקה לפני קנייה/מכירה</li>
+                <li>השוואה בין כמה נכסים</li>
+                <li>סינון עסקאות</li>
+              </ul>
+              <p className="font-semibold text-foreground mt-3">❌ לא מתאים ל:</p>
+              <ul className="text-xs text-muted-foreground space-y-1 mr-6 list-disc list-inside">
+                <li>שומה רשמית לבנק או בית משפט</li>
+                <li>היטל השבחה או הליכים משפטיים</li>
+                <li>תכנון פיננסי מורכב</li>
+              </ul>
+            </div>
+            <p className="text-xs text-warning bg-warning/10 p-2 rounded border border-warning/30">
+              ⚠️ <strong>חשוב:</strong> זוהי שומה מהירה בלבד. לצרכים מקצועיים נדרשת שומה מלאה של שמאי מוסמך.
+            </p>
+          </div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Calculator Card */}
         <Card className="glass-effect p-6 lg:col-span-2 space-y-6">

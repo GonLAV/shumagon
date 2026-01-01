@@ -195,6 +195,61 @@ export function OfficeValuationCalculator() {
         </div>
       </div>
 
+      <div className="p-4 rounded-xl bg-warning/10 border-2 border-warning/30">
+        <div className="flex gap-3">
+          <Warning className="w-6 h-6 text-warning flex-shrink-0 mt-0.5" weight="duotone" />
+          <div className="space-y-2">
+            <h3 className="font-bold text-warning text-lg">⚠️ הערת מקור מידע - חובה לקרוא!</h3>
+            <div className="text-sm space-y-2 text-foreground">
+              <p className="font-semibold">
+                🔴 <strong>הנתונים במחשבון זה הם סימולטיביים בלבד</strong> - אין חיבור אמיתי למאגרי מידע!
+              </p>
+              <div className="bg-background/60 p-3 rounded-lg space-y-1 text-muted-foreground">
+                <p>📍 <strong>מאיפה המחירים?</strong></p>
+                <p className="mr-6">
+                  כל הערכי הקרקע והמחירים למ"ר מבוססים על <strong className="text-warning">טבלה פנימית קבועה</strong> שמקודדת במערכת.
+                  לדוגמה: תל אביב = 150,000 ₪/מ"ר, רמלה = 45,000 ₪/מ"ר, וכו'.
+                </p>
+                <p className="mr-6 text-xs">
+                  (ראה קוד: <code className="bg-muted px-1 rounded">officeValuationCalculator.ts</code> שורות 654-672)
+                </p>
+              </div>
+              <div className="bg-background/60 p-3 rounded-lg space-y-1 text-muted-foreground">
+                <p>📊 <strong>עסקאות ההשוואה:</strong></p>
+                <p className="mr-6">
+                  העסקאות שמוצגות הן <strong className="text-warning">דוגמאות מדומות</strong> שאתה מזין ידנית בטאב "עסקאות השוואה".
+                  המערכת אינה שולפת עסקאות אמיתיות ממאגרים חיצוניים.
+                </p>
+              </div>
+              <div className="bg-destructive/20 p-3 rounded-lg border border-destructive/40 mt-3">
+                <p className="font-semibold text-destructive">
+                  ❌ <strong>לא לשימוש מקצועי:</strong>
+                </p>
+                <p className="text-sm text-foreground mt-1">
+                  מחשבון זה הוא כלי הדגמה טכנולוגית בלבד. לשומה מקצועית אמיתית יש צורך ב:
+                </p>
+                <ul className="list-disc list-inside text-sm text-foreground mr-4 mt-2 space-y-1">
+                  <li>חיבור ל-API של מאגרי נדל"ן (מידע נדל"ן, רשם המקרקעין, רשות המיסים)</li>
+                  <li>גישה למחירוני בנייה מעודכנים (דקל, צ'ק ליסט)</li>
+                  <li>מאגרי עסקאות אמיתיות ממקורות מאומתים</li>
+                  <li>שמאי מקרקעין מוסמך עם רישיון פעיל</li>
+                </ul>
+              </div>
+              <div className="bg-accent/10 p-3 rounded-lg border border-accent/30 mt-3">
+                <p className="font-semibold text-accent flex items-center gap-2">
+                  <Info className="w-4 h-4" weight="duotone" />
+                  <strong>מטרת המערכת:</strong>
+                </p>
+                <p className="text-sm text-foreground mt-1">
+                  להדגים את <strong>הפונקציונליות והממשק</strong> של מחשבון שמאות מתקדם.
+                  בסביבת ייצור אמיתית, ניתן לחבר את אותם החישובים למקורות מידע אמיתיים.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <Tabs defaultValue="property" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="property">
