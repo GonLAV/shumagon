@@ -41,6 +41,7 @@ import { APIAuthSettings } from '@/components/APIAuthSettings'
 import { APIUsageAnalytics } from '@/components/APIUsageAnalytics'
 import { APIQuotaManager } from '@/components/APIQuotaManager'
 import { OfficeValuationCalculator } from '@/components/OfficeValuationCalculator'
+import { QuickerCalculator } from '@/components/QuickerCalculator'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -229,6 +230,8 @@ function App() {
         return <APIQuotaManager />
       case 'office-valuation':
         return <OfficeValuationCalculator />
+      case 'quicker':
+        return <QuickerCalculator />
       default:
         return (
           <Dashboard
