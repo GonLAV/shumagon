@@ -27,7 +27,7 @@ import {
   ResidentialValuationResult,
   ResidentialValuationCalculator as ValuationEngine
 } from '@/lib/calculators/residentialValuationCalculator'
-import { NadlanGovAPI, type NadlanTransaction } from '@/lib/nadlanGovAPI'
+import { realIsraeliGovDataAPI, type NationalTransactionData } from '@/lib/realIsraeliGovDataAPI'
 import { RentalYieldAnalysis } from '@/components/RentalYieldAnalysis'
 
 export function ResidentialValuationCalculator() {
@@ -52,61 +52,68 @@ export function ResidentialValuationCalculator() {
   const [comparables, setComparables] = useState<Partial<ResidentialComparable>[]>([])
   const [result, setResult] = useState<ResidentialValuationResult | null>(null)
   const [isLoadingNadlan, setIsLoadingNadlan] = useState(false)
-  const [nadlanTransactions, setNadlanTransactions] = useState<NadlanTransaction[]>([])
+  const [nadlanTransactions, setNadlanTransactions] = useState<NationalTransactionData[]>([])
   const [showNadlanResults, setShowNadlanResults] = useState(false)
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('')
 
   const handleFetchNadlanTransactions = async () => {
-    if (!property.city) {
-      toast.error('יש להזין עיר לפני שליפת עסקאות')
-      return
-    }
-
     setIsLoadingNadlan(true)
     try {
-      const nadlanAPI = new NadlanGovAPI()
+      const cities = property.city ? [property.city] : undefined
+      const districts = selectedDistrict ? [selectedDistrict] : undefined
       
       const searchParams = {
-        city: property.city,
-        street: property.address || undefined,
-        propertyType: 'דירה',
+        cities,
+        districts,
+        propertyTypes: ['דירה', 'דירת גן', 'פנטהאוז'],
         minArea: property.area ? property.area * 0.8 : 60,
         maxArea: property.area ? property.area * 1.2 : 120,
         fromDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        toDate: new Date().toISOString().split('T')[0]
+        toDate: new Date().toISOString().split('T')[0],
+        verifiedOnly: false,
+        limit: 50
       }
 
-      const transactions = await nadlanAPI.searchTransactions(searchParams)
+      console.log('[ResidentialValuation] 🇮🇱 Fetching transactions from all over Israel:', searchParams)
+      const transactions = await realIsraeliGovDataAPI.searchNationalTransactions(searchParams)
+      
+      const statistics = realIsraeliGovDataAPI.calculateNationalStatistics(transactions)
       
       if (transactions.length === 0) {
-        toast.warning('לא נמצאו עסקאות מתאימות בנדל"ן', {
-          description: 'ניתן להזין עסקאות השוואה ידנית'
+        toast.warning('לא נמצאו עסקאות', {
+          description: 'נסה להרחיב את קריטריוני החיפוש'
         })
       } else {
         setNadlanTransactions(transactions)
         setShowNadlanResults(true)
-        toast.success(`נמצאו ${transactions.length} עסקאות מתאימות מנדל"ן`, {
-          description: 'בחר עסקאות להוספה למחשבון'
+        
+        const citiesFound = Object.keys(statistics.byCity).length
+        const districtsFound = Object.keys(statistics.byDistrict).length
+        
+        toast.success(`נמצאו ${transactions.length} עסקאות דירות מכל רחבי ישראל! 🇮🇱`, {
+          description: `${citiesFound} ערים | ${districtsFound} מחוזות | מחיר ממוצע: ₪${statistics.avgPricePerSqm.toLocaleString()}/מ"ר`,
+          duration: 6000
         })
       }
     } catch (error) {
-      console.error('Failed to fetch Nadlan transactions:', error)
-      toast.error('שגיאה בשליפת נתונים מנדל"ן')
+      console.error('Failed to fetch transactions:', error)
+      toast.error('שגיאה בשליפת נתונים')
     } finally {
       setIsLoadingNadlan(false)
     }
   }
 
-  const handleAddNadlanTransaction = (transaction: NadlanTransaction) => {
+  const handleAddNadlanTransaction = (transaction: NationalTransactionData) => {
     const newComparable: Partial<ResidentialComparable> = {
       id: transaction.dealId,
-      address: `${transaction.street} ${transaction.houseNumber || ''}, ${transaction.city}`.trim(),
+      address: `${transaction.street} ${transaction.houseNumber || ''}, ${transaction.city}, ${transaction.districtHe}`.trim(),
       salePrice: transaction.dealAmount,
       pricePerSqm: transaction.pricePerMeter,
       saleDate: transaction.dealDate,
       area: transaction.area,
       rooms: transaction.rooms,
       floor: transaction.floor,
-      condition: transaction.renovated ? 'excellent' : 'good',
+      condition: transaction.renovated ? 'excellent' : transaction.conditionHe === 'חדש' ? 'excellent' : 'good',
       buildYear: transaction.buildYear,
       hasElevator: transaction.elevator || false,
       hasParkingSpot: transaction.parking || false,
@@ -115,7 +122,7 @@ export function ResidentialValuationCalculator() {
     }
 
     setComparables(prev => [...prev, newComparable])
-    toast.success('עסקה נוספה להשוואה')
+    toast.success(`עסקה נוספה מ${transaction.city}`)
   }
 
   const handleCalculate = () => {

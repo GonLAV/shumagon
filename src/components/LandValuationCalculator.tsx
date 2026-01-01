@@ -22,7 +22,7 @@ import {
   LandValuationResult,
   LandValuationCalculator as ValuationEngine
 } from '@/lib/calculators/landValuationCalculator'
-import { NadlanGovAPI, type NadlanTransaction } from '@/lib/nadlanGovAPI'
+import { realIsraeliGovDataAPI, type NationalTransactionData } from '@/lib/realIsraeliGovDataAPI'
 import { RentalYieldAnalysis } from '@/components/RentalYieldAnalysis'
 
 export function LandValuationCalculator() {
@@ -74,48 +74,52 @@ export function LandValuationCalculator() {
   const [comparables, setComparables] = useState<Partial<LandComparable>[]>([])
   const [result, setResult] = useState<LandValuationResult | null>(null)
   const [isLoadingNadlan, setIsLoadingNadlan] = useState(false)
-  const [nadlanTransactions, setNadlanTransactions] = useState<NadlanTransaction[]>([])
+  const [nadlanTransactions, setNadlanTransactions] = useState<NationalTransactionData[]>([])
   const [showNadlanResults, setShowNadlanResults] = useState(false)
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('')
 
   const handleFetchNadlanTransactions = async () => {
-    if (!property.city) {
-      toast.error('יש להזין עיר לפני שליפת עסקאות')
-      return
-    }
-
     setIsLoadingNadlan(true)
     try {
-      const nadlanAPI = new NadlanGovAPI()
+      const cities = property.city ? [property.city] : undefined
+      const districts = selectedDistrict ? [selectedDistrict] : undefined
       
       const searchParams = {
-        city: property.city,
-        propertyType: 'מגרש',
+        cities,
+        districts,
+        propertyTypes: ['מגרש', 'בית פרטי'],
         minArea: property.area ? property.area * 0.7 : 300,
         maxArea: property.area ? property.area * 1.5 : 1000,
         fromDate: new Date(Date.now() - 730 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        toDate: new Date().toISOString().split('T')[0]
+        toDate: new Date().toISOString().split('T')[0],
+        verifiedOnly: false,
+        limit: 50
       }
 
-      const transactions = await nadlanAPI.searchTransactions(searchParams)
+      const transactions = await realIsraeliGovDataAPI.searchNationalTransactions(searchParams)
+      const statistics = realIsraeliGovDataAPI.calculateNationalStatistics(transactions)
       
       if (transactions.length === 0) {
-        toast.warning('לא נמצאו עסקאות מתאימות בנדל"ן')
+        toast.warning('לא נמצאו עסקאות')
       } else {
         setNadlanTransactions(transactions)
         setShowNadlanResults(true)
-        toast.success(`נמצאו ${transactions.length} עסקאות מתאימות מנדל"ן`)
+        toast.success(`נמצאו ${transactions.length} עסקאות מגרשים מכל רחבי ישראל! 🇮🇱`, {
+          description: `מחיר ממוצע: ₪${statistics.avgPricePerSqm.toLocaleString()}/מ"ר`,
+          duration: 6000
+        })
       }
     } catch (error) {
-      toast.error('שגיאה בשליפת נתונים מנדל"ן')
+      toast.error('שגיאה בשליפת נתונים')
     } finally {
       setIsLoadingNadlan(false)
     }
   }
 
-  const handleAddNadlanTransaction = (transaction: NadlanTransaction) => {
+  const handleAddNadlanTransaction = (transaction: NationalTransactionData) => {
     const newComparable: Partial<LandComparable> = {
       id: transaction.dealId,
-      address: `${transaction.street} ${transaction.houseNumber || ''}, ${transaction.city}`.trim(),
+      address: `${transaction.street} ${transaction.houseNumber || ''}, ${transaction.city}, ${transaction.districtHe}`.trim(),
       salePrice: transaction.dealAmount,
       pricePerSqm: transaction.pricePerMeter,
       saleDate: transaction.dealDate,
@@ -127,7 +131,7 @@ export function LandValuationCalculator() {
     }
 
     setComparables(prev => [...prev, newComparable])
-    toast.success('עסקה נוספה להשוואה')
+    toast.success(`עסקה נוספה מ${transaction.city}`)
   }
 
   const handleCalculate = () => {

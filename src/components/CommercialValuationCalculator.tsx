@@ -26,7 +26,7 @@ import {
   CommercialValuationResult,
   CommercialValuationCalculator as ValuationEngine
 } from '@/lib/calculators/commercialValuationCalculator'
-import { NadlanGovAPI, type NadlanTransaction } from '@/lib/nadlanGovAPI'
+import { realIsraeliGovDataAPI, type NationalTransactionData } from '@/lib/realIsraeliGovDataAPI'
 import { RentalYieldAnalysis } from '@/components/RentalYieldAnalysis'
 
 export function CommercialValuationCalculator() {
@@ -55,56 +55,59 @@ export function CommercialValuationCalculator() {
   const [comparables, setComparables] = useState<Partial<CommercialComparable>[]>([])
   const [result, setResult] = useState<CommercialValuationResult | null>(null)
   const [isLoadingNadlan, setIsLoadingNadlan] = useState(false)
-  const [nadlanTransactions, setNadlanTransactions] = useState<NadlanTransaction[]>([])
+  const [nadlanTransactions, setNadlanTransactions] = useState<NationalTransactionData[]>([])
   const [showNadlanResults, setShowNadlanResults] = useState(false)
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('')
 
   const handleFetchNadlanTransactions = async () => {
-    if (!property.city) {
-      toast.error('יש להזין עיר לפני שליפת עסקאות')
-      return
-    }
-
     setIsLoadingNadlan(true)
     try {
-      const nadlanAPI = new NadlanGovAPI()
+      const cities = property.city ? [property.city] : undefined
+      const districts = selectedDistrict ? [selectedDistrict] : undefined
       
       const searchParams = {
-        city: property.city,
-        street: property.address || undefined,
-        propertyType: 'מסחרי',
+        cities,
+        districts,
+        propertyTypes: ['חנות', 'משרד', 'מסחרי'],
         minArea: property.totalArea ? property.totalArea * 0.7 : 40,
         maxArea: property.totalArea ? property.totalArea * 1.3 : 150,
         fromDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        toDate: new Date().toISOString().split('T')[0]
+        toDate: new Date().toISOString().split('T')[0],
+        verifiedOnly: false,
+        limit: 50
       }
 
-      const transactions = await nadlanAPI.searchTransactions(searchParams)
+      const transactions = await realIsraeliGovDataAPI.searchNationalTransactions(searchParams)
+      const statistics = realIsraeliGovDataAPI.calculateNationalStatistics(transactions)
       
       if (transactions.length === 0) {
-        toast.warning('לא נמצאו עסקאות מתאימות בנדל"ן')
+        toast.warning('לא נמצאו עסקאות')
       } else {
         setNadlanTransactions(transactions)
         setShowNadlanResults(true)
-        toast.success(`נמצאו ${transactions.length} עסקאות מתאימות מנדל"ן`)
+        toast.success(`נמצאו ${transactions.length} עסקאות מסחריות מכל רחבי ישראל! 🇮🇱`, {
+          description: `מחיר ממוצע: ₪${statistics.avgPricePerSqm.toLocaleString()}/מ"ר`,
+          duration: 6000
+        })
       }
     } catch (error) {
-      toast.error('שגיאה בשליפת נתונים מנדל"ן')
+      toast.error('שגיאה בשליפת נתונים')
     } finally {
       setIsLoadingNadlan(false)
     }
   }
 
-  const handleAddNadlanTransaction = (transaction: NadlanTransaction) => {
+  const handleAddNadlanTransaction = (transaction: NationalTransactionData) => {
     const newComparable: Partial<CommercialComparable> = {
       id: transaction.dealId,
-      address: `${transaction.street} ${transaction.houseNumber || ''}, ${transaction.city}`.trim(),
+      address: `${transaction.street} ${transaction.houseNumber || ''}, ${transaction.city}, ${transaction.districtHe}`.trim(),
       salePrice: transaction.dealAmount,
       pricePerSqm: transaction.pricePerMeter,
       saleDate: transaction.dealDate,
       area: transaction.area,
       floor: transaction.floor,
       propertyType: 'retail',
-      condition: transaction.renovated ? 'excellent' : 'good',
+      condition: transaction.renovated ? 'excellent' : transaction.conditionHe === 'חדש' ? 'excellent' : 'good',
       buildYear: transaction.buildYear,
       parkingSpaces: transaction.parking ? 1 : 0,
       cornerLocation: false,
@@ -112,7 +115,7 @@ export function CommercialValuationCalculator() {
     }
 
     setComparables(prev => [...prev, newComparable])
-    toast.success('עסקה נוספה להשוואה')
+    toast.success(`עסקה נוספה מ${transaction.city}`)
   }
 
   const handleCalculate = () => {

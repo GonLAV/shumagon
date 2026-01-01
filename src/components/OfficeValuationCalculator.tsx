@@ -33,6 +33,7 @@ import {
   OfficeValuationCalculator as ValuationEngine 
 } from '@/lib/calculators/officeValuationCalculator'
 import { NadlanGovAPI, type NadlanTransaction } from '@/lib/nadlanGovAPI'
+import { realIsraeliGovDataAPI, type NationalTransactionData } from '@/lib/realIsraeliGovDataAPI'
 import { RentalYieldAnalysis } from '@/components/RentalYieldAnalysis'
 
 export function OfficeValuationCalculator() {
@@ -118,46 +119,52 @@ export function OfficeValuationCalculator() {
   const [calculationMethod, setCalculationMethod] = useState<'comparable-sales' | 'income-approach' | 'cost-approach'>('comparable-sales')
   const [showDetails, setShowDetails] = useState(false)
   const [isLoadingNadlan, setIsLoadingNadlan] = useState(false)
-  const [nadlanTransactions, setNadlanTransactions] = useState<NadlanTransaction[]>([])
+  const [nadlanTransactions, setNadlanTransactions] = useState<NationalTransactionData[]>([])
   const [showNadlanResults, setShowNadlanResults] = useState(false)
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('')
 
   const handleFetchNadlanTransactions = async () => {
-    if (!property.city) {
-      toast.error('יש להזין עיר לפני שליפת עסקאות')
-      return
-    }
-
     setIsLoadingNadlan(true)
     try {
-      const nadlanAPI = new NadlanGovAPI()
+      const cities = property.city ? [property.city] : undefined
+      const districts = selectedDistrict ? [selectedDistrict] : undefined
       
       const searchParams = {
-        city: property.city,
-        street: property.address || undefined,
-        propertyType: 'משרד',
+        cities,
+        districts,
+        propertyTypes: ['משרד'],
         minArea: property.totalArea ? property.totalArea * 0.7 : 50,
         maxArea: property.totalArea ? property.totalArea * 1.3 : 200,
         fromDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        toDate: new Date().toISOString().split('T')[0]
+        toDate: new Date().toISOString().split('T')[0],
+        verifiedOnly: false,
+        limit: 50
       }
 
-      console.log('[OfficeValuation] Fetching Nadlan transactions with params:', searchParams)
-      const transactions = await nadlanAPI.searchTransactions(searchParams)
+      console.log('[OfficeValuation] 🇮🇱 Fetching transactions from all over Israel:', searchParams)
+      const transactions = await realIsraeliGovDataAPI.searchNationalTransactions(searchParams)
+      
+      const statistics = realIsraeliGovDataAPI.calculateNationalStatistics(transactions)
       
       if (transactions.length === 0) {
-        toast.warning('לא נמצאו עסקאות מתאימות בנדל"ן', {
-          description: 'ניתן להזין עסקאות השוואה ידנית'
+        toast.warning('לא נמצאו עסקאות', {
+          description: 'נסה להרחיב את קריטריוני החיפוש'
         })
       } else {
         setNadlanTransactions(transactions)
         setShowNadlanResults(true)
-        toast.success(`נמצאו ${transactions.length} עסקאות מתאימות מנדל"ן`, {
-          description: 'בחר עסקאות להוספה למחשבון'
+        
+        const citiesFound = Object.keys(statistics.byCity).length
+        const districtsFound = Object.keys(statistics.byDistrict).length
+        
+        toast.success(`נמצאו ${transactions.length} עסקאות מכל רחבי ישראל! 🇮🇱`, {
+          description: `${citiesFound} ערים | ${districtsFound} מחוזות | מחיר ממוצע: ₪${statistics.avgPricePerSqm.toLocaleString()}/מ"ר`,
+          duration: 6000
         })
       }
     } catch (error) {
-      console.error('[OfficeValuation] Failed to fetch Nadlan transactions:', error)
-      toast.error('שגיאה בשליפת נתונים מנדל"ן', {
+      console.error('[OfficeValuation] Failed to fetch transactions:', error)
+      toast.error('שגיאה בשליפת נתונים', {
         description: error instanceof Error ? error.message : 'נסה שוב מאוחר יותר'
       })
     } finally {
@@ -165,16 +172,16 @@ export function OfficeValuationCalculator() {
     }
   }
 
-  const handleAddNadlanTransaction = (transaction: NadlanTransaction) => {
+  const handleAddNadlanTransaction = (transaction: NationalTransactionData) => {
     const newComparable: Partial<OfficeComparable> = {
       id: transaction.dealId,
-      address: `${transaction.street} ${transaction.houseNumber || ''}, ${transaction.city}`.trim(),
+      address: `${transaction.street} ${transaction.houseNumber || ''}, ${transaction.city}, ${transaction.districtHe}`.trim(),
       salePrice: transaction.dealAmount,
       pricePerSqm: transaction.pricePerMeter,
       saleDate: transaction.dealDate,
       area: transaction.area,
       floor: transaction.floor,
-      condition: transaction.renovated ? 'excellent' : 'good',
+      condition: transaction.renovated ? 'excellent' : transaction.conditionHe === 'חדש' ? 'excellent' : 'good',
       officeClass: 'B',
       parkingSpaces: transaction.parking ? 1 : 0,
       buildYear: transaction.buildYear,
@@ -182,7 +189,7 @@ export function OfficeValuationCalculator() {
     }
 
     setComparables(prev => [...prev, newComparable])
-    toast.success('עסקה נוספה להשוואה')
+    toast.success(`עסקה נוספה מ${transaction.city}`)
   }
 
   const handleCalculate = () => {
@@ -604,31 +611,97 @@ export function OfficeValuationCalculator() {
         <TabsContent value="comparables" className="space-y-6">
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>עסקאות השוואה</CardTitle>
-                  <CardDescription>
-                    הוסף עסקאות דומות לניתוח השוואתי - מומלץ 3-7 עסקאות
-                  </CardDescription>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <CardTitle>עסקאות השוואה מכל רחבי ישראל 🇮🇱</CardTitle>
+                    <CardDescription>
+                      שלוף עסקאות ממאגר ארצי - כל הערים והמחוזות
+                    </CardDescription>
+                  </div>
                 </div>
-                <Button
-                  onClick={handleFetchNadlanTransactions}
-                  disabled={isLoadingNadlan || !property.city}
-                  variant="default"
-                  className="gap-2"
-                >
-                  {isLoadingNadlan ? (
-                    <>
-                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      טוען...
-                    </>
-                  ) : (
-                    <>
-                      <CloudArrowDown className="w-5 h-5" weight="duotone" />
-                      שלוף מנדל"ן
-                    </>
-                  )}
-                </Button>
+                
+                <div className="p-4 bg-primary/5 rounded-lg border border-primary/20 space-y-3">
+                  <div className="text-sm font-semibold text-primary">סינון נתונים ארצי</div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div className="space-y-2">
+                      <Label className="text-xs">מחוז</Label>
+                      <Select value={selectedDistrict} onValueChange={setSelectedDistrict}>
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="כל המחוזות" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="">כל המחוזות</SelectItem>
+                          <SelectItem value="תל אביב">תל אביב</SelectItem>
+                          <SelectItem value="מרכז">מרכז</SelectItem>
+                          <SelectItem value="ירושלים">ירושלים</SelectItem>
+                          <SelectItem value="חיפה">חיפה</SelectItem>
+                          <SelectItem value="צפון">צפון</SelectItem>
+                          <SelectItem value="דרום">דרום</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label className="text-xs">עיר</Label>
+                      <Select
+                        value={property.city}
+                        onValueChange={(value) => setProperty({ ...property, city: value })}
+                      >
+                        <SelectTrigger className="bg-background">
+                          <SelectValue placeholder="כל הערים" />
+                        </SelectTrigger>
+                        <SelectContent className="max-h-72">
+                          <SelectItem value="">כל הערים</SelectItem>
+                          <SelectItem value="תל אביב-יפו">תל אביב-יפו</SelectItem>
+                          <SelectItem value="רמת גן">רמת גן</SelectItem>
+                          <SelectItem value="גבעתיים">גבעתיים</SelectItem>
+                          <SelectItem value="הרצליה">הרצליה</SelectItem>
+                          <SelectItem value="הוד השרון">הוד השרון</SelectItem>
+                          <SelectItem value="פתח תקווה">פתח תקווה</SelectItem>
+                          <SelectItem value="רעננה">רעננה</SelectItem>
+                          <SelectItem value="ראשון לציון">ראשון לציון</SelectItem>
+                          <SelectItem value="רחובות">רחובות</SelectItem>
+                          <SelectItem value="בת ים">בת ים</SelectItem>
+                          <SelectItem value="חולון">חולון</SelectItem>
+                          <SelectItem value="ירושלים">ירושלים</SelectItem>
+                          <SelectItem value="חיפה">חיפה</SelectItem>
+                          <SelectItem value="נתניה">נתניה</SelectItem>
+                          <SelectItem value="באר שבע">באר שבע</SelectItem>
+                          <SelectItem value="אשדוד">אשדוד</SelectItem>
+                          <SelectItem value="אשקלון">אשקלון</SelectItem>
+                          <SelectItem value="נהריה">נהריה</SelectItem>
+                          <SelectItem value="כרמיאל">כרמיאל</SelectItem>
+                          <SelectItem value="אילת">אילת</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="flex items-end">
+                      <Button
+                        onClick={handleFetchNadlanTransactions}
+                        disabled={isLoadingNadlan}
+                        variant="default"
+                        className="gap-2 w-full"
+                      >
+                        {isLoadingNadlan ? (
+                          <>
+                            <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                            טוען...
+                          </>
+                        ) : (
+                          <>
+                            <CloudArrowDown className="w-5 h-5" weight="duotone" />
+                            שלוף מכל הארץ
+                          </>
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    💡 השאר ריק לחיפוש בכל הארץ, או בחר מחוז/עיר ספציפיים
+                  </div>
+                </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -639,7 +712,7 @@ export function OfficeValuationCalculator() {
                       <div className="flex items-center gap-2">
                         <CheckIcon className="w-5 h-5 text-primary" weight="duotone" />
                         <div>
-                          <div className="font-semibold">נמצאו {nadlanTransactions.length} עסקאות מנדל"ן</div>
+                          <div className="font-semibold">🇮🇱 נמצאו {nadlanTransactions.length} עסקאות מכל רחבי ישראל</div>
                           <div className="text-sm text-muted-foreground">לחץ על עסקה להוספה למחשבון</div>
                         </div>
                       </div>
@@ -666,6 +739,14 @@ export function OfficeValuationCalculator() {
                                 <div className="font-medium">
                                   {transaction.street} {transaction.houseNumber}, {transaction.city}
                                 </div>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Badge variant="secondary" className="text-xs">
+                                    {transaction.districtHe}
+                                  </Badge>
+                                  <Badge variant="outline" className="text-xs">
+                                    {transaction.propertyTypeHe}
+                                  </Badge>
+                                </div>
                                 <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
                                   <div>
                                     <span className="font-medium">מחיר:</span> {transaction.dealAmount.toLocaleString('he-IL')} ₪
@@ -683,7 +764,7 @@ export function OfficeValuationCalculator() {
                                 {transaction.verified && (
                                   <Badge variant="outline" className="text-xs">
                                     <CheckIcon className="w-3 h-3 ml-1" />
-                                    מאומת
+                                    מאומת ממקור ממשלתי
                                   </Badge>
                                 )}
                               </div>
