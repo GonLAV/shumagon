@@ -98,6 +98,8 @@ export function BettermentLevyCalculator() {
   const [propertyAddress, setPropertyAddress] = useState<string>('')
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null)
   const [showGuide, setShowGuide] = useState(false)
+  const [selectedForComparison, setSelectedForComparison] = useState<string[]>([])
+  const [comparisonView, setComparisonView] = useState<'grid' | 'table'>('grid')
   const [showDisclaimer, setShowDisclaimer] = useState(true)
   const [planValidationStatus, setPlanValidationStatus] = useState<{prev?: string, new?: string}>({})
   const [autoFetchingPrev, setAutoFetchingPrev] = useState(false)
@@ -889,7 +891,32 @@ export function BettermentLevyCalculator() {
     )
   }
 
+  const toggleScenarioSelection = (id: string) => {
+    setSelectedForComparison(current => 
+      current.includes(id) 
+        ? current.filter(i => i !== id)
+        : [...current, id]
+    )
+  }
+
   if (comparisonMode && scenarios && scenarios.length > 0) {
+    const scenarioResults = scenarios.map(scenario => ({
+      scenario,
+      result: calculateScenarioResult(scenario)
+    }))
+
+    const selectedScenarios = scenarioResults.filter(sr => 
+      selectedForComparison.includes(sr.scenario.id)
+    )
+
+    const toggleScenarioSelection = (id: string) => {
+      setSelectedForComparison(current => 
+        current.includes(id) 
+          ? current.filter(i => i !== id)
+          : [...current, id]
+      )
+    }
+
     return (
       <div className="container mx-auto space-y-6">
         <motion.div
@@ -907,12 +934,30 @@ export function BettermentLevyCalculator() {
                   השוואת תרחישי היטל השבחה
                 </h1>
                 <p className="text-muted-foreground">
-                  השוואה צד לצד של מספר תרחישים
+                  השוואה צד לצד של מספר תרחישים - עלות וביצועים
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 bg-muted p-1 rounded-lg">
+                <Button
+                  variant={comparisonView === 'grid' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setComparisonView('grid')}
+                  className="gap-2"
+                >
+                  כרטיסים
+                </Button>
+                <Button
+                  variant={comparisonView === 'table' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setComparisonView('table')}
+                  className="gap-2"
+                >
+                  טבלה
+                </Button>
+              </div>
               <Button
                 variant="outline"
                 onClick={() => setComparisonMode(false)}
@@ -924,10 +969,275 @@ export function BettermentLevyCalculator() {
             </div>
           </div>
 
+          {selectedForComparison.length >= 2 && (
+            <Card className="glass-effect p-6 bg-gradient-to-br from-accent/10 to-primary/10 border-accent/50">
+              <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                <ChartLine className="w-6 h-6 text-accent" weight="duotone" />
+                סיכום השוואתי - {selectedForComparison.length} תרחישים נבחרו
+              </h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-background/80 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-2">טווח עלות היטל</div>
+                  <div className="space-y-1">
+                    <div className="font-mono text-lg font-bold text-success">
+                      מינימום: ₪{Math.min(...selectedScenarios.filter(sr => sr.result).map(sr => sr.result!.levy)).toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                    </div>
+                    <div className="font-mono text-lg font-bold text-destructive">
+                      מקסימום: ₪{Math.max(...selectedScenarios.filter(sr => sr.result).map(sr => sr.result!.levy)).toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-background/80 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-2">הפרש עלות</div>
+                  <div className="font-mono text-lg font-bold text-warning">
+                    ₪{(Math.max(...selectedScenarios.filter(sr => sr.result).map(sr => sr.result!.levy)) - 
+                       Math.min(...selectedScenarios.filter(sr => sr.result).map(sr => sr.result!.levy))).toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {((Math.max(...selectedScenarios.filter(sr => sr.result).map(sr => sr.result!.levy)) - 
+                       Math.min(...selectedScenarios.filter(sr => sr.result).map(sr => sr.result!.levy))) / 
+                       Math.min(...selectedScenarios.filter(sr => sr.result).map(sr => sr.result!.levy)) * 100).toFixed(1)}% הבדל
+                  </div>
+                </div>
+
+                <div className="p-4 bg-background/80 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-2">טווח תוספת זכויות</div>
+                  <div className="space-y-1">
+                    <div className="font-mono text-lg font-bold text-success">
+                      {Math.min(...selectedScenarios.filter(sr => sr.result).map(sr => sr.result!.delta.totalAreaDelta)).toLocaleString('he-IL')} מ"ר
+                    </div>
+                    <div className="font-mono text-lg font-bold">
+                      {Math.max(...selectedScenarios.filter(sr => sr.result).map(sr => sr.result!.delta.totalAreaDelta)).toLocaleString('he-IL')} מ"ר
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-background/80 rounded-lg">
+                  <div className="text-sm text-muted-foreground mb-2">עלות ממוצעת למ"ר</div>
+                  <div className="font-mono text-lg font-bold text-primary">
+                    ₪{(selectedScenarios.filter(sr => sr.result).reduce((sum, sr) => 
+                      sum + (sr.result!.levy / sr.result!.delta.totalAreaDelta), 0) / 
+                      selectedScenarios.filter(sr => sr.result).length).toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    עלות היטל ממוצעת לכל מ"ר זכויות
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-4 p-4 bg-background/60 rounded-lg">
+                <div className="text-sm font-semibold mb-3">המלצה אופטימלית:</div>
+                <div className="flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-success flex-shrink-0 mt-0.5" weight="fill" />
+                  <div className="text-sm text-muted-foreground">
+                    {(() => {
+                      const bestValue = selectedScenarios.filter(sr => sr.result).reduce((best, sr) => {
+                        const costPerSqm = sr.result!.levy / sr.result!.delta.totalAreaDelta
+                        const bestCostPerSqm = best.result!.levy / best.result!.delta.totalAreaDelta
+                        return costPerSqm < bestCostPerSqm ? sr : best
+                      })
+                      const costPerSqm = bestValue.result!.levy / bestValue.result!.delta.totalAreaDelta
+                      return (
+                        <>
+                          <strong className="text-accent">{bestValue.scenario.name}</strong> מציע את 
+                          העלות הנמוכה ביותר למ"ר (₪{costPerSqm.toLocaleString('he-IL', { maximumFractionDigits: 0 })}/מ"ר) 
+                          עם תוספת זכויות של {bestValue.result!.delta.totalAreaDelta.toLocaleString('he-IL')} מ"ר
+                        </>
+                      )
+                    })()}
+                  </div>
+                </div>
+              </div>
+            </Card>
+          )}
+
+          {comparisonView === 'table' && selectedForComparison.length >= 2 ? (
+            <Card className="glass-effect overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-muted/50">
+                    <tr>
+                      <th className="text-right p-4 font-semibold">פרמטר</th>
+                      {selectedScenarios.map(sr => (
+                        <th key={sr.scenario.id} className="text-center p-4 font-semibold border-r border-border">
+                          <div className="flex flex-col items-center gap-2">
+                            <span>{sr.scenario.name}</span>
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              onClick={() => toggleScenarioSelection(sr.scenario.id)}
+                              className="h-6 text-xs text-muted-foreground hover:text-destructive"
+                            >
+                              הסר
+                            </Button>
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr className="border-t border-border">
+                      <td className="p-4 font-medium bg-muted/20">תכנית קודמת</td>
+                      {selectedScenarios.map(sr => (
+                        <td key={sr.scenario.id} className="p-4 text-center border-r border-border font-mono text-sm">
+                          {sr.scenario.previousStatus.planNumber || '-'}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-t border-border">
+                      <td className="p-4 font-medium bg-muted/20">תכנית חדשה</td>
+                      {selectedScenarios.map(sr => (
+                        <td key={sr.scenario.id} className="p-4 text-center border-r border-border font-mono text-sm">
+                          {sr.scenario.newStatus.planNumber || '-'}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-t border-border">
+                      <td className="p-4 font-medium bg-muted/20">מועד קובע</td>
+                      {selectedScenarios.map(sr => (
+                        <td key={sr.scenario.id} className="p-4 text-center border-r border-border text-sm">
+                          {sr.scenario.determiningDate}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-t border-border">
+                      <td className="p-4 font-medium bg-muted/20">גודל מגרש</td>
+                      {selectedScenarios.map(sr => (
+                        <td key={sr.scenario.id} className="p-4 text-center border-r border-border font-mono">
+                          {sr.scenario.lotSize.toLocaleString('he-IL')} מ"ר
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-t border-border bg-accent/5">
+                      <td className="p-4 font-bold">תוספת זכויות בנייה</td>
+                      {selectedScenarios.map(sr => (
+                        <td key={sr.scenario.id} className="p-4 text-center border-r border-border">
+                          {sr.result ? (
+                            <span className="font-mono text-lg font-bold text-success">
+                              +{sr.result.delta.totalAreaDelta.toLocaleString('he-IL')} מ"ר
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">אין נתונים</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-t border-border">
+                      <td className="p-4 font-medium bg-muted/20">שווי שוק/מ"ר</td>
+                      {selectedScenarios.map(sr => (
+                        <td key={sr.scenario.id} className="p-4 text-center border-r border-border">
+                          {sr.result ? (
+                            <span className="font-mono">
+                              ₪{sr.result.valuePerSqm.toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">-</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-t border-border">
+                      <td className="p-4 font-medium bg-muted/20">שווי השבחה</td>
+                      {selectedScenarios.map(sr => (
+                        <td key={sr.scenario.id} className="p-4 text-center border-r border-border">
+                          {sr.result ? (
+                            <span className="font-mono font-semibold">
+                              ₪{sr.result.bettermentValue.toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">-</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-t border-border bg-primary/5">
+                      <td className="p-4 font-bold">היטל השבחה (50%)</td>
+                      {selectedScenarios.map(sr => (
+                        <td key={sr.scenario.id} className="p-4 text-center border-r border-border">
+                          {sr.result ? (
+                            <span className="font-mono text-xl font-bold text-accent">
+                              ₪{sr.result.levy.toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">-</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-t border-border">
+                      <td className="p-4 font-medium bg-muted/20">עלות למ"ר זכויות</td>
+                      {selectedScenarios.map(sr => (
+                        <td key={sr.scenario.id} className="p-4 text-center border-r border-border">
+                          {sr.result ? (
+                            <div className="space-y-1">
+                              <span className="font-mono font-semibold text-warning">
+                                ₪{(sr.result.levy / sr.result.delta.totalAreaDelta).toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                              </span>
+                              <div className="text-xs text-muted-foreground">
+                                למ"ר תוספת
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">-</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-t border-border">
+                      <td className="p-4 font-medium bg-muted/20">טווח שמרני (85%)</td>
+                      {selectedScenarios.map(sr => (
+                        <td key={sr.scenario.id} className="p-4 text-center border-r border-border">
+                          {sr.result ? (
+                            <span className="font-mono text-sm">
+                              ₪{sr.result.conservativeLevy.toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">-</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                    <tr className="border-t border-border">
+                      <td className="p-4 font-medium bg-muted/20">טווח מקסימלי (115%)</td>
+                      {selectedScenarios.map(sr => (
+                        <td key={sr.scenario.id} className="p-4 text-center border-r border-border">
+                          {sr.result ? (
+                            <span className="font-mono text-sm">
+                              ₪{sr.result.maximumLevy.toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                            </span>
+                          ) : (
+                            <span className="text-muted-foreground text-sm">-</span>
+                          )}
+                        </td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          ) : null}
+
+          {comparisonView === 'grid' && (
+            <>
+              {selectedForComparison.length < 2 && (
+                <Alert className="bg-accent/10 border-accent/30">
+                  <Info className="h-4 w-4" weight="duotone" />
+                  <AlertTitle>בחר לפחות 2 תרחישים להשוואה</AlertTitle>
+                  <AlertDescription>
+                    סמן את התיבות בתרחישים שברצונך להשוות כדי לקבל ניתוח מפורט של הבדלי עלות וביצועים
+                  </AlertDescription>
+                </Alert>
+              )}
+            </>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
             <AnimatePresence mode="popLayout">
               {scenarios.map((scenario, index) => {
                 const scenarioResult = calculateScenarioResult(scenario)
+                const isSelected = selectedForComparison.includes(scenario.id)
                 
                 return (
                   <motion.div
@@ -937,13 +1247,30 @@ export function BettermentLevyCalculator() {
                     exit={{ opacity: 0, scale: 0.9 }}
                     transition={{ delay: index * 0.05 }}
                   >
-                    <Card className="glass-effect p-6 h-full">
+                    <Card className={`glass-effect p-6 h-full transition-all ${
+                      isSelected ? 'ring-2 ring-accent shadow-lg shadow-accent/20' : ''
+                    }`}>
                       <div className="flex items-start justify-between mb-4">
-                        <div className="flex-1">
-                          <h3 className="text-xl font-bold mb-1">{scenario.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            מועד קובע: {scenario.determiningDate}
-                          </p>
+                        <div className="flex items-start gap-3 flex-1">
+                          <div className="pt-1">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => toggleScenarioSelection(scenario.id)}
+                              className="w-5 h-5 rounded border-border text-accent focus:ring-accent focus:ring-offset-0 cursor-pointer"
+                            />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="text-xl font-bold mb-1">{scenario.name}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              מועד קובע: {scenario.determiningDate}
+                            </p>
+                            {isSelected && (
+                              <Badge variant="default" className="mt-2 bg-accent text-accent-foreground">
+                                נבחר להשוואה
+                              </Badge>
+                            )}
+                          </div>
                         </div>
                         <div className="flex gap-2">
                           <Button
@@ -1032,6 +1359,30 @@ export function BettermentLevyCalculator() {
                                 <div className="flex justify-between">
                                   <span>מקסימלי:</span>
                                   <span className="font-mono">₪{scenarioResult.maximumLevy.toLocaleString('he-IL', { maximumFractionDigits: 0 })}</span>
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="p-4 bg-warning/10 border border-warning/30 rounded-lg">
+                              <div className="text-sm font-semibold text-muted-foreground mb-2">ביצועים</div>
+                              <div className="space-y-2 text-xs">
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">עלות למ"ר זכויות:</span>
+                                  <span className="font-mono font-semibold text-warning">
+                                    ₪{(scenarioResult.levy / scenarioResult.delta.totalAreaDelta).toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">יחס עלות/תועלת:</span>
+                                  <span className="font-mono font-semibold">
+                                    {((scenarioResult.levy / scenarioResult.bettermentValue) * 100).toFixed(1)}%
+                                  </span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                  <span className="text-muted-foreground">תוספת קומות:</span>
+                                  <span className="font-mono font-semibold text-success">
+                                    +{scenarioResult.delta.floorsDelta}
+                                  </span>
                                 </div>
                               </div>
                             </div>
