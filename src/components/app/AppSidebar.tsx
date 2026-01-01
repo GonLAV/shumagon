@@ -81,7 +81,10 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
       items: [
         { id: 'quicker', label: 'QUICKER - שומה מהירה', icon: Lightning, keywords: ['מהיר', 'פשוט', 'בסיסי', 'חישוב', 'שטח', 'מחיר'] },
         { id: 'calculators', label: 'מחשבונים מקצועיים', icon: Calculator, keywords: ['חישוב', 'התאמות', 'נוסחאות', 'השוואה'] },
-        { id: 'office-valuation', label: 'שווי משרדים', icon: Briefcase, keywords: ['משרדים', 'מסחרי', 'NOI', 'היוון', 'חלל עבודה', 'אופיס'] },
+        { id: 'office-valuation', label: 'שווי משרדים (נדל"ן)', icon: Briefcase, keywords: ['משרדים', 'מסחרי', 'NOI', 'היוון', 'חלל עבודה', 'אופיס', 'nadlan'] },
+        { id: 'residential-valuation', label: 'שווי דירות מגורים (נדל"ן)', icon: House, keywords: ['דירות', 'מגורים', 'דיור', 'nadlan', 'נדלן'] },
+        { id: 'commercial-valuation', label: 'שווי נכסי מסחר (נדל"ן)', icon: Briefcase, keywords: ['מסחר', 'חנויות', 'מסעדות', 'nadlan', 'נדלן'] },
+        { id: 'land-valuation', label: 'שווי קרקעות (נדל"ן)', icon: ChartLineUp, keywords: ['קרקע', 'מגרש', 'זכויות בנייה', 'nadlan', 'נדלן'] },
         { id: 'betterment-levy', label: 'היטל השבחה', icon: Scales, keywords: ['היטל', 'השבחה', 'תכנון', 'זכויות', 'תב"ע', 'מועד קובע'] },
         { id: 'bulk', label: 'שומה מרובה', icon: ListChecks, keywords: ['תיק', 'פורטפוליו', 'מספר נכסים', 'בולק'] },
         { id: 'distribution', label: 'חלוקת יחידות', icon: Buildings, keywords: ['פיצול', 'איזון', 'משקל', 'חלוקה', 'בניין'] },

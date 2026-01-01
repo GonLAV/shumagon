@@ -42,6 +42,9 @@ import { APIUsageAnalytics } from '@/components/APIUsageAnalytics'
 import { APIQuotaManager } from '@/components/APIQuotaManager'
 import { OfficeValuationCalculator } from '@/components/OfficeValuationCalculator'
 import { QuickerCalculator } from '@/components/QuickerCalculator'
+import { ResidentialValuationCalculator } from '@/components/ResidentialValuationCalculator'
+import { CommercialValuationCalculator } from '@/components/CommercialValuationCalculator'
+import { LandValuationCalculator } from '@/components/LandValuationCalculator'
 import { RealBuildingRightsViewer } from '@/components/RealBuildingRightsViewer'
 
 function App() {
@@ -231,6 +234,12 @@ function App() {
         return <APIQuotaManager />
       case 'office-valuation':
         return <OfficeValuationCalculator />
+      case 'residential-valuation':
+        return <ResidentialValuationCalculator />
+      case 'commercial-valuation':
+        return <CommercialValuationCalculator />
+      case 'land-valuation':
+        return <LandValuationCalculator />
       case 'quicker':
         return <QuickerCalculator />
       case 'real-building-rights':

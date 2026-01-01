@@ -60,6 +60,34 @@ This is a professional tool requiring multiple sophisticated features: property 
 4. **Income Capitalization Calculator** - NOI / Cap Rate with scenario analysis
 5. **Multi-Unit Calculator** - Building value allocation to individual units with automatic balancing
 
+### Nadlan-Connected Valuation Calculators (NEW - Real Government API Integration)
+- **Functionality**: Professional valuation calculators for residential, commercial, and land properties with direct integration to the Israeli government's Nadlan.gov.il database for real market transaction data
+- **Purpose**: Provide appraisers with access to real, verified government transaction data to support comparable sales analysis while maintaining professional calculation standards
+- **Trigger**: Navigate to "שווי דירות מגורים (נדל"ן)", "שווי נכסי מסחר (נדל"ן)", or "שווי קרקעות (נדל"ן)" from the sidebar
+- **Progression**: Enter property details → Click "שלוף מנדל"ן" in comparables tab → API fetches real government transactions matching criteria (city, property type, size range, timeframe) → Review fetched transactions → Click "הוסף" to add transactions as comparables → Enter additional comparables manually if needed → Click "חשב שווי" → View detailed valuation results with confidence scoring
+- **Success criteria**:
+  - Real-time connection to nadlan.gov.il government database
+  - Automatic transaction filtering by city, property type, area range (±20-30%), and timeframe (12-24 months)
+  - Transaction data includes: address, sale price, price per sqm, date, area, rooms/features, verified status
+  - Fallback to realistic synthetic data when API unavailable
+  - Professional adjustment calculations for location, area, condition, features, time
+  - Weighted averaging with distance and similarity weighting
+  - Confidence scoring based on sample size and data quality
+  - Detailed results showing: estimated value, value per sqm, value range, positive/negative factors, recommendations
+  
+**Available Nadlan-Connected Calculators:**
+1. **Residential Valuation (דירות מגורים)** - Apartments, penthouses, garden apartments, duplexes with adjustments for: rooms, floor, elevator, parking, balcony, storage, condition, age
+2. **Commercial Valuation (נכסי מסחר)** - Retail, restaurants, warehouses, clinics with adjustments for: corner location, shop window, pedestrian traffic, frontage, parking, accessibility
+3. **Land Valuation (קרקעות)** - Parcels and plots with adjustments for: zoning, building rights, topography, utilities, access, shape, development stage, encumbrances
+4. **Office Valuation (משרדים)** - Already implemented with full Nadlan integration (previous iteration)
+
+**Technical Integration Details:**
+- API endpoint: nadlan.gov.il/api (with rate limiting and fallback)
+- Data normalization handles multiple API response formats
+- Haversine distance calculation for radius filtering
+- Automatic adjustment factor calculations based on property characteristics
+- Real-time statistics: transaction count, avg price per sqm, price range, confidence level
+
 ### Advanced Market Comparison Tool (NEW - Beyond Quicker & Simplex3D)
 - **Functionality**: Intelligent AI-powered search for comparable properties with advanced filtering, sorting, and automatic similarity scoring across multiple criteria
 - **Purpose**: Find the most relevant comparable sales to support professional valuation methodology with precision and transparency
