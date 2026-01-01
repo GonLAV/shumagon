@@ -18,6 +18,8 @@ import {
   CalculatorSourceRegistry 
 } from '@/lib/calculators'
 import type { ValidationResult, CalculatorSource } from '@/lib/calculators'
+import { InteractiveAdjustmentCalculator } from '@/components/InteractiveAdjustmentCalculator'
+import { InteractiveWeightedCalculator } from '@/components/InteractiveWeightedCalculator'
 
 export function ProfessionalCalculators() {
   const [validationResults, setValidationResults] = useState<ValidationResult[]>([])
@@ -283,42 +285,11 @@ export function ProfessionalCalculators() {
         </TabsContent>
 
         <TabsContent value="adjustment">
-          <Card>
-            <CardHeader>
-              <CardTitle>מחשבון התאמות להשוואת עסקאות</CardTitle>
-              <CardDescription>
-                התאמות מפורטות עם תיעוד מלא ושקיפות
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="p-6 rounded-lg bg-muted/30 border-2 border-dashed">
-                <p className="text-center text-muted-foreground">
-                  ממשק מחשבון התאמות - בפיתוח
-                </p>
-                <p className="text-center text-sm text-muted-foreground mt-2">
-                  המחשבון זמין דרך API ויוצג בקרוב
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <InteractiveAdjustmentCalculator />
         </TabsContent>
 
         <TabsContent value="weighted">
-          <Card>
-            <CardHeader>
-              <CardTitle>מחשבון ממוצע משוקלל</CardTitle>
-              <CardDescription>
-                שקלול עסקאות לפי מרחק, דמיון, אמינות ועדכניות
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="p-6 rounded-lg bg-muted/30 border-2 border-dashed">
-                <p className="text-center text-muted-foreground">
-                  ממשק מחשבון ממוצע משוקלל - בפיתוח
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+          <InteractiveWeightedCalculator />
         </TabsContent>
 
         <TabsContent value="cost">
