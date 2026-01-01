@@ -29,6 +29,8 @@ import {
 } from '@/components/ui/accordion'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { planningDatabaseAPI, autoFetchBuildingRights, validateAndComparePlans } from '@/lib/planningDatabaseAPI'
+import { marketDataSync } from '@/lib/marketDataSync'
+import type { MarketTransactionData } from '@/lib/israelGovAPI'
 
 interface PlanningStatus {
   planNumber: string
@@ -101,6 +103,10 @@ export function BettermentLevyCalculator() {
   const [autoFetchingPrev, setAutoFetchingPrev] = useState(false)
   const [autoFetchingNew, setAutoFetchingNew] = useState(false)
   const [autoFetchEnabled, setAutoFetchEnabled] = useState(true)
+  const [marketDataFetching, setMarketDataFetching] = useState(false)
+  const [fetchedTransactions, setFetchedTransactions] = useState<MarketTransactionData[]>([])
+  const [propertyLocation, setPropertyLocation] = useState({ latitude: 32.0853, longitude: 34.7818 })
+  const [searchRadius, setSearchRadius] = useState(2)
 
   const [previousStatus, setPreviousStatus] = useState<PlanningStatus>({
     planNumber: '',
@@ -305,6 +311,65 @@ export function BettermentLevyCalculator() {
     } finally {
       setAutoFetchingPrev(false)
       setAutoFetchingNew(false)
+    }
+  }
+
+  const handleAutoFetchMarketData = async () => {
+    if (!determiningDate) {
+      toast.error('יש להזין מועד קובע לפני שליפת נתוני שוק')
+      return
+    }
+
+    setMarketDataFetching(true)
+    
+    try {
+      const result = await marketDataSync.autoFetchForBettermentLevy(
+        determiningDate,
+        propertyLocation,
+        searchRadius
+      )
+
+      setFetchedTransactions(result.transactions)
+
+      if (result.transactions.length > 0) {
+        setMarketValue(result.marketValue.valuePerSqm)
+        
+        const confidenceEmoji = result.marketValue.confidence === 'high' ? '🟢' : 
+                               result.marketValue.confidence === 'medium' ? '🟡' : '🔴'
+        
+        toast.success(`נמצאו ${result.transactions.length} עסקאות רלוונטיות! ${confidenceEmoji}`, {
+          description: `שווי שוק: ₪${result.marketValue.valuePerSqm.toLocaleString('he-IL')}/מ"ר | רמת ביטחון: ${
+            result.marketValue.confidence === 'high' ? 'גבוהה' : 
+            result.marketValue.confidence === 'medium' ? 'בינונית' : 'נמוכה'
+          }`,
+          duration: 6000
+        })
+
+        const marketDataItems: MarketData[] = result.transactions.slice(0, 10).map(t => ({
+          transactionDate: t.transactionDate,
+          pricePerSqm: t.pricePerSqm,
+          source: t.source === 'land-registry' ? 'רשם המקרקעין' : 
+                  t.source === 'tax-authority' ? 'רשות המיסים' : 
+                  t.source === 'broker' ? 'מתווך' : 'פלטפורמה',
+          location: t.address,
+          verified: t.verified
+        }))
+        
+        setMarketDataSource(marketDataItems)
+      } else {
+        toast.warning('לא נמצאו עסקאות רלוונטיות למועד הקובע', {
+          description: 'ניתן להזין ידנית את שווי השוק למ"ר או להרחיב את רדיוס החיפוש',
+          duration: 5000
+        })
+      }
+      
+    } catch (error) {
+      console.error('Error fetching market data:', error)
+      toast.error('שגיאה בשליפת נתוני שוק', {
+        description: 'אנא נסה שוב או הזן נתונים ידנית'
+      })
+    } finally {
+      setMarketDataFetching(false)
     }
   }
 
@@ -2079,15 +2144,110 @@ export function BettermentLevyCalculator() {
               </div>
             </Card>
 
+            <Card className="glass-effect p-6 mb-4">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Database className="w-5 h-5 text-primary" weight="duotone" />
+                שליפה אוטומטית של נתוני שוק
+              </h3>
+              <Alert className="mb-4 bg-primary/10 border-primary/30">
+                <Info className="h-4 w-4 text-primary" weight="duotone" />
+                <AlertTitle className="text-sm font-bold">🎯 שליפה אוטומטית ממאגרי נדל״ן ממשלתיים</AlertTitle>
+                <AlertDescription className="text-xs mt-2 space-y-1">
+                  <p>המערכת תשלוף אוטומטית עסקאות רלוונטיות למועד הקובע ממאגרי רשם המקרקעין ורשות המיסים</p>
+                  <p className="text-success font-semibold">✨ אין צורך בהזנה ידנית - הכל אוטומטי!</p>
+                </AlertDescription>
+              </Alert>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="search-latitude">קו רוחב (Latitude)</Label>
+                  <Input
+                    id="search-latitude"
+                    type="number"
+                    step="0.0001"
+                    value={propertyLocation.latitude}
+                    onChange={(e) => setPropertyLocation({ ...propertyLocation, latitude: Number(e.target.value) })}
+                    className="font-mono"
+                    placeholder="32.0853"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    ברירת מחדל: תל אביב (32.0853)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="search-longitude">קו אורך (Longitude)</Label>
+                  <Input
+                    id="search-longitude"
+                    type="number"
+                    step="0.0001"
+                    value={propertyLocation.longitude}
+                    onChange={(e) => setPropertyLocation({ ...propertyLocation, longitude: Number(e.target.value) })}
+                    className="font-mono"
+                    placeholder="34.7818"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    ברירת מחדל: תל אביב (34.7818)
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="search-radius">רדיוס חיפוש (ק״מ)</Label>
+                  <Input
+                    id="search-radius"
+                    type="number"
+                    step="0.5"
+                    min="0.5"
+                    max="10"
+                    value={searchRadius}
+                    onChange={(e) => setSearchRadius(Number(e.target.value))}
+                    className="font-mono"
+                    placeholder="2"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    מומלץ: 1-3 ק״מ לאזור עירוני
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 p-3 bg-accent/10 border border-accent/30 rounded-lg">
+                <p className="text-xs text-muted-foreground flex items-start gap-2">
+                  <Info className="w-4 h-4 text-accent flex-shrink-0 mt-0.5" weight="duotone" />
+                  <span>
+                    <strong>איך למצוא קואורדינטות:</strong> חפש את הכתובת ב-Google Maps, לחץ ימני על הנקודה ובחר "What's here?" - הקואורדינטות יופיעו בחלק התחתון.
+                    או השאר את ערכי ברירת המחדל לאזור תל אביב.
+                  </span>
+                </p>
+              </div>
+
+              {fetchedTransactions.length > 0 && (
+                <div className="mt-4">
+                  <Badge variant="default" className="gap-2">
+                    <CheckCircle className="w-4 h-4" weight="fill" />
+                    נמצאו {fetchedTransactions.length} עסקאות רלוונטיות
+                  </Badge>
+                </div>
+              )}
+            </Card>
+
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Button
                 size="lg"
-                onClick={handleAIAnalysis}
+                onClick={handleAutoFetchMarketData}
                 className="gap-2"
-                disabled={!determiningDate}
+                disabled={!determiningDate || marketDataFetching}
               >
-                <TrendUp className="w-5 h-5" weight="duotone" />
-                שלוף נתוני שוק למועד הקובע
+                {marketDataFetching ? (
+                  <>
+                    <Database className="w-5 h-5 animate-pulse" weight="duotone" />
+                    שולף נתונים...
+                  </>
+                ) : (
+                  <>
+                    <TrendUp className="w-5 h-5" weight="duotone" />
+                    שלוף נתוני שוק אוטומטית
+                  </>
+                )}
               </Button>
 
               <Button

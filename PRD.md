@@ -240,6 +240,56 @@ This is a professional tool requiring multiple sophisticated features: property 
   - **Error Handling**: Graceful degradation if some data sources unavailable, shows which sources succeeded
   - **Professional UI**: Glass-morphism cards, gradient headings, color-coded adjustments (green/red), success badges
 
+### Automated Market Data Synchronization (NEW - Real Estate Intelligence)
+- **Functionality**: Automated system for continuous synchronization of real estate transaction data from government databases (Land Registry, Tax Authority) with intelligent filtering, duplicate detection, and quality scoring
+- **Purpose**: Maintain an always-current database of market transactions without manual data entry, enabling accurate market analysis and betterment levy calculations
+- **Trigger**: Runs automatically on schedule (hourly/daily/weekly) or manually via "סנכרון נתוני שוק" in main navigation
+- **Progression**: 
+  - Automatic: System checks schedule → Connects to government APIs → Fetches transactions by region → Filters by criteria → Detects duplicates → Updates database → Sends notification
+  - Manual: Click "הרץ סנכרון כעת" → Progress bar shows 0-100% → System fetches data from configured regions → Real-time statistics update → Completion notification with results summary
+- **Success criteria**:
+  - Connects to multiple government data sources (Land Registry רשם המקרקעין, Tax Authority רשות המיסים, Meidanet Platform)
+  - Fetches transactions for multiple geographic regions simultaneously (Tel Aviv, Jerusalem, Haifa, etc.)
+  - Intelligent filtering: property type, price range, area range, verification status, data sources
+  - Automatic duplicate detection based on address, date, price, and area matching
+  - Data quality scoring: verified vs unverified, complete vs incomplete records
+  - Configurable sync intervals: real-time, hourly, daily, weekly
+  - Visual sync status dashboard showing:
+    * Last sync timestamp
+    * New records found
+    * Total fetched
+    * Duration
+    * Data quality metrics (verified %, complete %)
+  - Search region configuration with coordinates and radius (0.5-10km)
+  - Sync history log with status, errors, and statistics
+  - Real-time progress tracking during sync
+  - Auto-enrichment option: fetch additional data (planning status, tax assessment, GIS data) for each transaction
+  - Integration with Betterment Levy Calculator for automatic market value determination
+  - Performance: Fetch and process 100+ transactions in under 10 seconds
+  - Error resilience: Continues sync even if one region/source fails
+  - Visual indicators: Green badges for successful sync, yellow for partial, red for failed
+
+### Betterment Levy Market Data Integration (NEW - Automated Valuation)
+- **Functionality**: Automatic fetching of relevant market transactions for betterment levy calculations based on the determining date and property location
+- **Purpose**: Eliminate manual market research by automatically pulling comparable transactions from government databases for accurate betterment valuation
+- **Trigger**: Click "שלוף נתוני שוק אוטומטית" in Betterment Levy Calculator → Calculation tab
+- **Progression**: 
+  - Enter determining date + property coordinates + search radius → Click "שלוף נתוני שוק אוטומטית" → System queries government databases for transactions near determining date (±6 months) → Filters by location (radius in km) and property type → Calculates market value per sqm automatically → Displays confidence level (high/medium/low) based on data points → Shows transaction list with details → Auto-fills market value field
+- **Success criteria**:
+  - Fetches transactions within configurable time window (default ±6 months from determining date)
+  - Location-based search using coordinates (latitude/longitude) + radius
+  - Real-time API integration with government databases
+  - Automatic market value calculation using median price per sqm
+  - Confidence scoring: High (10+ transactions), Medium (5-9), Low (<5)
+  - Displays found transactions with: date, address, price/sqm, source, verification status
+  - Auto-populates market value in calculator
+  - Visual feedback: Green badge for high confidence, yellow for medium, red for low
+  - Helpful tooltips for coordinate input with Google Maps instructions
+  - Default coordinates for major cities (Tel Aviv, Jerusalem, etc.)
+  - Integration with market data sync system for offline operation
+  - Performance: Fetch and analyze transactions in 3-5 seconds
+  - Toast notifications with detailed results and confidence level
+
 ### Market Trends Analytics
 - **Functionality**: Visual analytics showing price trends, days on market, price per sqm by neighborhood
 - **Purpose**: Provide market context and support valuation decisions

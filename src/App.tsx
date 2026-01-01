@@ -36,6 +36,7 @@ import { RentalDataManager } from '@/components/RentalDataManager'
 import { RentalAnalyzer } from '@/components/RentalAnalyzer'
 import { BettermentLevyCalculator } from '@/components/BettermentLevyCalculator'
 import { PropertyHistoricalSearch } from '@/components/PropertyHistoricalSearch'
+import { MarketDataSync } from '@/components/MarketDataSync'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -214,6 +215,8 @@ function App() {
         return <BettermentLevyCalculator />
       case 'historical-search':
         return <PropertyHistoricalSearch />
+      case 'market-sync':
+        return <MarketDataSync />
       default:
         return (
           <Dashboard
