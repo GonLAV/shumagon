@@ -30,6 +30,7 @@ import { AuditTrail } from '@/components/AuditTrail'
 import { AIInsights } from '@/components/AIInsights'
 import { TransactionImporter } from '@/components/TransactionImporter'
 import { AutomatedReports } from '@/components/AutomatedReports'
+import { ProfessionalCalculators } from '@/components/ProfessionalCalculators'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -101,7 +102,7 @@ function App() {
 
       <main className="container mx-auto px-6 py-8 relative">
         <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-          <TabsList className="mb-8 glass-effect p-1.5 grid grid-cols-6 lg:grid-cols-23 gap-1">
+          <TabsList className="mb-8 glass-effect p-1.5 grid grid-cols-6 lg:grid-cols-24 gap-1">
             <TabsTrigger value="dashboard" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <House size={18} weight="duotone" />
               <span className="hidden sm:inline">לוח בקרה</span>
@@ -193,6 +194,10 @@ function App() {
             <TabsTrigger value="automated-reports" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <ChartBar size={18} weight="duotone" />
               <span className="hidden sm:inline">דוחות מגמות</span>
+            </TabsTrigger>
+            <TabsTrigger value="calculators" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Calculator size={18} weight="duotone" />
+              <span className="hidden sm:inline">מחשבונים</span>
             </TabsTrigger>
           </TabsList>
 
@@ -329,6 +334,10 @@ function App() {
 
           <TabsContent value="automated-reports" className="mt-0">
             <AutomatedReports />
+          </TabsContent>
+
+          <TabsContent value="calculators" className="mt-0">
+            <ProfessionalCalculators />
           </TabsContent>
         </Tabs>
       </main>

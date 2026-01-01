@@ -40,6 +40,26 @@ This is a professional tool requiring multiple sophisticated features: property 
 - **Progression**: Set search parameters (radius, similarity threshold) → Click "הפעל ניתוח AI מתקדם" → AI generates 5 comparable properties with realistic addresses, prices, and adjustments → Review comparables → Toggle selection → Click "חשב מחדש" to update valuation → Click "עדכן ניתוח AI" for professional insights in Hebrew
 - **Success criteria**: Generates realistic comparables within 10 seconds, calculates adjustments automatically, provides confidence score, allows manual refinement, generates professional analysis in Hebrew
 
+### Professional Calculation System (NEW - Critical for Legal Compliance)
+- **Functionality**: Comprehensive suite of professional appraisal calculators with complete transparency, legal source documentation, and automatic regression testing
+- **Purpose**: Provide appraisers with mathematically precise, legally defensible calculation tools that show every step of the calculation process
+- **Trigger**: Click "מחשבונים" tab in main navigation
+- **Progression**: Select calculator type (Adjustments/Weighted Average/Cost Approach/Income Capitalization/Multi-Unit) → Enter parameters → View detailed calculation breakdown → Review formula and legal sources → Export results to report
+- **Success criteria**: 
+  - All formulas fully transparent with step-by-step breakdown
+  - Every calculator documented with legal source (Appraiser Standard 19-22)
+  - Automatic regression tests validate accuracy
+  - Professional Hebrew narrative ready for reports
+  - Audit trail logs all calculations
+  - Override capability with mandatory reasoning documentation
+
+**Available Calculators:**
+1. **Adjustment Calculator** - Detailed adjustments for comparable transactions (floor, condition, amenities, time)
+2. **Weighted Average Calculator** - Weighted averaging of comparables by proximity, similarity, reliability, recency
+3. **Cost Approach Calculator** - Reproduction cost minus depreciation plus land value
+4. **Income Capitalization Calculator** - NOI / Cap Rate with scenario analysis
+5. **Multi-Unit Calculator** - Building value allocation to individual units with automatic balancing
+
 ### Advanced Market Comparison Tool (NEW - Beyond Quicker & Simplex3D)
 - **Functionality**: Intelligent AI-powered search for comparable properties with advanced filtering, sorting, and automatic similarity scoring across multiple criteria
 - **Purpose**: Find the most relevant comparable sales to support professional valuation methodology with precision and transparency
