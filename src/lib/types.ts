@@ -512,3 +512,315 @@ export interface ExecutionStep {
   opened?: boolean
   clicked?: boolean
 }
+
+export type ReportTemplate = 'bank' | 'tax' | 'internal' | 'multi-unit' | 'court' | 'betterment-levy' | 'rental'
+export type ReportStandard = 'standard-19' | 'standard-22' | 'custom'
+export type CaseStatus = 'draft' | 'submitted' | 'under-review' | 'approved' | 'closed' | 'archived'
+export type UserRole = 'senior-appraiser' | 'junior-appraiser' | 'intern' | 'admin' | 'viewer'
+
+export interface StandardizedReport {
+  id: string
+  caseId: string
+  propertyId: string
+  template: ReportTemplate
+  standard: ReportStandard
+  version: number
+  status: CaseStatus
+  requiredFields: ReportField[]
+  completedFields: string[]
+  missingFields: string[]
+  regulatoryWarnings: RegulatoryWarning[]
+  sections: ReportSection[]
+  smartFill: SmartFillData
+  versionHistory: ReportVersion[]
+  lockedAt?: string
+  lockedBy?: string
+  digitalSignature?: DigitalSignature
+  createdAt: string
+  updatedAt: string
+  submittedAt?: string
+  approvedAt?: string
+}
+
+export interface ReportField {
+  id: string
+  name: string
+  label: string
+  type: 'text' | 'number' | 'date' | 'select' | 'textarea' | 'file'
+  required: boolean
+  standard?: ReportStandard
+  section: string
+  value?: any
+  validation?: FieldValidation
+  helpText?: string
+}
+
+export interface FieldValidation {
+  min?: number
+  max?: number
+  pattern?: string
+  options?: string[]
+  dependsOn?: string
+  customRule?: string
+}
+
+export interface RegulatoryWarning {
+  id: string
+  severity: 'critical' | 'warning' | 'info'
+  standard: ReportStandard
+  section: string
+  field?: string
+  message: string
+  regulation: string
+  resolution?: string
+  acknowledgedAt?: string
+  acknowledgedBy?: string
+}
+
+export interface SmartFillData {
+  autoCompletedFields: string[]
+  suggestions: FieldSuggestion[]
+  dataSource: 'previous-reports' | 'property-data' | 'government-api' | 'ai-analysis'
+  confidence: number
+}
+
+export interface FieldSuggestion {
+  fieldId: string
+  suggestedValue: any
+  confidence: number
+  source: string
+  reasoning: string
+}
+
+export interface ReportVersion {
+  version: number
+  createdAt: string
+  createdBy: string
+  createdByName: string
+  changes: VersionChange[]
+  comment?: string
+  snapshot: any
+  isLocked: boolean
+}
+
+export interface VersionChange {
+  field: string
+  fieldLabel: string
+  before: any
+  after: any
+  timestamp: string
+}
+
+export interface Case {
+  id: string
+  caseNumber: string
+  clientId: string
+  propertyId: string
+  status: CaseStatus
+  priority: 'low' | 'normal' | 'high' | 'urgent'
+  type: 'single-property' | 'multi-unit' | 'portfolio' | 'land' | 'commercial'
+  assignedTo: string[]
+  reports: string[]
+  invoices: string[]
+  documents: CaseDocument[]
+  timeline: CaseEvent[]
+  tags: string[]
+  dueDate?: string
+  startedAt: string
+  completedAt?: string
+  archivedAt?: string
+  notes?: string
+  internalNotes?: string
+}
+
+export interface CaseDocument {
+  id: string
+  name: string
+  type: 'report' | 'contract' | 'correspondence' | 'photo' | 'plan' | 'other'
+  fileUrl: string
+  uploadedBy: string
+  uploadedAt: string
+  size: number
+  tags: string[]
+}
+
+export interface CaseEvent {
+  id: string
+  type: 'created' | 'assigned' | 'status-changed' | 'report-generated' | 'invoice-sent' | 'payment-received' | 'note-added' | 'document-uploaded' | 'archived'
+  description: string
+  userId: string
+  userName: string
+  timestamp: string
+  metadata?: Record<string, any>
+}
+
+export interface MultiUnitBuilding {
+  id: string
+  address: {
+    street: string
+    city: string
+    neighborhood: string
+    postalCode: string
+  }
+  buildingDetails: {
+    totalFloors: number
+    totalUnits: number
+    buildYear: number
+    constructionType: string
+    roofType: string
+    commonAreas: string[]
+  }
+  units: BuildingUnit[]
+  commonData: {
+    landValue: number
+    constructionCost: number
+    depreciation: number
+    buildingRights: BuildingRights
+    utilities: UtilityConnection[]
+  }
+  masterValuation?: {
+    totalValue: number
+    valuePerSqm: number
+    methodology: string
+    calculatedAt: string
+  }
+  createdAt: string
+  updatedAt: string
+}
+
+export interface BuildingUnit {
+  id: string
+  unitNumber: string
+  floor: number
+  type: PropertyType
+  builtArea: number
+  rooms: number
+  bedrooms: number
+  bathrooms: number
+  balcony: boolean
+  balconyArea?: number
+  parking?: number
+  storage?: boolean
+  condition: PropertyCondition
+  exposure: 'north' | 'south' | 'east' | 'west' | 'ne' | 'nw' | 'se' | 'sw'
+  individualAdjustments: UnitAdjustment[]
+  valuationResult?: {
+    estimatedValue: number
+    confidence: number
+    method: ValuationMethod
+  }
+  reportId?: string
+  status: 'pending' | 'valued' | 'reported'
+}
+
+export interface UnitAdjustment {
+  type: 'floor' | 'exposure' | 'condition' | 'view' | 'renovation' | 'custom'
+  description: string
+  adjustmentPercent: number
+  reasoning: string
+}
+
+export interface BuildingRights {
+  currentUsage: number
+  allowedUsage: number
+  remainingRights: number
+  zoningDesignation: string
+  restrictions: string[]
+  potentialExpansion?: {
+    additionalSqm: number
+    estimatedCost: number
+    estimatedValue: number
+    feasibility: 'high' | 'medium' | 'low'
+  }
+}
+
+export interface UtilityConnection {
+  type: 'water' | 'electricity' | 'gas' | 'sewage' | 'internet'
+  status: 'connected' | 'available' | 'unavailable'
+  provider?: string
+  notes?: string
+}
+
+export interface TeamMember {
+  id: string
+  name: string
+  email: string
+  role: UserRole
+  licenseNumber?: string
+  phone?: string
+  avatar?: string
+  permissions: Permission[]
+  activeCases: string[]
+  completedCases: number
+  performance: {
+    avgCompletionTime: number
+    clientSatisfaction: number
+    accuracy: number
+  }
+  isActive: boolean
+  joinedAt: string
+  lastActive?: string
+}
+
+export interface Permission {
+  resource: 'cases' | 'clients' | 'properties' | 'reports' | 'invoices' | 'settings' | 'team'
+  actions: ('view' | 'create' | 'edit' | 'delete' | 'approve' | 'export' | 'sign')[]
+  scope: 'all' | 'assigned' | 'own' | 'none'
+}
+
+export interface ChangeLog {
+  id: string
+  entityType: 'case' | 'property' | 'report' | 'client' | 'invoice'
+  entityId: string
+  entityName: string
+  action: 'created' | 'updated' | 'deleted' | 'locked' | 'unlocked' | 'signed' | 'exported' | 'shared'
+  userId: string
+  userName: string
+  userRole: UserRole
+  changes: VersionChange[]
+  timestamp: string
+  ipAddress?: string
+  userAgent?: string
+  comment?: string
+  isReversible: boolean
+}
+
+export interface AIInsight {
+  id: string
+  type: 'comparable-suggestion' | 'price-anomaly' | 'internal-contradiction' | 'market-trend' | 'risk-warning' | 'text-draft'
+  severity: 'info' | 'warning' | 'critical'
+  title: string
+  description: string
+  affectedEntity: {
+    type: string
+    id: string
+    name: string
+  }
+  suggestions?: string[]
+  confidence: number
+  dataSource: string[]
+  createdAt: string
+  acknowledgedAt?: string
+  dismissedAt?: string
+  actionTaken?: string
+}
+
+export interface DocumentLock {
+  documentId: string
+  documentType: 'report' | 'case' | 'invoice'
+  lockedAt: string
+  lockedBy: string
+  lockedByName: string
+  reason: string
+  digitalSignature?: DigitalSignature
+  checksum: string
+  isRevocable: boolean
+}
+
+export interface ExportFormat {
+  type: 'word' | 'pdf-unsigned' | 'pdf-signed' | 'excel' | 'json'
+  includeAttachments: boolean
+  includeAuditTrail: boolean
+  watermark?: boolean
+  encryptionLevel?: 'none' | 'password' | 'certificate'
+}

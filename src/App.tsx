@@ -14,7 +14,7 @@ import { LiveDataConnections } from '@/components/LiveDataConnections'
 import { TeamCollaboration } from '@/components/TeamCollaboration'
 import { DevelopmentRightsCalculator } from '@/components/DevelopmentRightsCalculator'
 import { EmailSequences } from '@/components/EmailSequences'
-import { House, ChartBar, Users, UserCircle, CurrencyDollar, Flask, Palette, Cube, Database, UsersThree, Calculator, ListChecks, EnvelopeSimple, Lightning } from '@phosphor-icons/react'
+import { House, ChartBar, Users, UserCircle, CurrencyDollar, Flask, Palette, Cube, Database, UsersThree, Calculator, ListChecks, EnvelopeSimple, Lightning, FolderOpen, FileText, Buildings, ClockCounterClockwise, ShieldCheck, Robot } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { AppHeader } from '@/components/app/AppHeader'
 import { PropertiesTab } from '@/components/app/PropertiesTab'
@@ -22,6 +22,12 @@ import { ValuationEngineTester } from '@/components/ValuationEngineTester'
 import { BrandingSettingsTab } from '@/components/BrandingSettingsTab'
 import { BulkValuation } from '@/components/BulkValuation'
 import { EmailHistory } from '@/components/EmailHistory'
+import { CaseManagement } from '@/components/CaseManagement'
+import { StandardizedReports } from '@/components/StandardizedReports'
+import { MultiUnitManager } from '@/components/MultiUnitManager'
+import { TeamManagement } from '@/components/TeamManagement'
+import { AuditTrail } from '@/components/AuditTrail'
+import { AIInsights } from '@/components/AIInsights'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -93,7 +99,7 @@ function App() {
 
       <main className="container mx-auto px-6 py-8 relative">
         <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-          <TabsList className="mb-8 glass-effect p-1.5 grid grid-cols-6 lg:grid-cols-15 gap-1">
+          <TabsList className="mb-8 glass-effect p-1.5 grid grid-cols-6 lg:grid-cols-21 gap-1">
             <TabsTrigger value="dashboard" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <House size={18} weight="duotone" />
               <span className="hidden sm:inline">לוח בקרה</span>
@@ -153,6 +159,30 @@ function App() {
             <TabsTrigger value="development" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Calculator size={18} weight="duotone" />
               <span className="hidden sm:inline">זכויות בנייה</span>
+            </TabsTrigger>
+            <TabsTrigger value="cases" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <FolderOpen size={18} weight="duotone" />
+              <span className="hidden sm:inline">ניהול תיקים</span>
+            </TabsTrigger>
+            <TabsTrigger value="standardized" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <FileText size={18} weight="duotone" />
+              <span className="hidden sm:inline">דוחות תקניים</span>
+            </TabsTrigger>
+            <TabsTrigger value="multi-unit" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Buildings size={18} weight="duotone" />
+              <span className="hidden sm:inline">ריבוי יחידות</span>
+            </TabsTrigger>
+            <TabsTrigger value="team-manage" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ShieldCheck size={18} weight="duotone" />
+              <span className="hidden sm:inline">צוות והרשאות</span>
+            </TabsTrigger>
+            <TabsTrigger value="audit" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <ClockCounterClockwise size={18} weight="duotone" />
+              <span className="hidden sm:inline">Audit Trail</span>
+            </TabsTrigger>
+            <TabsTrigger value="ai-insights" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <Robot size={18} weight="duotone" />
+              <span className="hidden sm:inline">AI תובנות</span>
             </TabsTrigger>
           </TabsList>
 
@@ -257,6 +287,30 @@ function App() {
 
           <TabsContent value="development" className="mt-0">
             <DevelopmentRightsCalculator />
+          </TabsContent>
+
+          <TabsContent value="cases" className="mt-0">
+            <CaseManagement properties={properties || []} clients={clients || []} />
+          </TabsContent>
+
+          <TabsContent value="standardized" className="mt-0">
+            <StandardizedReports properties={properties || []} clients={clients || []} />
+          </TabsContent>
+
+          <TabsContent value="multi-unit" className="mt-0">
+            <MultiUnitManager />
+          </TabsContent>
+
+          <TabsContent value="team-manage" className="mt-0">
+            <TeamManagement />
+          </TabsContent>
+
+          <TabsContent value="audit" className="mt-0">
+            <AuditTrail />
+          </TabsContent>
+
+          <TabsContent value="ai-insights" className="mt-0">
+            <AIInsights />
           </TabsContent>
         </Tabs>
       </main>
