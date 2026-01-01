@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { Calendar, Calculator, FileText, TrendUp, Warning, CheckCircle, Scales, Copy, Plus, Trash, Info, Book, Question } from '@phosphor-icons/react'
+import { Calendar, Calculator, FileText, TrendUp, Warning, CheckCircle, Scales, Copy, Plus, Trash, Info, Book, Question, ClockCounterClockwise, ChartLine } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useKV } from '@github/spark/hooks'
@@ -68,9 +68,31 @@ interface BettermentScenario {
   calculationMethod: string
 }
 
+interface PropertyHistoricalRecord {
+  id: string
+  propertyIdentifier: string
+  propertyAddress: string
+  createdAt: string
+  scenario: BettermentScenario
+  calculationResult: {
+    delta: any
+    valuePerSqm: number
+    bettermentValue: number
+    levy: number
+    conservativeLevy: number
+    averageLevy: number
+    maximumLevy: number
+  }
+  notes: string
+}
+
 export function BettermentLevyCalculator() {
   const [comparisonMode, setComparisonMode] = useState(false)
+  const [historicalMode, setHistoricalMode] = useState(false)
   const [scenarios, setScenarios] = useKV<BettermentScenario[]>('betterment-scenarios', [])
+  const [historicalRecords, setHistoricalRecords] = useKV<PropertyHistoricalRecord[]>('betterment-history', [])
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string>('')
+  const [propertyAddress, setPropertyAddress] = useState<string>('')
   const [activeScenarioId, setActiveScenarioId] = useState<string | null>(null)
   const [showGuide, setShowGuide] = useState(false)
   const [showDisclaimer, setShowDisclaimer] = useState(true)
@@ -194,6 +216,44 @@ export function BettermentLevyCalculator() {
     toast.success(`התרחיש "${scenarioName}" נשמר בהצלחה`)
   }
 
+  const saveToHistory = () => {
+    if (!selectedPropertyId && !propertyAddress) {
+      toast.error('יש להזין זיהוי נכס או כתובת לפני שמירה להיסטוריה')
+      return
+    }
+
+    const result = calculateBettermentValue()
+    if (!result) {
+      toast.error('לא ניתן לשמור - אין תוצאת חישוב תקינה')
+      return
+    }
+
+    const notes = prompt('הוסף הערות לרשומה ההיסטורית (אופציונלי):')
+
+    const historicalRecord: PropertyHistoricalRecord = {
+      id: Date.now().toString(),
+      propertyIdentifier: selectedPropertyId || `כתובת-${Date.now()}`,
+      propertyAddress: propertyAddress || 'לא צוין',
+      createdAt: new Date().toISOString(),
+      scenario: {
+        id: Date.now().toString(),
+        name: `תיעוד ${new Date().toLocaleDateString('he-IL')}`,
+        previousStatus,
+        newStatus,
+        determiningDate,
+        lotSize,
+        marketValue,
+        marketDataSource,
+        calculationMethod
+      },
+      calculationResult: result,
+      notes: notes || ''
+    }
+
+    setHistoricalRecords((current) => [...(current || []), historicalRecord])
+    toast.success('התיעוד ההיסטורי נשמר בהצלחה')
+  }
+
   const loadScenario = (scenario: BettermentScenario) => {
     setPreviousStatus(scenario.previousStatus)
     setNewStatus(scenario.newStatus)
@@ -212,6 +272,27 @@ export function BettermentLevyCalculator() {
       setActiveScenarioId(null)
     }
     toast.success('התרחיש נמחק')
+  }
+
+  const deleteHistoricalRecord = (id: string) => {
+    setHistoricalRecords((current) => (current || []).filter(r => r.id !== id))
+    toast.success('הרשומה ההיסטורית נמחקה')
+  }
+
+  const getPropertyHistory = (propertyId: string) => {
+    return (historicalRecords || [])
+      .filter(r => r.propertyIdentifier === propertyId)
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  }
+
+  const getUniqueProperties = () => {
+    const uniqueProps = new Map<string, PropertyHistoricalRecord>()
+    ;(historicalRecords || []).forEach(record => {
+      if (!uniqueProps.has(record.propertyIdentifier)) {
+        uniqueProps.set(record.propertyIdentifier, record)
+      }
+    })
+    return Array.from(uniqueProps.values())
   }
 
   const duplicateScenario = (scenario: BettermentScenario) => {
@@ -337,6 +418,219 @@ export function BettermentLevyCalculator() {
   }
 
   const result = calculateBettermentValue()
+
+  if (historicalMode) {
+    const uniqueProperties = getUniqueProperties()
+    
+    return (
+      <div className="container mx-auto space-y-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-4"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/20 p-3 rounded-xl">
+                <ClockCounterClockwise className="w-8 h-8 text-primary" weight="duotone" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-l from-primary to-accent bg-clip-text text-transparent">
+                  היסטוריית היטל השבחה
+                </h1>
+                <p className="text-muted-foreground">
+                  מעקב אחר שינויים היסטוריים בהיטל השבחה לנכסים לאורך זמן
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setHistoricalMode(false)}
+                className="gap-2"
+              >
+                <Calculator className="w-4 h-4" weight="duotone" />
+                חזור למחשבון
+              </Button>
+            </div>
+          </div>
+
+          {uniqueProperties.length === 0 ? (
+            <Card className="glass-effect p-12 text-center">
+              <ClockCounterClockwise className="w-16 h-16 text-muted-foreground mx-auto mb-4" weight="duotone" />
+              <h3 className="text-xl font-semibold mb-2">אין נתונים היסטוריים</h3>
+              <p className="text-muted-foreground mb-6">
+                שמור חישובי היטל השבחה להיסטוריה כדי לעקוב אחר שינויים לאורך זמן
+              </p>
+              <Button
+                variant="outline"
+                onClick={() => setHistoricalMode(false)}
+                className="gap-2"
+              >
+                <Calculator className="w-4 h-4" weight="duotone" />
+                התחל חישוב
+              </Button>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {uniqueProperties.map(property => {
+                const propertyHistory = getPropertyHistory(property.propertyIdentifier)
+                const latestRecord = propertyHistory[0]
+                const oldestRecord = propertyHistory[propertyHistory.length - 1]
+                const hasMultipleRecords = propertyHistory.length > 1
+
+                let changePercentage = 0
+                let changeAmount = 0
+                if (hasMultipleRecords && oldestRecord.calculationResult.levy > 0) {
+                  changeAmount = latestRecord.calculationResult.levy - oldestRecord.calculationResult.levy
+                  changePercentage = (changeAmount / oldestRecord.calculationResult.levy) * 100
+                }
+
+                return (
+                  <Card key={property.propertyIdentifier} className="glass-effect p-6">
+                    <div className="space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-xl font-bold mb-1">{property.propertyAddress}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            מזהה: {property.propertyIdentifier}
+                          </p>
+                          <Badge variant="outline" className="mt-2">
+                            {propertyHistory.length} רשומות היסטוריות
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {hasMultipleRecords && (
+                        <div className="p-4 bg-gradient-to-br from-primary/10 to-accent/10 border border-primary/30 rounded-lg">
+                          <div className="flex items-center gap-2 mb-2">
+                            <ChartLine className="w-5 h-5 text-primary" weight="duotone" />
+                            <span className="font-semibold text-sm">שינוי לאורך זמן</span>
+                          </div>
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">היטל ראשון:</span>
+                              <span className="font-mono text-sm">
+                                ₪{oldestRecord.calculationResult.levy.toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                              </span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm text-muted-foreground">היטל אחרון:</span>
+                              <span className="font-mono text-sm">
+                                ₪{latestRecord.calculationResult.levy.toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                              </span>
+                            </div>
+                            <Separator />
+                            <div className="flex justify-between items-center">
+                              <span className="text-sm font-bold">שינוי:</span>
+                              <div className="flex items-center gap-2">
+                                <span className={`font-mono font-bold ${changeAmount >= 0 ? 'text-success' : 'text-destructive'}`}>
+                                  {changeAmount >= 0 ? '+' : ''}₪{changeAmount.toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                                </span>
+                                <Badge variant={changeAmount >= 0 ? 'default' : 'destructive'}>
+                                  {changeAmount >= 0 ? '+' : ''}{changePercentage.toFixed(1)}%
+                                </Badge>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-3 max-h-[400px] overflow-y-auto">
+                        <div className="text-sm font-semibold text-muted-foreground px-1">
+                          היסטוריית חישובים
+                        </div>
+                        {propertyHistory.map((record, index) => (
+                          <motion.div
+                            key={record.id}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: index * 0.05 }}
+                            className="p-4 bg-muted/30 rounded-lg border border-border hover:border-primary/50 transition-colors"
+                          >
+                            <div className="flex items-start justify-between mb-3">
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <Calendar className="w-4 h-4 text-muted-foreground" weight="duotone" />
+                                  <span className="text-sm font-semibold">
+                                    {new Date(record.createdAt).toLocaleDateString('he-IL', {
+                                      year: 'numeric',
+                                      month: 'long',
+                                      day: 'numeric'
+                                    })}
+                                  </span>
+                                  {index === 0 && (
+                                    <Badge variant="secondary" className="text-xs">אחרון</Badge>
+                                  )}
+                                </div>
+                                <p className="text-xs text-muted-foreground">
+                                  מועד קובע: {record.scenario.determiningDate}
+                                </p>
+                              </div>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => deleteHistoricalRecord(record.id)}
+                                className="h-8 w-8 text-destructive hover:text-destructive"
+                              >
+                                <Trash className="w-4 h-4" weight="duotone" />
+                              </Button>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                              <div>
+                                <span className="text-muted-foreground block mb-1">תכנית קודמת:</span>
+                                <span className="font-mono text-xs">{record.scenario.previousStatus.planNumber}</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground block mb-1">תכנית חדשה:</span>
+                                <span className="font-mono text-xs">{record.scenario.newStatus.planNumber}</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground block mb-1">תוספת זכויות:</span>
+                                <span className="font-mono text-success font-semibold">
+                                  +{record.calculationResult.delta.totalAreaDelta.toLocaleString('he-IL')} מ"ר
+                                </span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground block mb-1">שווי/מ"ר:</span>
+                                <span className="font-mono">
+                                  ₪{record.calculationResult.valuePerSqm.toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                                </span>
+                              </div>
+                            </div>
+
+                            <Separator className="my-3" />
+
+                            <div className="p-3 bg-accent/10 rounded-lg">
+                              <div className="flex justify-between items-center">
+                                <span className="text-sm font-semibold text-muted-foreground">היטל השבחה:</span>
+                                <span className="font-mono text-lg font-bold text-accent">
+                                  ₪{record.calculationResult.levy.toLocaleString('he-IL', { maximumFractionDigits: 0 })}
+                                </span>
+                              </div>
+                            </div>
+
+                            {record.notes && (
+                              <div className="mt-3 p-2 bg-muted/50 rounded text-xs text-muted-foreground">
+                                <Info className="w-3 h-3 inline ml-1" weight="duotone" />
+                                {record.notes}
+                              </div>
+                            )}
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </Card>
+                )
+              })}
+            </div>
+          )}
+        </motion.div>
+      </div>
+    )
+  }
 
   if (comparisonMode && scenarios && scenarios.length > 0) {
     return (
@@ -555,6 +849,20 @@ export function BettermentLevyCalculator() {
             </p>
           </div>
           <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setHistoricalMode(true)}
+              className="gap-2"
+            >
+              <ClockCounterClockwise className="w-4 h-4" weight="duotone" />
+              היסטוריה
+              {historicalRecords && historicalRecords.length > 0 && (
+                <Badge variant="secondary" className="mr-1">
+                  {historicalRecords.length}
+                </Badge>
+              )}
+            </Button>
             <Dialog open={showGuide} onOpenChange={setShowGuide}>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm" className="gap-2">
@@ -1310,7 +1618,42 @@ export function BettermentLevyCalculator() {
           </TabsContent>
 
           <TabsContent value="calculation" className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <Card className="glass-effect p-6 mb-4">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Info className="w-5 h-5 text-primary" weight="duotone" />
+                זיהוי נכס (למעקב היסטורי)
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="property-id">מזהה נכס (אופציונלי)</Label>
+                  <Input
+                    id="property-id"
+                    value={selectedPropertyId}
+                    onChange={(e) => setSelectedPropertyId(e.target.value)}
+                    placeholder="לדוגמה: 123456789 או מספר גוש/חלקה"
+                    dir="ltr"
+                    className="text-right"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    מזהה ייחודי לצורך מעקב היסטורי - גוש/חלקה, תעודת זהות, או כל מזהה אחר
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="property-address">כתובת נכס (אופציונלי)</Label>
+                  <Input
+                    id="property-address"
+                    value={propertyAddress}
+                    onChange={(e) => setPropertyAddress(e.target.value)}
+                    placeholder="רחוב 123, עיר"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    כתובת הנכס לזיהוי קל יותר בהיסטוריה
+                  </p>
+                </div>
+              </div>
+            </Card>
+
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <Button
                 size="lg"
                 onClick={handleAIAnalysis}
@@ -1341,6 +1684,17 @@ export function BettermentLevyCalculator() {
               >
                 <Plus className="w-5 h-5" weight="duotone" />
                 שמור כתרחיש להשוואה
+              </Button>
+
+              <Button
+                size="lg"
+                variant="secondary"
+                onClick={saveToHistory}
+                className="gap-2"
+                disabled={!result}
+              >
+                <ClockCounterClockwise className="w-5 h-5" weight="duotone" />
+                שמור להיסטוריה
               </Button>
             </div>
 
