@@ -162,11 +162,11 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
         )
       }))
       .filter(group => group.items.length > 0)
-  }, [searchQuery, menuItems])
+  }, [searchQuery])
 
   const allMenuItems = useMemo(() => {
     return menuItems.flatMap(group => group.items)
-  }, [menuItems])
+  }, [])
 
   const favoriteItems = useMemo(() => {
     const favs = favorites || []
