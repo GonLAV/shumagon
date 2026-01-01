@@ -44,7 +44,11 @@ import {
   Sparkle,
   CalendarBlank,
   Eye,
-  Archive
+  Archive,
+  Flask,
+  Percent,
+  TrendUp,
+  SplitVertical
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { cn } from '@/lib/utils'
@@ -55,6 +59,23 @@ import { he } from 'date-fns/locale'
 export type SequenceTrigger = 'manual' | 'report-sent' | 'invoice-sent' | 'no-response' | 'payment-overdue' | 'appointment-scheduled'
 export type SequenceStatus = 'active' | 'paused' | 'completed' | 'archived'
 export type EmailStepStatus = 'pending' | 'scheduled' | 'sent' | 'failed' | 'skipped'
+
+export interface ABTestVariant {
+  id: string
+  label: string
+  subject: string
+  message: string
+  weight: number
+  stats: {
+    sent: number
+    opened: number
+    clicked: number
+    replied: number
+    openRate: number
+    clickRate: number
+    replyRate: number
+  }
+}
 
 export interface EmailSequenceStep {
   id: string
@@ -67,6 +88,8 @@ export interface EmailSequenceStep {
   attachInvoice: boolean
   waitForResponse: boolean
   enabled: boolean
+  abTestEnabled: boolean
+  abTestVariants: ABTestVariant[]
 }
 
 export interface EmailSequence {
@@ -111,6 +134,8 @@ export interface ExecutionStep {
   errorMessage?: string
   opened?: boolean
   clicked?: boolean
+  abTestVariantId?: string
+  abTestVariantLabel?: string
 }
 
 const DEFAULT_SEQUENCES: EmailSequence[] = [
@@ -139,7 +164,9 @@ const DEFAULT_SEQUENCES: EmailSequence[] = [
         attachReport: false,
         attachInvoice: false,
         waitForResponse: true,
-        enabled: true
+        enabled: true,
+        abTestEnabled: false,
+        abTestVariants: []
       },
       {
         id: 'step-2',
@@ -163,7 +190,9 @@ const DEFAULT_SEQUENCES: EmailSequence[] = [
         attachReport: true,
         attachInvoice: false,
         waitForResponse: true,
-        enabled: true
+        enabled: true,
+        abTestEnabled: false,
+        abTestVariants: []
       },
       {
         id: 'step-3',
@@ -187,7 +216,9 @@ const DEFAULT_SEQUENCES: EmailSequence[] = [
         attachReport: false,
         attachInvoice: false,
         waitForResponse: false,
-        enabled: true
+        enabled: true,
+        abTestEnabled: false,
+        abTestVariants: []
       }
     ],
     createdAt: new Date().toISOString(),
@@ -227,7 +258,9 @@ const DEFAULT_SEQUENCES: EmailSequence[] = [
         attachReport: false,
         attachInvoice: true,
         waitForResponse: true,
-        enabled: true
+        enabled: true,
+        abTestEnabled: false,
+        abTestVariants: []
       },
       {
         id: 'step-2',
@@ -251,7 +284,9 @@ const DEFAULT_SEQUENCES: EmailSequence[] = [
         attachReport: false,
         attachInvoice: true,
         waitForResponse: true,
-        enabled: true
+        enabled: true,
+        abTestEnabled: false,
+        abTestVariants: []
       },
       {
         id: 'step-3',
@@ -273,7 +308,9 @@ const DEFAULT_SEQUENCES: EmailSequence[] = [
         attachReport: false,
         attachInvoice: true,
         waitForResponse: false,
-        enabled: true
+        enabled: true,
+        abTestEnabled: false,
+        abTestVariants: []
       }
     ],
     createdAt: new Date().toISOString(),
@@ -316,7 +353,9 @@ const DEFAULT_SEQUENCES: EmailSequence[] = [
         attachReport: false,
         attachInvoice: false,
         waitForResponse: true,
-        enabled: true
+        enabled: true,
+        abTestEnabled: false,
+        abTestVariants: []
       },
       {
         id: 'step-2',
@@ -345,7 +384,9 @@ const DEFAULT_SEQUENCES: EmailSequence[] = [
         attachReport: false,
         attachInvoice: false,
         waitForResponse: true,
-        enabled: true
+        enabled: true,
+        abTestEnabled: false,
+        abTestVariants: []
       },
       {
         id: 'step-3',
@@ -372,7 +413,9 @@ const DEFAULT_SEQUENCES: EmailSequence[] = [
         attachReport: false,
         attachInvoice: false,
         waitForResponse: true,
-        enabled: true
+        enabled: true,
+        abTestEnabled: false,
+        abTestVariants: []
       }
     ],
     createdAt: new Date().toISOString(),
@@ -382,6 +425,275 @@ const DEFAULT_SEQUENCES: EmailSequence[] = [
     tags: ['טיפוח', 'לידים', 'מכירות']
   }
 ]
+
+interface ABTestResultsProps {
+  sequences: EmailSequence[]
+}
+
+function ABTestResults({ sequences }: ABTestResultsProps) {
+  const sequencesWithABTests = sequences.filter(seq => 
+    seq.steps.some(step => step.abTestEnabled && step.abTestVariants.length > 0)
+  )
+
+  if (sequencesWithABTests.length === 0) {
+    return (
+      <div className="space-y-6">
+        <Card className="border-primary/20 bg-primary/5">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Flask size={20} className="text-primary" />
+              מה זה בדיקת A/B?
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <p className="text-sm text-muted-foreground">
+              בדיקת A/B מאפשרת לך לבדוק גרסאות שונות של נושא ותוכן אימייל כדי לגלות מה עובד הכי טוב עם הלקוחות שלך.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <SplitVertical size={16} className="text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">חלוקה אוטומטית</p>
+                  <p className="text-xs text-muted-foreground">המערכת מחלקת את הנמענים לפי המשקל שהגדרת</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <ChartLine size={16} className="text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">מעקב מדויק</p>
+                  <p className="text-xs text-muted-foreground">עוקב אחר פתיחות, קליקים ותגובות לכל גרסה</p>
+                </div>
+              </div>
+              <div className="flex gap-3">
+                <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <TrendUp size={16} className="text-primary" />
+                </div>
+                <div>
+                  <p className="font-medium text-sm">זיהוי מנצחים</p>
+                  <p className="text-xs text-muted-foreground">המערכת מזהה את הגרסה המצליחה ביותר</p>
+                </div>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="py-12 text-center">
+            <Flask size={48} weight="duotone" className="text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground mb-2">אין בדיקות A/B פעילות</p>
+            <p className="text-sm text-muted-foreground">
+              הפעל בדיקת A/B בעריכת רצף כדי לבדוק גרסאות שונות של אימיילים
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {sequencesWithABTests.map(sequence => (
+        <Card key={sequence.id}>
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  {sequence.name}
+                  <Badge variant="secondary" className="gap-1">
+                    <Flask size={12} />
+                    A/B מופעל
+                  </Badge>
+                </CardTitle>
+                <CardDescription className="mt-1">{sequence.description}</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            {sequence.steps
+              .filter(step => step.abTestEnabled && step.abTestVariants.length > 0)
+              .map((step, stepIndex) => (
+                <div key={step.id} className="space-y-4">
+                  <div className="flex items-center gap-3 pb-3 border-b">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold">
+                      {stepIndex + 1}
+                    </div>
+                    <div>
+                      <p className="font-medium">{step.subject || 'שלב ללא כותרת'}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {step.abTestVariants.length} גרסאות בבדיקה
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {step.abTestVariants.map(variant => {
+                      const hasStats = variant.stats.sent > 0
+                      const bestOpenRate = Math.max(...step.abTestVariants.map(v => v.stats.openRate))
+                      const bestClickRate = Math.max(...step.abTestVariants.map(v => v.stats.clickRate))
+                      const isWinningOpen = hasStats && variant.stats.openRate === bestOpenRate && bestOpenRate > 0
+                      const isWinningClick = hasStats && variant.stats.clickRate === bestClickRate && bestClickRate > 0
+
+                      return (
+                        <Card key={variant.id} className={cn(
+                          "relative",
+                          (isWinningOpen || isWinningClick) && "border-2 border-success"
+                        )}>
+                          {(isWinningOpen || isWinningClick) && (
+                            <div className="absolute -top-3 right-4">
+                              <Badge className="bg-success text-success-foreground gap-1">
+                                <TrendUp size={12} />
+                                מנצח
+                              </Badge>
+                            </div>
+                          )}
+                          <CardHeader className="pb-3">
+                            <div className="flex items-center justify-between">
+                              <Badge variant="outline">{variant.label}</Badge>
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                <Percent size={12} />
+                                {variant.weight}%
+                              </div>
+                            </div>
+                          </CardHeader>
+                          <CardContent className="space-y-3">
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">נושא</p>
+                              <p className="text-sm font-medium line-clamp-2">
+                                {variant.subject || <span className="text-muted-foreground italic">לא הוגדר</span>}
+                              </p>
+                            </div>
+                            
+                            <div>
+                              <p className="text-xs font-medium text-muted-foreground mb-1">תוכן</p>
+                              <p className="text-xs text-muted-foreground line-clamp-3">
+                                {variant.message || <span className="italic">לא הוגדר</span>}
+                              </p>
+                            </div>
+
+                            <Separator />
+
+                            {hasStats ? (
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between text-sm">
+                                  <span className="text-muted-foreground">נשלחו</span>
+                                  <span className="font-semibold">{variant.stats.sent}</span>
+                                </div>
+                                
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted-foreground flex items-center gap-1">
+                                      <Eye size={12} />
+                                      נפתחו
+                                    </span>
+                                    <span className="font-semibold text-primary">
+                                      {variant.stats.openRate.toFixed(1)}%
+                                    </span>
+                                  </div>
+                                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                                    <div 
+                                      className="h-full bg-primary"
+                                      style={{ width: `${variant.stats.openRate}%` }}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">
+                                    {variant.stats.opened} מתוך {variant.stats.sent}
+                                  </p>
+                                </div>
+
+                                <div className="space-y-1">
+                                  <div className="flex items-center justify-between text-sm">
+                                    <span className="text-muted-foreground flex items-center gap-1">
+                                      <TrendUp size={12} />
+                                      לחצו
+                                    </span>
+                                    <span className="font-semibold text-accent">
+                                      {variant.stats.clickRate.toFixed(1)}%
+                                    </span>
+                                  </div>
+                                  <div className="h-2 rounded-full bg-muted overflow-hidden">
+                                    <div 
+                                      className="h-full bg-accent"
+                                      style={{ width: `${variant.stats.clickRate}%` }}
+                                    />
+                                  </div>
+                                  <p className="text-xs text-muted-foreground">
+                                    {variant.stats.clicked} מתוך {variant.stats.sent}
+                                  </p>
+                                </div>
+
+                                {variant.stats.replied > 0 && (
+                                  <div className="flex items-center justify-between text-sm pt-2 border-t">
+                                    <span className="text-muted-foreground">השיבו</span>
+                                    <span className="font-semibold text-success">
+                                      {variant.stats.replyRate.toFixed(1)}% ({variant.stats.replied})
+                                    </span>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-center py-4">
+                                <p className="text-sm text-muted-foreground">אין נתונים עדיין</p>
+                                <p className="text-xs text-muted-foreground mt-1">
+                                  הנתונים יופיעו לאחר שליחת אימיילים
+                                </p>
+                              </div>
+                            )}
+                          </CardContent>
+                        </Card>
+                      )
+                    })}
+                  </div>
+
+                  {step.abTestVariants.some(v => v.stats.sent > 0) && (
+                    <Card className="bg-muted/30">
+                      <CardContent className="pt-6">
+                        <div className="flex items-center gap-3 mb-4">
+                          <ChartLine size={20} className="text-primary" />
+                          <h4 className="font-semibold">סיכום השוואתי</h4>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">סה"כ נשלחו</p>
+                            <p className="text-2xl font-bold">
+                              {step.abTestVariants.reduce((sum, v) => sum + v.stats.sent, 0)}
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">ממוצע פתיחה</p>
+                            <p className="text-2xl font-bold text-primary">
+                              {(step.abTestVariants.reduce((sum, v) => sum + v.stats.openRate, 0) / step.abTestVariants.length).toFixed(1)}%
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">ממוצע קליקים</p>
+                            <p className="text-2xl font-bold text-accent">
+                              {(step.abTestVariants.reduce((sum, v) => sum + v.stats.clickRate, 0) / step.abTestVariants.length).toFixed(1)}%
+                            </p>
+                          </div>
+                          <div>
+                            <p className="text-xs text-muted-foreground mb-1">הגרסה המנצחת</p>
+                            <p className="text-lg font-bold text-success">
+                              {step.abTestVariants.find(v => 
+                                v.stats.openRate === Math.max(...step.abTestVariants.map(vv => vv.stats.openRate))
+                              )?.label || '-'}
+                            </p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  )}
+                </div>
+              ))}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  )
+}
 
 export function EmailSequences() {
   const [sequences, setSequences] = useKV<EmailSequence[]>('email-sequences', DEFAULT_SEQUENCES)
@@ -410,7 +722,9 @@ export function EmailSequences() {
           attachReport: false,
           attachInvoice: false,
           waitForResponse: false,
-          enabled: true
+          enabled: true,
+          abTestEnabled: false,
+          abTestVariants: []
         }
       ],
       createdAt: new Date().toISOString(),
@@ -573,7 +887,7 @@ export function EmailSequences() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="sequences" className="gap-2">
             <Lightning size={18} />
             רצפים
@@ -581,6 +895,10 @@ export function EmailSequences() {
           <TabsTrigger value="executions" className="gap-2">
             <Users size={18} />
             ביצועים פעילים
+          </TabsTrigger>
+          <TabsTrigger value="ab-tests" className="gap-2">
+            <Flask size={18} />
+            תוצאות A/B
           </TabsTrigger>
         </TabsList>
 
@@ -693,6 +1011,10 @@ export function EmailSequences() {
               ))}
             </div>
           )}
+        </TabsContent>
+
+        <TabsContent value="ab-tests" className="space-y-4 mt-6">
+          <ABTestResults sequences={sequences || []} />
         </TabsContent>
       </Tabs>
 
@@ -875,12 +1197,21 @@ function SequenceCard({ sequence, onEdit, onDuplicate, onDelete, onToggleStatus,
                   {index + 1}
                 </div>
                 <div className="flex-1">
-                  <p className="font-medium text-sm">{step.subject}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-medium text-sm">{step.subject}</p>
+                    {step.abTestEnabled && step.abTestVariants.length > 0 && (
+                      <Badge variant="outline" className="gap-1 text-xs">
+                        <Flask size={10} />
+                        A/B
+                      </Badge>
+                    )}
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     {step.delayDays > 0 && `${step.delayDays} ימים`}
                     {step.delayDays > 0 && step.delayHours > 0 && ' + '}
                     {step.delayHours > 0 && `${step.delayHours} שעות`}
                     {step.delayDays === 0 && step.delayHours === 0 && 'מיידי'}
+                    {step.abTestEnabled && ` • ${step.abTestVariants.length} גרסאות`}
                   </p>
                 </div>
                 <ArrowRight size={16} className="text-muted-foreground" />
@@ -1046,7 +1377,9 @@ function SequenceEditorDialog({ open, onOpenChange, sequence, onSave }: Sequence
       attachReport: false,
       attachInvoice: false,
       waitForResponse: false,
-      enabled: true
+      enabled: true,
+      abTestEnabled: false,
+      abTestVariants: []
     }
     setSteps([...steps, newStep])
   }
@@ -1245,6 +1578,189 @@ function SequenceEditorDialog({ open, onOpenChange, sequence, onSave }: Sequence
                         />
                         <Label className="text-xs">המתן לתגובה</Label>
                       </div>
+                    </div>
+
+                    <Separator className="my-4" />
+
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={step.abTestEnabled}
+                            onCheckedChange={(checked) => {
+                              const updated = [...steps]
+                              updated[index].abTestEnabled = checked
+                              if (checked && updated[index].abTestVariants.length === 0) {
+                                updated[index].abTestVariants = [
+                                  {
+                                    id: `variant-a-${Date.now()}`,
+                                    label: 'גרסה A',
+                                    subject: step.subject,
+                                    message: step.message,
+                                    weight: 50,
+                                    stats: { sent: 0, opened: 0, clicked: 0, replied: 0, openRate: 0, clickRate: 0, replyRate: 0 }
+                                  },
+                                  {
+                                    id: `variant-b-${Date.now()}`,
+                                    label: 'גרסה B',
+                                    subject: '',
+                                    message: '',
+                                    weight: 50,
+                                    stats: { sent: 0, opened: 0, clicked: 0, replied: 0, openRate: 0, clickRate: 0, replyRate: 0 }
+                                  }
+                                ]
+                              }
+                              setSteps(updated)
+                            }}
+                          />
+                          <Label className="text-sm font-medium flex items-center gap-2">
+                            <Flask size={16} className="text-primary" />
+                            בדיקת A/B
+                          </Label>
+                        </div>
+                        {step.abTestEnabled && step.abTestVariants.length > 0 && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => {
+                              const updated = [...steps]
+                              const newVariantId = String.fromCharCode(65 + updated[index].abTestVariants.length)
+                              updated[index].abTestVariants.push({
+                                id: `variant-${Date.now()}`,
+                                label: `גרסה ${newVariantId}`,
+                                subject: '',
+                                message: '',
+                                weight: Math.floor(100 / (updated[index].abTestVariants.length + 1)),
+                                stats: { sent: 0, opened: 0, clicked: 0, replied: 0, openRate: 0, clickRate: 0, replyRate: 0 }
+                              })
+                              const totalWeight = updated[index].abTestVariants.reduce((sum, v) => sum + v.weight, 0)
+                              if (totalWeight > 100) {
+                                updated[index].abTestVariants.forEach((v, i) => {
+                                  v.weight = Math.floor(100 / updated[index].abTestVariants.length)
+                                })
+                              }
+                              setSteps(updated)
+                            }}
+                          >
+                            <Plus size={14} className="ml-1" />
+                            הוסף גרסה
+                          </Button>
+                        )}
+                      </div>
+
+                      {step.abTestEnabled && (
+                        <div className="space-y-3 p-4 rounded-lg bg-muted/30 border border-border">
+                          <div className="flex items-center gap-2 text-sm text-muted-foreground mb-3">
+                            <SplitVertical size={16} />
+                            <span>הגדר גרסאות שונות לבדיקה. המערכת תחלק את הנמענים באופן אוטומטי.</span>
+                          </div>
+
+                          {step.abTestVariants.map((variant, variantIndex) => (
+                            <Card key={variant.id} className="border-l-4 border-l-primary/40">
+                              <CardHeader className="pb-3">
+                                <div className="flex items-center justify-between">
+                                  <div className="flex items-center gap-3">
+                                    <Badge variant="secondary">{variant.label}</Badge>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                      <Percent size={14} />
+                                      <Input
+                                        type="number"
+                                        min="0"
+                                        max="100"
+                                        value={variant.weight}
+                                        onChange={(e) => {
+                                          const updated = [...steps]
+                                          const value = Math.min(100, Math.max(0, parseInt(e.target.value) || 0))
+                                          updated[index].abTestVariants[variantIndex].weight = value
+                                          setSteps(updated)
+                                        }}
+                                        className="w-16 h-7 text-xs"
+                                      />
+                                      <span className="text-xs">משקל</span>
+                                    </div>
+                                  </div>
+                                  {step.abTestVariants.length > 2 && (
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      onClick={() => {
+                                        const updated = [...steps]
+                                        updated[index].abTestVariants = updated[index].abTestVariants.filter((_, i) => i !== variantIndex)
+                                        setSteps(updated)
+                                      }}
+                                    >
+                                      <Trash size={14} />
+                                    </Button>
+                                  )}
+                                </div>
+                              </CardHeader>
+                              <CardContent className="space-y-3">
+                                <div>
+                                  <Label className="text-xs">נושא האימייל</Label>
+                                  <Input
+                                    value={variant.subject}
+                                    onChange={(e) => {
+                                      const updated = [...steps]
+                                      updated[index].abTestVariants[variantIndex].subject = e.target.value
+                                      setSteps(updated)
+                                    }}
+                                    placeholder="נושא לגרסה זו..."
+                                    className="mt-1"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs">תוכן ההודעה</Label>
+                                  <Textarea
+                                    value={variant.message}
+                                    onChange={(e) => {
+                                      const updated = [...steps]
+                                      updated[index].abTestVariants[variantIndex].message = e.target.value
+                                      setSteps(updated)
+                                    }}
+                                    placeholder="תוכן האימייל לגרסה זו..."
+                                    rows={3}
+                                    className="mt-1"
+                                  />
+                                </div>
+
+                                {variant.stats.sent > 0 && (
+                                  <div className="grid grid-cols-3 gap-3 pt-3 border-t">
+                                    <div className="text-center">
+                                      <p className="text-xs text-muted-foreground">נשלחו</p>
+                                      <p className="text-lg font-semibold">{variant.stats.sent}</p>
+                                    </div>
+                                    <div className="text-center">
+                                      <div className="flex items-center justify-center gap-1">
+                                        <Eye size={12} className="text-muted-foreground" />
+                                        <p className="text-xs text-muted-foreground">נפתחו</p>
+                                      </div>
+                                      <p className="text-lg font-semibold text-primary">
+                                        {variant.stats.openRate.toFixed(1)}%
+                                      </p>
+                                      <p className="text-xs text-muted-foreground">{variant.stats.opened}/{variant.stats.sent}</p>
+                                    </div>
+                                    <div className="text-center">
+                                      <div className="flex items-center justify-center gap-1">
+                                        <TrendUp size={12} className="text-muted-foreground" />
+                                        <p className="text-xs text-muted-foreground">לחצו</p>
+                                      </div>
+                                      <p className="text-lg font-semibold text-accent">
+                                        {variant.stats.clickRate.toFixed(1)}%
+                                      </p>
+                                      <p className="text-xs text-muted-foreground">{variant.stats.clicked}/{variant.stats.sent}</p>
+                                    </div>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          ))}
+
+                          <div className="flex items-center gap-2 p-3 rounded-lg bg-primary/10 text-sm">
+                            <ChartLine size={16} className="text-primary" />
+                            <span>סה"כ משקל: {step.abTestVariants.reduce((sum, v) => sum + v.weight, 0)}% (צריך להיות 100%)</span>
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>
