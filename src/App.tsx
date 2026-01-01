@@ -38,6 +38,7 @@ import { BettermentLevyCalculator } from '@/components/BettermentLevyCalculator'
 import { PropertyHistoricalSearch } from '@/components/PropertyHistoricalSearch'
 import { MarketDataSync } from '@/components/MarketDataSync'
 import { APIAuthSettings } from '@/components/APIAuthSettings'
+import { APIUsageAnalytics } from '@/components/APIUsageAnalytics'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -220,6 +221,8 @@ function App() {
         return <MarketDataSync />
       case 'api-settings':
         return <APIAuthSettings />
+      case 'api-analytics':
+        return <APIUsageAnalytics />
       default:
         return (
           <Dashboard
