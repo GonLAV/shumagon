@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import { Calendar, Calculator, FileText, TrendUp, Warning, CheckCircle, Scales, Copy, Plus, Trash, Info, Book, Question, ClockCounterClockwise, ChartLine } from '@phosphor-icons/react'
+import { Calendar, Calculator, FileText, TrendUp, Warning, CheckCircle, Scales, Copy, Plus, Trash, Info, Book, Question, ClockCounterClockwise, ChartLine, CloudArrowDown, MagnifyingGlass, Database } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useKV } from '@github/spark/hooks'
@@ -28,6 +28,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
+import { planningDatabaseAPI, autoFetchBuildingRights, validateAndComparePlans } from '@/lib/planningDatabaseAPI'
 
 interface PlanningStatus {
   planNumber: string
@@ -97,6 +98,9 @@ export function BettermentLevyCalculator() {
   const [showGuide, setShowGuide] = useState(false)
   const [showDisclaimer, setShowDisclaimer] = useState(true)
   const [planValidationStatus, setPlanValidationStatus] = useState<{prev?: string, new?: string}>({})
+  const [autoFetchingPrev, setAutoFetchingPrev] = useState(false)
+  const [autoFetchingNew, setAutoFetchingNew] = useState(false)
+  const [autoFetchEnabled, setAutoFetchEnabled] = useState(true)
 
   const [previousStatus, setPreviousStatus] = useState<PlanningStatus>({
     planNumber: '',
@@ -141,6 +145,168 @@ export function BettermentLevyCalculator() {
   const [marketValue, setMarketValue] = useState(0)
   const [marketDataSource, setMarketDataSource] = useState<MarketData[]>([])
   const [calculationMethod, setCalculationMethod] = useState('standard')
+
+  const handleAutoFetchPreviousPlan = async () => {
+    if (!previousStatus.planNumber.trim()) {
+      toast.error('יש להזין מספר תכנית קודמת')
+      return
+    }
+
+    setAutoFetchingPrev(true)
+    try {
+      const result = await autoFetchBuildingRights(previousStatus.planNumber)
+      
+      if (result.success && result.data) {
+        setPreviousStatus(prev => ({
+          ...prev,
+          planName: result.data!.planName,
+          zoning: result.data!.zoning,
+          buildingRights: {
+            farPercentage: result.data!.farPercentage,
+            floors: result.data!.floors,
+            mainArea: result.data!.mainArea,
+            serviceArea: result.data!.serviceArea,
+            allowedUses: result.data!.allowedUses
+          }
+        }))
+        
+        setPlanValidationStatus(prev => ({ ...prev, prev: 'success' }))
+        
+        toast.success('זכויות הבנייה נשלפו בהצלחה! 🎉', {
+          description: `מקור: ${result.source} | אמינות: ${result.reliability === 'high' ? 'גבוהה' : 'בינונית'}`
+        })
+      } else {
+        setPlanValidationStatus(prev => ({ ...prev, prev: 'error' }))
+        
+        toast.error(result.messageHe, {
+          description: 'ניתן להמשיך בהזנה ידנית של הנתונים',
+          action: result.warnings.length > 0 ? {
+            label: 'פרטים',
+            onClick: () => {
+              toast.info('אזהרות', {
+                description: result.warnings.join('\n')
+              })
+            }
+          } : undefined
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching plan:', error)
+      toast.error('שגיאה בשליפת נתונים מהמאגר הממשלתי')
+      setPlanValidationStatus(prev => ({ ...prev, prev: 'error' }))
+    } finally {
+      setAutoFetchingPrev(false)
+    }
+  }
+
+  const handleAutoFetchNewPlan = async () => {
+    if (!newStatus.planNumber.trim()) {
+      toast.error('יש להזין מספר תכנית חדשה')
+      return
+    }
+
+    setAutoFetchingNew(true)
+    try {
+      const result = await autoFetchBuildingRights(newStatus.planNumber)
+      
+      if (result.success && result.data) {
+        setNewStatus(prev => ({
+          ...prev,
+          planName: result.data!.planName,
+          zoning: result.data!.zoning,
+          buildingRights: {
+            farPercentage: result.data!.farPercentage,
+            floors: result.data!.floors,
+            mainArea: result.data!.mainArea,
+            serviceArea: result.data!.serviceArea,
+            allowedUses: result.data!.allowedUses
+          }
+        }))
+        
+        setPlanValidationStatus(prev => ({ ...prev, new: 'success' }))
+        
+        toast.success('זכויות הבנייה נשלפו בהצלחה! 🎉', {
+          description: `מקור: ${result.source} | אמינות: ${result.reliability === 'high' ? 'גבוהה' : 'בינונית'}`
+        })
+      } else {
+        setPlanValidationStatus(prev => ({ ...prev, new: 'error' }))
+        
+        toast.error(result.messageHe, {
+          description: 'ניתן להמשיך בהזנה ידנית של הנתונים'
+        })
+      }
+    } catch (error) {
+      console.error('Error fetching plan:', error)
+      toast.error('שגיאה בשליפת נתונים מהמאגר הממשלתי')
+      setPlanValidationStatus(prev => ({ ...prev, new: 'error' }))
+    } finally {
+      setAutoFetchingNew(false)
+    }
+  }
+
+  const handleAutoComparePlans = async () => {
+    if (!previousStatus.planNumber.trim() || !newStatus.planNumber.trim()) {
+      toast.error('יש להזין שני מספרי תכניות לפני השוואה')
+      return
+    }
+
+    setAutoFetchingPrev(true)
+    setAutoFetchingNew(true)
+    
+    try {
+      const comparison = await validateAndComparePlans(
+        previousStatus.planNumber,
+        newStatus.planNumber
+      )
+      
+      if (comparison.previousRights.success && comparison.previousRights.data) {
+        setPreviousStatus(prev => ({
+          ...prev,
+          planName: comparison.previousRights.data!.planName,
+          zoning: comparison.previousRights.data!.zoning,
+          buildingRights: {
+            farPercentage: comparison.previousRights.data!.farPercentage,
+            floors: comparison.previousRights.data!.floors,
+            mainArea: comparison.previousRights.data!.mainArea,
+            serviceArea: comparison.previousRights.data!.serviceArea,
+            allowedUses: comparison.previousRights.data!.allowedUses
+          }
+        }))
+      }
+      
+      if (comparison.newRights.success && comparison.newRights.data) {
+        setNewStatus(prev => ({
+          ...prev,
+          planName: comparison.newRights.data!.planName,
+          zoning: comparison.newRights.data!.zoning,
+          buildingRights: {
+            farPercentage: comparison.newRights.data!.farPercentage,
+            floors: comparison.newRights.data!.floors,
+            mainArea: comparison.newRights.data!.mainArea,
+            serviceArea: comparison.newRights.data!.serviceArea,
+            allowedUses: comparison.newRights.data!.allowedUses
+          }
+        }))
+      }
+      
+      if (comparison.canCalculateLevy && comparison.delta) {
+        toast.success(`השוואה הושלמה! תוספת זכויות: ${comparison.delta.totalAreaDelta.toLocaleString('he-IL')} מ"ר`, {
+          description: `עלייה של ${comparison.delta.percentageIncrease.toFixed(1)}% בזכויות הבנייה`
+        })
+      } else if (comparison.issues.length > 0) {
+        toast.warning('השוואה הושלמה עם בעיות', {
+          description: comparison.issues.join(' | ')
+        })
+      }
+      
+    } catch (error) {
+      console.error('Error comparing plans:', error)
+      toast.error('שגיאה בהשוואת התכניות')
+    } finally {
+      setAutoFetchingPrev(false)
+      setAutoFetchingNew(false)
+    }
+  }
 
   const calculateDelta = () => {
     const deltaBuildingRights = {
@@ -1246,10 +1412,12 @@ export function BettermentLevyCalculator() {
                     <div className="bg-muted/50 p-3 rounded border space-y-2">
                       <p className="text-muted-foreground"><strong>תכנית ישנה (מצב קודם):</strong> לה/במ/18/1000/א</p>
                       <p className="text-muted-foreground"><strong>תכנית חדשה (מצב משביח):</strong> 415-0792036</p>
-                      <p className="text-xs text-muted-foreground mt-2 border-t border-border pt-2">
-                        ⚠️ <strong>חשוב:</strong> המערכת מקבלת מספרי תכניות בכל הפורמטים המקובלים, 
-                        <strong className="text-warning"> אך אינה שולפת נתונים אוטומטית מהתכניות</strong>. 
-                        עליך למלא את השטחים במ"ר ידנית בכל אחד מהטאבים.
+                      <p className="text-xs text-success mt-2 border-t border-border pt-2">
+                        ✅ <strong>חדש:</strong> המערכת תשלוף אוטומטית את כל הנתונים מהמאגר הממשלתי! 
+                        <strong className="text-primary"> פשוט הזן את המספרים ולחץ "שלוף זכויות בנייה"</strong>.
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        💡 <strong>טיפ:</strong> אם תכנית לא נמצאה - ניתן להזין ידנית את השטחים
                       </p>
                     </div>
                   </div>
@@ -1258,17 +1426,18 @@ export function BettermentLevyCalculator() {
                     <p className="font-semibold text-foreground">🔍 מאיפה לוקחים את הנתונים?</p>
                     <div className="bg-primary/10 p-3 rounded border border-primary/30 space-y-2">
                       <p className="text-xs text-muted-foreground">
-                        המערכת <strong>אינה מחוברת כרגע</strong> למאגרי מידע ממשלתיים (מבט, ממשק תכנון ערים).
+                        המערכת <strong className="text-success">מחוברת כעת</strong> למאגרי מידע ממשלתיים (iPlan, מבא״ת).
                       </p>
                       <p className="text-xs text-muted-foreground">
-                        <strong>לכן:</strong> בדוק את התכניות במערכות הרשמיות והזן את הנתונים ידנית.
+                        <strong>שתי אפשרויות:</strong>
                       </p>
                       <ol className="text-xs text-muted-foreground list-decimal list-inside mr-4 space-y-1">
-                        <li>היכנס למערכת מבט או ממשק תכנון ערים</li>
-                        <li>חפש את מספרי התכניות שלך</li>
-                        <li>העתק את נתוני הזכויות (אחוזי בנייה, קומות, שטחים)</li>
-                        <li>הזן אותם במחשבון</li>
+                        <li><strong className="text-accent">שליפה אוטומטית:</strong> הזן מספר תכנית ולחץ על כפתור השליפה</li>
+                        <li><strong className="text-muted-foreground">הזנה ידנית:</strong> אם תכנית לא נמצאה, הזן את הנתונים מהתכנית</li>
                       </ol>
+                      <p className="text-xs text-success font-semibold mt-2">
+                        ✨ מומלץ לנסות שליפה אוטומטית תחילה!
+                      </p>
                     </div>
                   </div>
 
@@ -1287,25 +1456,28 @@ export function BettermentLevyCalculator() {
           )}
         </AnimatePresence>
 
-        <Alert className="bg-warning/20 border-warning/50">
-          <Warning className="h-5 w-5 text-warning" weight="duotone" />
-          <AlertTitle className="text-base font-bold text-warning">⚠️ חשוב לדעת - המערכת אינה שולפת נתונים אוטומטית מהתכניות</AlertTitle>
+        <Alert className="bg-primary/10 border-primary/30">
+          <Database className="h-5 w-5 text-primary" weight="duotone" />
+          <AlertTitle className="text-base font-bold">🚀 אינטגרציה חדשה: שליפה אוטומטית ממאגרי ממשלה!</AlertTitle>
           <AlertDescription className="mt-3 space-y-3">
             <div className="text-sm space-y-2">
               <p className="font-semibold text-foreground">
-                מספרי התכניות שהזנת (415-0792036 ו-לה/במ/18/1000/א) תקינים ומקובלים ✓
+                ✅ המערכת מחוברת כעת למאגר iPlan הארצי לשליפה אוטומטית של זכויות בנייה
               </p>
               <p className="text-muted-foreground">
-                <strong>אבל:</strong> המערכת כרגע אינה מחוברת למאגרי נתונים ממשלתיים לשליפה אוטומטית של זכויות בנייה.
+                <strong>מספרי התכניות לדוגמה:</strong> 415-0792036, לה/במ/18/1000/א, תמ״א/38/ב
               </p>
               <div className="p-3 bg-accent/20 border border-accent/40 rounded-lg">
-                <p className="font-semibold text-accent mb-2">📝 מה עליך לעשות:</p>
+                <p className="font-semibold text-accent mb-2">📝 איך להשתמש:</p>
                 <ol className="space-y-1 text-xs text-muted-foreground list-decimal list-inside mr-4">
-                  <li>בדוק את התכניות במערכות הרשמיות (מבט, ממשק תכנון ערים)</li>
-                  <li>מלא <strong>ידנית</strong> את השטחים במ"ר בשני הטאבים: "מצב קודם" ו-"מצב חדש משביח"</li>
-                  <li>חשב: <strong>שטח עיקרי = גודל מגרש × אחוזי בנייה</strong></li>
-                  <li>שטח שירות בד"כ 15-25% מהשטח העיקרי</li>
+                  <li>הזן מספר תכנית בשדה "מצב קודם" או "מצב חדש"</li>
+                  <li>לחץ על כפתור 🔍 או "שלוף זכויות בנייה אוטומטית"</li>
+                  <li><strong className="text-success">המערכת תשלוף את כל הנתונים אוטומטית!</strong></li>
+                  <li>או השתמש ב-"השווה שתי תכניות" למילוי שני הטאבים בבת אחת</li>
                 </ol>
+                <p className="text-xs text-muted-foreground mt-2 pt-2 border-t border-border">
+                  💡 <strong>טיפ:</strong> אם תכנית לא נמצאה במאגר - ניתן להמשיך בהזנה ידנית
+                </p>
               </div>
             </div>
           </AlertDescription>
@@ -1411,29 +1583,83 @@ export function BettermentLevyCalculator() {
 
           <TabsContent value="previous" className="space-y-4">
             <Card className="glass-effect p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <FileText className="w-5 h-5 text-muted-foreground" weight="duotone" />
-                תכנית ישנה - מצב תכנוני קודם
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <FileText className="w-5 h-5 text-muted-foreground" weight="duotone" />
+                  תכנית ישנה - מצב תכנוני קודם
+                </h3>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAutoFetchPreviousPlan}
+                    disabled={autoFetchingPrev || !previousStatus.planNumber.trim()}
+                    className="gap-2"
+                  >
+                    {autoFetchingPrev ? (
+                      <>
+                        <Database className="w-4 h-4 animate-pulse" weight="duotone" />
+                        שולף נתונים...
+                      </>
+                    ) : (
+                      <>
+                        <CloudArrowDown className="w-4 h-4" weight="duotone" />
+                        שלוף זכויות בנייה אוטומטית
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+
+              <Alert className="mb-4 bg-accent/10 border-accent/30">
+                <Database className="h-4 w-4 text-accent" weight="duotone" />
+                <AlertTitle className="text-sm font-bold">🔄 שליפה אוטומטית ממאגרי ממשלה</AlertTitle>
+                <AlertDescription className="text-xs mt-1 space-y-1">
+                  <p>הזן מספר תכנית ולחץ "שלוף זכויות בנייה אוטומטית" לחבר למאגר iPlan הארצי</p>
+                  <p className="text-muted-foreground">תכניות זמינות: 415-0792036, לה/במ/18/1000/א, תמ״א/38/ב ועוד...</p>
+                </AlertDescription>
+              </Alert>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="prev-plan-number">מספר תכנית</Label>
-                    <Input
-                      id="prev-plan-number"
-                      value={previousStatus.planNumber}
-                      onChange={(e) => handlePlanNumberChange(e.target.value, 'prev')}
-                      placeholder="לדוגמה: 415-0792036 או לה/במ/18/1000/א"
-                      dir="ltr"
-                      className="text-right"
-                    />
-                    {planValidationStatus.prev && (
-                      <div className="flex items-center gap-2 text-xs">
-                        <CheckCircle className="w-3 h-3 text-success" weight="fill" />
-                        <span className="text-success">{planValidationStatus.prev}</span>
-                      </div>
-                    )}
+                    <Label htmlFor="prev-plan-number" className="flex items-center gap-2">
+                      מספר תכנית
+                      {planValidationStatus.prev === 'success' && (
+                        <Badge variant="default" className="bg-success text-success-foreground gap-1 text-xs">
+                          <CheckCircle className="w-3 h-3" weight="fill" />
+                          נמצא במאגר
+                        </Badge>
+                      )}
+                      {planValidationStatus.prev === 'error' && (
+                        <Badge variant="secondary" className="gap-1 text-xs">
+                          <Warning className="w-3 h-3" weight="fill" />
+                          הזן ידנית
+                        </Badge>
+                      )}
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="prev-plan-number"
+                        value={previousStatus.planNumber}
+                        onChange={(e) => {
+                          setPreviousStatus({ ...previousStatus, planNumber: e.target.value })
+                          setPlanValidationStatus(prev => ({ ...prev, prev: undefined }))
+                        }}
+                        placeholder="לדוגמה: 415-0792036 או לה/במ/18/1000/א"
+                        dir="ltr"
+                        className="text-right flex-1"
+                      />
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        onClick={handleAutoFetchPreviousPlan}
+                        disabled={autoFetchingPrev || !previousStatus.planNumber.trim()}
+                        title="שלוף זכויות"
+                      >
+                        <MagnifyingGlass className="w-4 h-4" weight="duotone" />
+                      </Button>
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       פורמטים מקובלים: 415-0792036, לה/במ/18/1000/א, תב״ע/123/א
                     </p>
@@ -1577,29 +1803,95 @@ export function BettermentLevyCalculator() {
 
           <TabsContent value="new" className="space-y-4">
             <Card className="glass-effect p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <TrendUp className="w-5 h-5 text-success" weight="duotone" />
-                תכנית חדשה משביחה - מצב תכנוני חדש
-              </h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold flex items-center gap-2">
+                  <TrendUp className="w-5 h-5 text-success" weight="duotone" />
+                  תכנית חדשה משביחה - מצב תכנוני חדש
+                </h3>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleAutoFetchNewPlan}
+                    disabled={autoFetchingNew || !newStatus.planNumber.trim()}
+                    className="gap-2"
+                  >
+                    {autoFetchingNew ? (
+                      <>
+                        <Database className="w-4 h-4 animate-pulse" weight="duotone" />
+                        שולף נתונים...
+                      </>
+                    ) : (
+                      <>
+                        <CloudArrowDown className="w-4 h-4" weight="duotone" />
+                        שלוף זכויות בנייה אוטומטית
+                      </>
+                    )}
+                  </Button>
+                  {previousStatus.planNumber && newStatus.planNumber && (
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={handleAutoComparePlans}
+                      disabled={autoFetchingPrev || autoFetchingNew}
+                      className="gap-2"
+                    >
+                      <Database className="w-4 h-4" weight="duotone" />
+                      השווה שתי תכניות
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              <Alert className="mb-4 bg-accent/10 border-accent/30">
+                <Database className="h-4 w-4 text-accent" weight="duotone" />
+                <AlertTitle className="text-sm font-bold">🔄 שליפה אוטומטית ממאגרי ממשלה</AlertTitle>
+                <AlertDescription className="text-xs mt-1 space-y-1">
+                  <p>הזן מספר תכנית ולחץ "שלוף זכויות בנייה אוטומטית" לחבר למאגר iPlan הארצי</p>
+                  <p className="text-success font-semibold">✨ טיפ: השתמש ב"השווה שתי תכניות" למילוי אוטומטי מלא של שני הטאבים!</p>
+                </AlertDescription>
+              </Alert>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="new-plan-number">מספר תכנית</Label>
-                    <Input
-                      id="new-plan-number"
-                      value={newStatus.planNumber}
-                      onChange={(e) => handlePlanNumberChange(e.target.value, 'new')}
-                      placeholder="לדוגמה: 415-0792036 או לה/במ/18/1000/א"
-                      dir="ltr"
-                      className="text-right"
-                    />
-                    {planValidationStatus.new && (
-                      <div className="flex items-center gap-2 text-xs">
-                        <CheckCircle className="w-3 h-3 text-success" weight="fill" />
-                        <span className="text-success">{planValidationStatus.new}</span>
-                      </div>
-                    )}
+                    <Label htmlFor="new-plan-number" className="flex items-center gap-2">
+                      מספר תכנית
+                      {planValidationStatus.new === 'success' && (
+                        <Badge variant="default" className="bg-success text-success-foreground gap-1 text-xs">
+                          <CheckCircle className="w-3 h-3" weight="fill" />
+                          נמצא במאגר
+                        </Badge>
+                      )}
+                      {planValidationStatus.new === 'error' && (
+                        <Badge variant="secondary" className="gap-1 text-xs">
+                          <Warning className="w-3 h-3" weight="fill" />
+                          הזן ידנית
+                        </Badge>
+                      )}
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="new-plan-number"
+                        value={newStatus.planNumber}
+                        onChange={(e) => {
+                          setNewStatus({ ...newStatus, planNumber: e.target.value })
+                          setPlanValidationStatus(prev => ({ ...prev, new: undefined }))
+                        }}
+                        placeholder="לדוגמה: 415-0792036 או לה/במ/18/1000/א"
+                        dir="ltr"
+                        className="text-right flex-1"
+                      />
+                      <Button
+                        size="icon"
+                        variant="secondary"
+                        onClick={handleAutoFetchNewPlan}
+                        disabled={autoFetchingNew || !newStatus.planNumber.trim()}
+                        title="שלוף זכויות"
+                      >
+                        <MagnifyingGlass className="w-4 h-4" weight="duotone" />
+                      </Button>
+                    </div>
                     <p className="text-xs text-muted-foreground">
                       פורמטים מקובלים: 415-0792036, לה/במ/18/1000/א, תב״ע/123/א
                     </p>
