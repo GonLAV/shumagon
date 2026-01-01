@@ -88,6 +88,39 @@ This is a professional tool requiring multiple sophisticated features: property 
 - Automatic adjustment factor calculations based on property characteristics
 - Real-time statistics: transaction count, avg price per sqm, price range, confidence level
 
+### Rental Market Data Integration for Income Approach (NEW - Critical for Income Valuations)
+- **Functionality**: Automatic rental market data integration in all income-approach calculators, pulling real rental transaction data from government APIs and market sources to estimate potential rental income
+- **Purpose**: Provide accurate, data-driven rental income estimates for income capitalization valuations, eliminating manual research and improving valuation accuracy
+- **Trigger**: Click "שלוף נתוני שכירות מהשוק" button in any income-based calculator
+- **Progression**: Enter property details (city, type, area, rooms, neighborhood) → Click fetch button → System queries rental market data from Nadlan.gov.il and other sources → Displays rental statistics (avg, median, min, max, trend) → Shows estimated monthly/annual rent with confidence level → Automatically populates income fields in calculator
+- **Success criteria**:
+  - Real-time rental data fetching from multiple sources (10-50 comparable rentals)
+  - Confidence scoring (low/medium/high) based on sample size and data quality
+  - Market trend analysis showing direction (rising/stable/falling) and percentage change
+  - Rental estimates with low/mid/high range based on comparable transactions
+  - Automatic population of gross annual income in income capitalization calculator
+  - Detailed stats: average rent, median, price per sqm, transaction count
+  - Works across all property types: residential, commercial, office, land
+  - Graceful fallback to realistic synthetic data when API unavailable
+  
+**Integrated Calculators:**
+1. **Income Capitalization Calculator** - Primary integration with full rental market panel
+2. **Residential Valuation Calculator** - Rental income estimation for investment properties
+3. **Commercial Valuation Calculator** - Retail/restaurant rental market data
+4. **Office Valuation Calculator** - Office space rental rates and trends
+5. **Land Valuation Calculator** - Land lease/rental potential estimation
+
+**Technical Implementation:**
+- New `RentalMarketAPI` service (`/lib/rentalMarketAPI.ts`) with methods:
+  - `fetchRentalData(query)` - Fetch transactions by filters
+  - `getRentalIncomeEstimate()` - Get estimate with confidence scoring
+  - `calculateMarketStats()` - Calculate avg, median, trend
+  - `generateSyntheticRentalData()` - Fallback realistic data
+- Reusable `RentalMarketIntegration` component for all calculators
+- Data sources: nadlan.gov.il rental API + synthetic data generator
+- Query parameters: city, propertyType, area range, rooms, neighborhood, timeframe
+- Response includes: monthlyRent, annualRent, rentPerSqm, confidence, marketStats, comparables
+
 ### Advanced Market Comparison Tool (NEW - Beyond Quicker & Simplex3D)
 - **Functionality**: Intelligent AI-powered search for comparable properties with advanced filtering, sorting, and automatic similarity scoring across multiple criteria
 - **Purpose**: Find the most relevant comparable sales to support professional valuation methodology with precision and transparency

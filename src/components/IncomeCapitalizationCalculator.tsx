@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { Progress } from '@/components/ui/progress'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { 
   TrendUp, 
   Calculator as CalcIcon, 
@@ -15,14 +16,19 @@ import {
   FileText,
   Info,
   Warning,
-  Percent
+  Percent,
+  CloudArrowDown,
+  CheckCircle,
+  Database
 } from '@phosphor-icons/react'
+import { toast } from 'sonner'
 import { 
   IncomeCapitalizationCalculator as CapCalculator,
   type IncomeParams,
   type CapRateParams,
   type IncomeCapitalizationResult
 } from '@/lib/calculators/incomeCapitalizationCalculator'
+import { RentalMarketAPI, type RentalIncomeEstimate } from '@/lib/rentalMarketAPI'
 
 export function IncomeCapitalizationCalculator() {
   const [grossAnnualIncome, setGrossAnnualIncome] = useState('600000')
@@ -41,6 +47,13 @@ export function IncomeCapitalizationCalculator() {
   const [conditionAdjustment, setConditionAdjustment] = useState('0')
   
   const [result, setResult] = useState<IncomeCapitalizationResult | null>(null)
+  
+  const [city, setCity] = useState('תל אביב')
+  const [propertyType, setPropertyType] = useState<'apartment' | 'office' | 'commercial'>('apartment')
+  const [area, setArea] = useState('90')
+  const [rooms, setRooms] = useState('3')
+  const [isLoadingRental, setIsLoadingRental] = useState(false)
+  const [rentalEstimate, setRentalEstimate] = useState<RentalIncomeEstimate | null>(null)
 
   const handleCalculate = () => {
     const incomeParams: IncomeParams = {
@@ -71,6 +84,34 @@ export function IncomeCapitalizationCalculator() {
 
     const calculationResult = CapCalculator.calculate(incomeParams, capRateParams)
     setResult(calculationResult)
+  }
+
+  const handleFetchRentalData = async () => {
+    setIsLoadingRental(true)
+    try {
+      const estimate = await RentalMarketAPI.getRentalIncomeEstimate(
+        city,
+        propertyType,
+        parseFloat(area) || 90,
+        parseFloat(rooms) || undefined
+      )
+      
+      setRentalEstimate(estimate)
+      setGrossAnnualIncome(estimate.annualRent.toString())
+      
+      toast.success('נתוני שכירות נטענו מהשוק', {
+        description: `${estimate.basedOnTransactions} עסקאות דומות נמצאו. רמת ביטחון: ${
+          estimate.confidence === 'high' ? 'גבוהה' : 
+          estimate.confidence === 'medium' ? 'בינונית' : 'נמוכה'
+        }`
+      })
+    } catch (error) {
+      toast.error('שגיאה בטעינת נתוני שוק', {
+        description: 'אנא הזן את הכנסות השכירות באופן ידני'
+      })
+    } finally {
+      setIsLoadingRental(false)
+    }
   }
 
   const totalExpenses = 
@@ -112,6 +153,137 @@ export function IncomeCapitalizationCalculator() {
           הנוסחה: <code className="font-mono bg-muted px-2 py-0.5 rounded">שווי = NOI ÷ Cap Rate</code>
         </AlertDescription>
       </Alert>
+
+      <Card className="border-primary/20 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Database size={24} weight="duotone" className="text-primary" />
+            נתוני שוק שכירות
+          </CardTitle>
+          <CardDescription>
+            שלוף הכנסות שכירות מנתוני שוק אמיתיים (Nadlan.gov.il)
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="rental-city">עיר</Label>
+              <Select value={city} onValueChange={setCity}>
+                <SelectTrigger id="rental-city">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="תל אביב">תל אביב</SelectItem>
+                  <SelectItem value="ירושלים">ירושלים</SelectItem>
+                  <SelectItem value="חיפה">חיפה</SelectItem>
+                  <SelectItem value="באר שבע">באר שבע</SelectItem>
+                  <SelectItem value="רעננה">רעננה</SelectItem>
+                  <SelectItem value="נתניה">נתניה</SelectItem>
+                  <SelectItem value="רמת גן">רמת גן</SelectItem>
+                  <SelectItem value="פתח תקווה">פתח תקווה</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="rental-type">סוג נכס</Label>
+              <Select value={propertyType} onValueChange={(v: any) => setPropertyType(v)}>
+                <SelectTrigger id="rental-type">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="apartment">דירה</SelectItem>
+                  <SelectItem value="office">משרד</SelectItem>
+                  <SelectItem value="commercial">מסחר</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="rental-area">שטח (מ"ר)</Label>
+              <Input
+                id="rental-area"
+                type="number"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                placeholder="90"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="rental-rooms">חדרים</Label>
+              <Input
+                id="rental-rooms"
+                type="number"
+                value={rooms}
+                onChange={(e) => setRooms(e.target.value)}
+                placeholder="3"
+                step="0.5"
+              />
+            </div>
+          </div>
+
+          <Button 
+            onClick={handleFetchRentalData} 
+            disabled={isLoadingRental}
+            className="w-full gap-2"
+            variant="outline"
+          >
+            <CloudArrowDown size={20} weight="duotone" />
+            {isLoadingRental ? 'טוען נתוני שוק...' : 'שלוף נתוני שכירות מהשוק'}
+          </Button>
+
+          {rentalEstimate && (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="p-3 rounded-lg bg-background border">
+                <div className="text-xs text-muted-foreground mb-1">שכירות חודשית משוערת</div>
+                <div className="text-lg font-bold text-primary">
+                  ₪{rentalEstimate.monthlyRent.toLocaleString('he-IL')}
+                </div>
+                <div className="text-xs text-muted-foreground">
+                  ₪{rentalEstimate.rentPerSqm.toFixed(0)}/מ"ר
+                </div>
+              </div>
+
+              <div className="p-3 rounded-lg bg-background border">
+                <div className="text-xs text-muted-foreground mb-1">טווח שכירות</div>
+                <div className="text-sm font-semibold">
+                  ₪{rentalEstimate.lowEstimate.toLocaleString('he-IL')} - 
+                  ₪{rentalEstimate.highEstimate.toLocaleString('he-IL')}
+                </div>
+                <Badge variant={
+                  rentalEstimate.confidence === 'high' ? 'default' : 
+                  rentalEstimate.confidence === 'medium' ? 'secondary' : 'outline'
+                } className="mt-1">
+                  <CheckCircle size={12} weight="fill" className="ml-1" />
+                  {rentalEstimate.confidence === 'high' ? 'ביטחון גבוה' : 
+                   rentalEstimate.confidence === 'medium' ? 'ביטחון בינוני' : 'ביטחון נמוך'}
+                </Badge>
+              </div>
+
+              <div className="p-3 rounded-lg bg-background border">
+                <div className="text-xs text-muted-foreground mb-1">מגמת שוק</div>
+                <div className="flex items-center gap-2">
+                  <Badge variant={
+                    rentalEstimate.marketStats.marketTrend === 'rising' ? 'default' :
+                    rentalEstimate.marketStats.marketTrend === 'falling' ? 'destructive' : 'secondary'
+                  }>
+                    {rentalEstimate.marketStats.marketTrend === 'rising' ? '↗ עולה' :
+                     rentalEstimate.marketStats.marketTrend === 'falling' ? '↘ יורד' : '→ יציב'}
+                  </Badge>
+                  <span className="text-sm font-semibold">
+                    {rentalEstimate.marketStats.trendPercentage > 0 ? '+' : ''}
+                    {rentalEstimate.marketStats.trendPercentage.toFixed(1)}%
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground mt-1">
+                  מבוסס על {rentalEstimate.basedOnTransactions} עסקאות
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Card>
