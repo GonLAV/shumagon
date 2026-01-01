@@ -14,7 +14,7 @@ import { LiveDataConnections } from '@/components/LiveDataConnections'
 import { TeamCollaboration } from '@/components/TeamCollaboration'
 import { DevelopmentRightsCalculator } from '@/components/DevelopmentRightsCalculator'
 import { EmailSequences } from '@/components/EmailSequences'
-import { House, ChartBar, Users, UserCircle, CurrencyDollar, Flask, Palette, Cube, Database, UsersThree, Calculator, ListChecks, EnvelopeSimple, Lightning, FolderOpen, FileText, Buildings, ClockCounterClockwise, ShieldCheck, Robot } from '@phosphor-icons/react'
+import { House, ChartBar, Users, UserCircle, CurrencyDollar, Flask, Palette, Cube, Database, UsersThree, Calculator, ListChecks, EnvelopeSimple, Lightning, FolderOpen, FileText, Buildings, ClockCounterClockwise, ShieldCheck, Robot, CloudArrowDown } from '@phosphor-icons/react'
 import { Toaster } from '@/components/ui/sonner'
 import { AppHeader } from '@/components/app/AppHeader'
 import { PropertiesTab } from '@/components/app/PropertiesTab'
@@ -28,6 +28,7 @@ import { MultiUnitManager } from '@/components/MultiUnitManager'
 import { TeamManagement } from '@/components/TeamManagement'
 import { AuditTrail } from '@/components/AuditTrail'
 import { AIInsights } from '@/components/AIInsights'
+import { TransactionImporter } from '@/components/TransactionImporter'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -99,7 +100,7 @@ function App() {
 
       <main className="container mx-auto px-6 py-8 relative">
         <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-          <TabsList className="mb-8 glass-effect p-1.5 grid grid-cols-6 lg:grid-cols-21 gap-1">
+          <TabsList className="mb-8 glass-effect p-1.5 grid grid-cols-6 lg:grid-cols-22 gap-1">
             <TabsTrigger value="dashboard" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <House size={18} weight="duotone" />
               <span className="hidden sm:inline">לוח בקרה</span>
@@ -183,6 +184,10 @@ function App() {
             <TabsTrigger value="ai-insights" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
               <Robot size={18} weight="duotone" />
               <span className="hidden sm:inline">AI תובנות</span>
+            </TabsTrigger>
+            <TabsTrigger value="import" className="gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+              <CloudArrowDown size={18} weight="duotone" />
+              <span className="hidden sm:inline">ייבוא עסקאות</span>
             </TabsTrigger>
           </TabsList>
 
@@ -311,6 +316,10 @@ function App() {
 
           <TabsContent value="ai-insights" className="mt-0">
             <AIInsights />
+          </TabsContent>
+
+          <TabsContent value="import" className="mt-0">
+            <TransactionImporter />
           </TabsContent>
         </Tabs>
       </main>

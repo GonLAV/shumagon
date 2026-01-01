@@ -348,6 +348,23 @@ This is a professional tool requiring multiple sophisticated features: property 
   - Real-time sync of all actions (measurements, annotations, photos) across participants
   - Each participant has unique color identifier
   - Live cursor tracking shows participant positions
+
+### Automatic Transaction Import from Government API (NEW - Industry-Leading)
+- **Functionality**: Automated import of real estate transactions from Israeli government APIs with advanced filtering, scheduling, duplicate detection, and workflow management
+- **Purpose**: Eliminate manual data entry and ensure appraisers have access to the most recent, verified market transactions for comparable analysis
+- **Trigger**: Click "ייבוא עסקאות" tab in main navigation
+- **Progression**: Create import config → Set location (lat/lng + radius) → Configure filters (price range, area, rooms, condition, age, verified only) → Set schedule (manual/daily/weekly/monthly) → Enable auto-approve or manual review → Save config → Run import (manual or automatic) → System fetches transactions from government API → Applies all filters → Detects duplicates (same address, date, price, area) → Categorizes as pending/approved → View in transactions list → Review pending transactions → Approve/reject individually → Export to CSV for analysis → Track import history with full statistics
+- **Success criteria**:
+  - Connects to land registry, tax authority, and broker platforms
+  - Imports 10-100 transactions per run in under 10 seconds
+  - Duplicate detection accuracy >95% (same address + date + price ±₪1,000 + area ±2m²)
+  - Auto-scheduling runs at configured intervals (2:00 AM for daily)
+  - Filter compliance 100% (only transactions matching criteria)
+  - Statistics dashboard shows: total transactions, pending count, avg price, avg price/m², approval rate, verified percentage
+  - Export to CSV with all transaction details (date, address, price, price/m², area, rooms, floor, condition, age, verified status, import date, approval status)
+  - Import history tracking with: fetch count, new transactions, duplicates, filtered out, errors, duration
+  - Manual approve/reject with review tracking (user, timestamp, notes)
+  - Configurable notifications on successful imports
   - Group chat with message history
   - Participant list shows active/inactive status
   - Session saves include all participants' contributions with attribution
