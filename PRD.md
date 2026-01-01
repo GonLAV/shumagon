@@ -656,6 +656,51 @@ This is a professional tool requiring multiple sophisticated features: property 
   - Time-to-development estimation
   - Feasibility analysis with construction costs
 
+### Betterment Levy Calculator (NEW - Industry-Leading Planning Analysis)
+- **Functionality**: Intelligent betterment levy calculator that compares planning status changes (previous plan vs. new enriching plan) with market values at the determining date, calculating accurate betterment levy based on building rights delta and real estate transaction data
+- **Purpose**: Enable appraisers to calculate betterment levy in a data-driven, transparent, and legally defensible manner by connecting planning changes to market valuations with full audit trail
+- **Trigger**: Click "היטל השבחה" in main navigation under "שומות וחישובים" category
+- **Progression**: 
+  - Enter determining date and lot size → Configure previous planning status (plan number, zoning, building rights: FAR%, floors, main area, service area, restrictions) → Configure new enriching planning status with enhanced rights → Click "שלוף נתוני שוק למועד הקובע" → AI fetches relevant comparable transactions from government data sources at determining date → System calculates weighted average market value per sqm → Click "חשב היטל השבחה" → System calculates building rights delta (FAR delta, floors delta, area deltas) → Calculates betterment value (delta × market value) → Applies 50% levy rate → Displays results with conservative/average/maximum ranges → Shows complete calculation breakdown with formula, substitution, and result → Provides audit trail with all data sources
+- **Success criteria**: ✅ COMPLETED
+  - ✅ Dual-panel interface for previous vs. new planning status
+  - ✅ Comprehensive building rights input: FAR percentage, floors, main area, service area, allowed uses, restrictions
+  - ✅ Determining date configuration with calendar picker
+  - ✅ Calculation method selection (standard 50%, agricultural, urban renewal, exceptional)
+  - ✅ AI-powered market data retrieval from government sources at determining date
+  - ✅ Automatic comparable transactions generation with verification status
+  - ✅ Weighted average market value calculation per sqm
+  - ✅ Delta calculation engine:
+    * FAR percentage delta
+    * Floors delta
+    * Main area delta (sqm)
+    * Service area delta (sqm)
+    * Total area delta
+  - ✅ Transparent calculation display showing:
+    * Formula: שווי השבחה = (Δ זכויות בנייה × שווי זכויות ליחידה)
+    * Substitution with actual values
+    * Result in ILS
+  - ✅ Betterment levy calculation (50% standard rate)
+  - ✅ Value range display (conservative 85%, average 100%, maximum 115%)
+  - ✅ Visual delta indicators with color coding (green for positive additions)
+  - ✅ Comprehensive audit trail section documenting:
+    * Planning data sources (previous plan, new plan)
+    * Determining date
+    * Market data sources (number of verified transactions)
+    * Calculation methodology
+  - ✅ Legal disclaimer clearly stating calculation is advisory tool only
+  - ✅ Professional Hebrew interface throughout
+  - ✅ Three-tab workflow: Previous Status → New Status → Calculation & Levy
+  - ✅ Glass-morphism UI matching app aesthetic
+  - ✅ Smooth animations and transitions
+  - ✅ Real-time calculation updates
+  - ✅ Toast notifications for user guidance
+  - ✅ Zoning designation dropdown (residential, commercial, mixed, industrial, agricultural, public)
+  - ✅ Market data table with transaction details (date, price/sqm, source, location, verification)
+  - ✅ Summary cards showing total rights in previous vs. new status
+  - ✅ ScrollArea for audit trail with comprehensive logging
+  - ✅ Warning card with legal compliance note (Planning and Building Law references)
+
 ### Automated Workflow & Smart Checklists (Simplex3D Feature)
 - **Functionality**: Intelligent workflow engine with customizable checklists, automated task generation, deadline tracking, and completion validation ensuring no steps are missed
 - **Purpose**: Standardize appraisal process, ensure compliance, reduce errors, and improve efficiency through automation
@@ -751,6 +796,7 @@ Animations should feel instant yet fluid - inspired by Tesla UI responsiveness a
 
 2. **🧮 שומות וחישובים (Valuations & Calculations)** - Professional calculation tools
    - מחשבונים מקצועיים (Professional Calculators) - All calculation methodologies
+   - היטל השבחה (Betterment Levy) - Planning-based betterment levy calculator
    - שומה מרובה (Bulk Valuation) - Portfolio batch processing
    - חלוקת יחידות (Unit Distribution) - Unit value allocation with auto-balancing
    - זכויות בנייה (Development Rights) - Development rights calculator

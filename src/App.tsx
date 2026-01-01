@@ -34,6 +34,7 @@ import { AppSidebar } from '@/components/app/AppSidebar'
 import { SidebarProvider } from '@/components/ui/sidebar'
 import { RentalDataManager } from '@/components/RentalDataManager'
 import { RentalAnalyzer } from '@/components/RentalAnalyzer'
+import { BettermentLevyCalculator } from '@/components/BettermentLevyCalculator'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -208,6 +209,8 @@ function App() {
         return <RentalDataManager />
       case 'rental-analysis':
         return <RentalAnalyzer />
+      case 'betterment-levy':
+        return <BettermentLevyCalculator />
       default:
         return (
           <Dashboard
