@@ -42,6 +42,7 @@ import { APIUsageAnalytics } from '@/components/APIUsageAnalytics'
 import { APIQuotaManager } from '@/components/APIQuotaManager'
 import { OfficeValuationCalculator } from '@/components/OfficeValuationCalculator'
 import { QuickerCalculator } from '@/components/QuickerCalculator'
+import { RealBuildingRightsViewer } from '@/components/RealBuildingRightsViewer'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -232,6 +233,8 @@ function App() {
         return <OfficeValuationCalculator />
       case 'quicker':
         return <QuickerCalculator />
+      case 'real-building-rights':
+        return <RealBuildingRightsViewer />
       default:
         return (
           <Dashboard

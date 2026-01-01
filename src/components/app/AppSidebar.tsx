@@ -129,6 +129,7 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
     {
       title: '🚀 טכנולוגיות מתקדמות',
       items: [
+        { id: 'real-building-rights', label: 'זכויות בנייה אמיתיות', icon: Buildings, keywords: ['iPlan', 'מבא"ת', 'Mavat', 'זכויות', 'תכנון', 'היתרים', 'ממשלה', 'API', 'אמיתי', 'גוש', 'חלקה'] },
         { id: 'digital-twin', label: 'תאום דיגיטלי 3D', icon: Cube, keywords: ['3D', 'מודל', 'וירטואלי', 'תלת מימד'] },
         { id: 'data-sources', label: 'מקורות נתונים חיים', icon: Database, keywords: ['API', 'ממשלתי', 'חיבורים', 'נתונים', 'לייב'] },
         { id: 'import', label: 'ייבוא עסקאות', icon: CloudArrowDown, keywords: ['העלאה', 'CSV', 'אקסל', 'ייבוא', 'ייצוא'] },
