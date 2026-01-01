@@ -738,9 +738,66 @@ Typography conveys technical precision and futuristic minimalism through clean s
 
 Animations should feel instant yet fluid - inspired by Tesla UI responsiveness and SpaceX precision. Every motion serves a purpose: card hover lifts (4px translate with scale 1.02), smooth page transitions (300ms with ease-out), number counting animations for stats, gradient shimmer effects on glass cards, micro-interactions on buttons (scale down on press), and satisfying checkmarks on saves. Stagger animations on lists (50ms delay per item) create rhythm. All animations use GPU-accelerated transforms for 60fps smoothness.
 
+## Navigation & Information Architecture
+
+**The application uses a structured sidebar navigation system** to organize the extensive feature set into logical, easy-to-navigate categories. This replaces the previous horizontal tab system to provide better scalability and clearer organization.
+
+### Sidebar Structure (7 Main Categories):
+
+1. **ראשי (Core)** - Essential daily tools
+   - לוח בקרה (Dashboard) - Central workspace and overview
+   - נכסים (Properties) - Property database and management
+   - לקוחות (Clients) - Client relationship management
+
+2. **שומות וניתוח (Valuations & Analysis)** - Professional calculation tools
+   - מחשבונים מקצועיים (Professional Calculators) - All calculation methodologies
+   - שומה מרובה (Bulk Valuation) - Portfolio batch processing
+   - בדיקת מנוע שומה (Valuation Engine Tester) - Testing environment
+   - תובנות AI (AI Insights) - AI-powered analysis and insights
+   - ניתוח שוק (Market Insights) - Market trends and analytics
+
+3. **דוחות ומסמכים (Reports & Documents)** - Report generation and export
+   - דוחות תקניים (Standardized Reports) - Regulatory compliant documentation
+   - דוחות מגמות (Automated Reports) - Trend analysis reports
+   - מיתוג PDF (PDF Branding) - Custom report branding and templates
+
+4. **ניהול תיקים (Case Management)** - Complex property management
+   - ניהול תיקים (Case Management) - File and project management
+   - ריבוי יחידות (Multi-Unit) - Multi-unit building management
+   - חלוקת יחידות (Unit Distribution) - Unit value allocation calculator
+   - זכויות בנייה (Development Rights) - Development rights calculator
+
+5. **תקשורת ומעקב (Communication & Follow-up)** - Client engagement
+   - דוחות שנשלחו (Email History) - Sent reports tracking
+   - רצפי מעקב (Email Sequences) - Automated follow-up campaigns
+   - פורטל לקוחות (Client Portal) - Client access portal management
+
+6. **טכנולוגיות מתקדמות (Advanced Technologies)** - Cutting-edge features
+   - תאום דיגיטלי (Digital Twin) - Property digital twin visualization
+   - מקורות נתונים (Data Sources) - Live government data connections
+   - ייבוא עסקאות (Transaction Import) - Automated transaction import
+
+7. **ניהול עסקי (Business Management)** - Business operations
+   - ניהול עסקי (Business Management) - Financial oversight and invoicing
+   - צוות והרשאות (Team Management) - Permissions and role management
+   - שיתוף פעולה (Team Collaboration) - Team collaboration tools
+   - Audit Trail - Complete activity logging and compliance
+
+### Navigation Design Principles:
+- **Glass morphism sidebar** with subtle backdrop blur and border
+- **Collapsible functionality** to maximize workspace when needed
+- **Category labels** in muted text with clear visual hierarchy
+- **Active state highlighting** with primary color and duotone icons
+- **Persistent state** - remembers last viewed section across sessions
+- **RTL-optimized** for Hebrew interface with proper alignment
+- **Smooth transitions** between views with fade animations
+- **Icon consistency** using Phosphor Icons duotone weight throughout
+- **Mobile responsive** - collapses to icon-only mode on smaller screens
+
 ## Component Selection
 
 - **Components**:
+  - Sidebar: Shadcn Sidebar component with collapsible groups, custom styling with glass effect
   - Card: Glass morphism effect with backdrop blur, subtle borders, gradient overlays on hover - used for all content containers
   - Tabs: Sleek pills with smooth active indicator, glowing when selected
   - Dialog: Full-screen overlays with backdrop blur and smooth scale-in animations
