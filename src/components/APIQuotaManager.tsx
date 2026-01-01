@@ -44,7 +44,11 @@ import {
   Sliders,
   Database,
   TrendUp,
-  Bell
+  Bell,
+  Lightning,
+  Rocket,
+  Briefcase,
+  Stack
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { format, startOfMonth, startOfDay, differenceInSeconds } from 'date-fns'
@@ -216,6 +220,112 @@ const DEFAULT_APIS: Record<string, Omit<APIQuotaConfig, 'id'>> = {
   }
 }
 
+interface ThrottlePreset {
+  id: string
+  name: string
+  nameHe: string
+  description: string
+  descriptionHe: string
+  icon: string
+  config: ThrottleConfig
+  quotaMultiplier: {
+    requests: number
+    costMultiplier: number
+  }
+  color: string
+}
+
+const THROTTLE_PRESETS: ThrottlePreset[] = [
+  {
+    id: 'basic',
+    name: 'Basic',
+    nameHe: 'בסיסי',
+    description: 'Conservative limits for small-scale usage',
+    descriptionHe: 'מגבלות שמרניות לשימוש בהיקף קטן',
+    icon: 'shield',
+    config: {
+      enabled: true,
+      maxRequestsPerSecond: 2,
+      burstAllowance: 5,
+      cooldownMs: 500,
+      queueEnabled: true,
+      maxQueueSize: 20,
+      priorityLevels: false
+    },
+    quotaMultiplier: {
+      requests: 0.5,
+      costMultiplier: 1.0
+    },
+    color: 'from-blue-500/20 to-blue-600/20'
+  },
+  {
+    id: 'professional',
+    name: 'Professional',
+    nameHe: 'מקצועי',
+    description: 'Balanced performance for regular business use',
+    descriptionHe: 'ביצועים מאוזנים לשימוש עסקי רגיל',
+    icon: 'briefcase',
+    config: {
+      enabled: true,
+      maxRequestsPerSecond: 5,
+      burstAllowance: 12,
+      cooldownMs: 200,
+      queueEnabled: true,
+      maxQueueSize: 50,
+      priorityLevels: true
+    },
+    quotaMultiplier: {
+      requests: 1.0,
+      costMultiplier: 1.0
+    },
+    color: 'from-primary/20 to-primary/30'
+  },
+  {
+    id: 'enterprise',
+    name: 'Enterprise',
+    nameHe: 'ארגוני',
+    description: 'High-performance limits for large-scale operations',
+    descriptionHe: 'מגבלות ביצועים גבוהות לפעילות בהיקף רחב',
+    icon: 'rocket',
+    config: {
+      enabled: true,
+      maxRequestsPerSecond: 15,
+      burstAllowance: 30,
+      cooldownMs: 50,
+      queueEnabled: true,
+      maxQueueSize: 150,
+      priorityLevels: true
+    },
+    quotaMultiplier: {
+      requests: 3.0,
+      costMultiplier: 0.7
+    },
+    color: 'from-accent/20 to-accent/30'
+  },
+  {
+    id: 'unlimited',
+    name: 'Unlimited',
+    nameHe: 'ללא הגבלה',
+    description: 'No throttling - maximum speed (use with caution)',
+    descriptionHe: 'ללא מגבלת קצב - מהירות מקסימלית (השתמש בזהירות)',
+    icon: 'lightning',
+    config: {
+      enabled: false,
+      maxRequestsPerSecond: 100,
+      burstAllowance: 200,
+      cooldownMs: 0,
+      queueEnabled: false,
+      maxQueueSize: 0,
+      priorityLevels: false
+    },
+    quotaMultiplier: {
+      requests: 10.0,
+      costMultiplier: 1.5
+    },
+    color: 'from-destructive/20 to-destructive/30'
+  }
+]
+
 export function APIQuotaManager() {
   const [quotaConfigs, setQuotaConfigs] = useKV<Record<string, APIQuotaConfig>>('api-quota-configs', 
     Object.entries(DEFAULT_APIS).reduce((acc, [key, config]) => {
@@ -227,6 +337,7 @@ export function APIQuotaManager() {
   const [usageSnapshots, setUsageSnapshots] = useKV<UsageSnapshot[]>('api-usage-snapshots', [])
   const [selectedAPI, setSelectedAPI] = useState<string | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [presetDialogOpen, setPresetDialogOpen] = useState(false)
 
   const analytics = useMemo(() => {
     const configs = quotaConfigs || {}
@@ -330,6 +441,47 @@ export function APIQuotaManager() {
     })
   }
 
+  const handleApplyPreset = (presetId: string, apiIds?: string[]) => {
+    const preset = THROTTLE_PRESETS.find(p => p.id === presetId)
+    if (!preset) return
+
+    setQuotaConfigs(current => {
+      if (!current) return {}
+      const updated = { ...current }
+      const targetApis = apiIds || Object.keys(updated)
+
+      targetApis.forEach(apiId => {
+        if (!updated[apiId]) return
+
+        const baseQuota = DEFAULT_APIS[apiId]?.quota.requests || updated[apiId].quota.requests
+        const baseCost = DEFAULT_APIS[apiId]?.costPerRequest || updated[apiId].costPerRequest
+
+        updated[apiId] = {
+          ...updated[apiId],
+          throttle: { ...preset.config },
+          quota: {
+            ...updated[apiId].quota,
+            requests: Math.floor(baseQuota * preset.quotaMultiplier.requests)
+          },
+          costPerRequest: baseCost * preset.quotaMultiplier.costMultiplier
+        }
+      })
+
+      return updated
+    })
+
+    toast.success(`תבנית "${preset.nameHe}" הוחלה בהצלחה`)
+    setPresetDialogOpen(false)
+  }
+
+  const handleApplyPresetToAPI = (apiId: string, presetId: string) => {
+    handleApplyPreset(presetId, [apiId])
+  }
+
+  const handleApplyPresetToAll = (presetId: string) => {
+    handleApplyPreset(presetId)
+  }
+
   const handleSimulateUsage = (apiId: string, count: number) => {
     setQuotaConfigs(current => {
       if (!current) return {}
@@ -415,12 +567,131 @@ export function APIQuotaManager() {
         </div>
         
         <div className="flex gap-2">
+          <Button 
+            variant="outline" 
+            onClick={() => setPresetDialogOpen(true)}
+          >
+            <Stack className="ml-2" />
+            תבניות Throttling
+          </Button>
           <Button variant="outline" onClick={handleResetAllQuotas}>
             <ArrowsClockwise className="ml-2" />
             איפוס כל המכסות
           </Button>
         </div>
       </div>
+
+      <Card className="bg-gradient-to-br from-primary/5 to-accent/5 border-primary/20">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Stack size={24} className="text-primary" />
+            תבניות Throttling מוכנות
+          </CardTitle>
+          <CardDescription>
+            החל תצורות מוגדרות מראש לפי דרגת השימוש שלך - בסיסי, מקצועי או ארגוני
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {THROTTLE_PRESETS.map((preset) => {
+              const IconComponent = 
+                preset.icon === 'shield' ? Shield :
+                preset.icon === 'briefcase' ? Briefcase :
+                preset.icon === 'rocket' ? Rocket :
+                Lightning
+
+              return (
+                <Card 
+                  key={preset.id} 
+                  className={`cursor-pointer transition-all hover:shadow-lg hover:scale-105 bg-gradient-to-br ${preset.color} border-2 hover:border-primary/50`}
+                  onClick={() => {
+                    if (confirm(`האם להחיל את תבנית "${preset.nameHe}" על כל ה-APIs?`)) {
+                      handleApplyPresetToAll(preset.id)
+                    }
+                  }}
+                >
+                  <CardHeader className="pb-3">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                          <IconComponent size={20} className="text-primary" />
+                          {preset.nameHe}
+                        </CardTitle>
+                        <CardDescription className="text-xs mt-1">
+                          {preset.name}
+                        </CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <p className="text-sm text-foreground/80">{preset.descriptionHe}</p>
+                    
+                    <Separator />
+                    
+                    <div className="space-y-2 text-xs">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">בקשות/שנייה:</span>
+                        <span className="font-semibold">{preset.config.maxRequestsPerSecond}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Burst:</span>
+                        <span className="font-semibold">{preset.config.burstAllowance}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">מכסה:</span>
+                        <span className="font-semibold">×{preset.quotaMultiplier.requests.toFixed(1)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">עלות:</span>
+                        <span className="font-semibold">×{preset.quotaMultiplier.costMultiplier.toFixed(1)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">תור:</span>
+                        <span className="font-semibold">
+                          {preset.config.queueEnabled ? `✓ (${preset.config.maxQueueSize})` : '✗'}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">עדיפויות:</span>
+                        <span className="font-semibold">
+                          {preset.config.priorityLevels ? '✓' : '✗'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="w-full mt-2"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setPresetDialogOpen(true)
+                      }}
+                    >
+                      החל באופן סלקטיבי
+                    </Button>
+                  </CardContent>
+                </Card>
+              )
+            })}
+          </div>
+
+          <div className="mt-4 p-4 bg-muted/50 rounded-lg border">
+            <div className="flex items-start gap-3">
+              <Info size={20} className="text-primary mt-0.5" />
+              <div className="text-sm space-y-1">
+                <p className="font-semibold">הסבר על דרגות התבניות:</p>
+                <ul className="list-disc list-inside space-y-1 text-muted-foreground">
+                  <li><strong>בסיסי:</strong> מתאים למשרדים קטנים עם 1-3 שמאים, עד 50 שומות בחודש</li>
+                  <li><strong>מקצועי:</strong> מתאים למשרדים בינוניים עם 3-10 שמאים, עד 200 שומות בחודש</li>
+                  <li><strong>ארגוני:</strong> מתאים למשרדים גדולים, מעל 10 שמאים, מעל 500 שומות בחודש</li>
+                  <li><strong>ללא הגבלה:</strong> מומלץ רק לבדיקות או לשימוש זמני - עלול לגרום לעלויות גבוהות</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -558,7 +829,7 @@ export function APIQuotaManager() {
 
                     <Separator />
 
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 flex-wrap">
                       <Button 
                         variant="outline" 
                         size="sm"
@@ -575,6 +846,22 @@ export function APIQuotaManager() {
                         <Play className="ml-2" size={16} />
                         סימולציה (+10)
                       </Button>
+                      
+                      <Select 
+                        onValueChange={(presetId) => handleApplyPresetToAPI(apiId, presetId)}
+                      >
+                        <SelectTrigger className="h-9 w-[160px]">
+                          <SelectValue placeholder="תבנית מהירה" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {THROTTLE_PRESETS.map((preset) => (
+                            <SelectItem key={preset.id} value={preset.id}>
+                              {preset.nameHe}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+
                       <Button 
                         variant="outline" 
                         size="sm"
@@ -938,6 +1225,159 @@ export function APIQuotaManager() {
           </DialogContent>
         </Dialog>
       )}
+
+      <Dialog open={presetDialogOpen} onOpenChange={setPresetDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>החלת תבניות Throttling</DialogTitle>
+            <DialogDescription>בחר תבנית והחל אותה על APIs ספציפיים</DialogDescription>
+          </DialogHeader>
+          
+          <Tabs defaultValue={THROTTLE_PRESETS[0].id} className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              {THROTTLE_PRESETS.map((preset) => (
+                <TabsTrigger key={preset.id} value={preset.id}>
+                  {preset.nameHe}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            {THROTTLE_PRESETS.map((preset) => {
+              const IconComponent = 
+                preset.icon === 'shield' ? Shield :
+                preset.icon === 'briefcase' ? Briefcase :
+                preset.icon === 'rocket' ? Rocket :
+                Lightning
+
+              return (
+                <TabsContent key={preset.id} value={preset.id} className="space-y-4">
+                  <Card className={`bg-gradient-to-br ${preset.color} border-2`}>
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2">
+                        <IconComponent size={24} className="text-primary" />
+                        {preset.nameHe} ({preset.name})
+                      </CardTitle>
+                      <CardDescription>{preset.descriptionHe}</CardDescription>
+                    </CardHeader>
+                    <CardContent className="grid md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-sm">פרמטרי Throttling</h4>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">בקשות מקסימליות לשנייה:</span>
+                            <span className="font-medium">{preset.config.maxRequestsPerSecond}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Burst Allowance:</span>
+                            <span className="font-medium">{preset.config.burstAllowance}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Cooldown:</span>
+                            <span className="font-medium">{preset.config.cooldownMs}ms</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">גודל תור:</span>
+                            <span className="font-medium">
+                              {preset.config.queueEnabled ? preset.config.maxQueueSize : 'כבוי'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Priority Levels:</span>
+                            <span className="font-medium">
+                              {preset.config.priorityLevels ? 'מופעל' : 'כבוי'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <h4 className="font-semibold text-sm">השפעה על מכסות ועלויות</h4>
+                        <div className="space-y-1 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">מכסת בקשות:</span>
+                            <span className="font-medium">
+                              {preset.quotaMultiplier.requests === 1 
+                                ? 'ללא שינוי' 
+                                : `×${preset.quotaMultiplier.requests}`
+                              }
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">מחיר לבקשה:</span>
+                            <span className="font-medium">
+                              {preset.quotaMultiplier.costMultiplier === 1 
+                                ? 'ללא שינוי' 
+                                : `×${preset.quotaMultiplier.costMultiplier}`
+                              }
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="mt-4 pt-4 border-t">
+                          <Button 
+                            className="w-full" 
+                            onClick={() => handleApplyPresetToAll(preset.id)}
+                          >
+                            החל על כל ה-APIs
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle className="text-lg">החל על APIs ספציפיים</CardTitle>
+                      <CardDescription>בחר לאילו APIs להחיל תבנית זו</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <ScrollArea className="h-[300px] pr-4">
+                        <div className="space-y-3">
+                          {quotaConfigs && Object.entries(quotaConfigs).map(([apiId, config]) => {
+                            const baseQuota = DEFAULT_APIS[apiId]?.quota.requests || config.quota.requests
+                            const baseCost = DEFAULT_APIS[apiId]?.costPerRequest || config.costPerRequest
+                            const newQuota = Math.floor(baseQuota * preset.quotaMultiplier.requests)
+                            const newCost = baseCost * preset.quotaMultiplier.costMultiplier
+
+                            return (
+                              <div 
+                                key={apiId} 
+                                className="flex items-center justify-between p-3 border rounded-lg hover:bg-muted/50 transition-colors"
+                              >
+                                <div className="flex-1">
+                                  <div className="font-semibold">{config.apiNameHe}</div>
+                                  <div className="text-xs text-muted-foreground">{config.apiName}</div>
+                                  <div className="text-xs text-muted-foreground mt-1">
+                                    מכסה: {config.quota.requests} → {newQuota} • 
+                                    עלות: ₪{config.costPerRequest.toFixed(3)} → ₪{newCost.toFixed(3)}
+                                  </div>
+                                </div>
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  onClick={() => handleApplyPresetToAPI(apiId, preset.id)}
+                                >
+                                  החל
+                                </Button>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </ScrollArea>
+                    </CardContent>
+                  </Card>
+                </TabsContent>
+              )
+            })}
+          </Tabs>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPresetDialogOpen(false)}>
+              סגור
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
