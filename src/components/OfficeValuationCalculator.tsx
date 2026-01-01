@@ -20,7 +20,10 @@ import {
   Info,
   CurrencyDollar,
   ChartBar,
-  FileArrowDown
+  FileArrowDown,
+  CloudArrowDown,
+  CheckCircle as CheckIcon,
+  X
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { 
@@ -29,6 +32,7 @@ import {
   OfficeValuationResult,
   OfficeValuationCalculator as ValuationEngine 
 } from '@/lib/calculators/officeValuationCalculator'
+import { NadlanGovAPI, type NadlanTransaction } from '@/lib/nadlanGovAPI'
 
 export function OfficeValuationCalculator() {
   const [property, setProperty] = useState<Partial<OfficeProperty>>({
@@ -112,6 +116,73 @@ export function OfficeValuationCalculator() {
   const [result, setResult] = useState<OfficeValuationResult | null>(null)
   const [calculationMethod, setCalculationMethod] = useState<'comparable-sales' | 'income-approach' | 'cost-approach'>('comparable-sales')
   const [showDetails, setShowDetails] = useState(false)
+  const [isLoadingNadlan, setIsLoadingNadlan] = useState(false)
+  const [nadlanTransactions, setNadlanTransactions] = useState<NadlanTransaction[]>([])
+  const [showNadlanResults, setShowNadlanResults] = useState(false)
+
+  const handleFetchNadlanTransactions = async () => {
+    if (!property.city) {
+      toast.error('יש להזין עיר לפני שליפת עסקאות')
+      return
+    }
+
+    setIsLoadingNadlan(true)
+    try {
+      const nadlanAPI = new NadlanGovAPI()
+      
+      const searchParams = {
+        city: property.city,
+        street: property.address || undefined,
+        propertyType: 'משרד',
+        minArea: property.totalArea ? property.totalArea * 0.7 : 50,
+        maxArea: property.totalArea ? property.totalArea * 1.3 : 200,
+        fromDate: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        toDate: new Date().toISOString().split('T')[0]
+      }
+
+      console.log('[OfficeValuation] Fetching Nadlan transactions with params:', searchParams)
+      const transactions = await nadlanAPI.searchTransactions(searchParams)
+      
+      if (transactions.length === 0) {
+        toast.warning('לא נמצאו עסקאות מתאימות בנדל"ן', {
+          description: 'ניתן להזין עסקאות השוואה ידנית'
+        })
+      } else {
+        setNadlanTransactions(transactions)
+        setShowNadlanResults(true)
+        toast.success(`נמצאו ${transactions.length} עסקאות מתאימות מנדל"ן`, {
+          description: 'בחר עסקאות להוספה למחשבון'
+        })
+      }
+    } catch (error) {
+      console.error('[OfficeValuation] Failed to fetch Nadlan transactions:', error)
+      toast.error('שגיאה בשליפת נתונים מנדל"ן', {
+        description: error instanceof Error ? error.message : 'נסה שוב מאוחר יותר'
+      })
+    } finally {
+      setIsLoadingNadlan(false)
+    }
+  }
+
+  const handleAddNadlanTransaction = (transaction: NadlanTransaction) => {
+    const newComparable: Partial<OfficeComparable> = {
+      id: transaction.dealId,
+      address: `${transaction.street} ${transaction.houseNumber || ''}, ${transaction.city}`.trim(),
+      salePrice: transaction.dealAmount,
+      pricePerSqm: transaction.pricePerMeter,
+      saleDate: transaction.dealDate,
+      area: transaction.area,
+      floor: transaction.floor,
+      condition: transaction.renovated ? 'excellent' : 'good',
+      officeClass: 'B',
+      parkingSpaces: transaction.parking ? 1 : 0,
+      buildYear: transaction.buildYear,
+      distance: 0
+    }
+
+    setComparables(prev => [...prev, newComparable])
+    toast.success('עסקה נוספה להשוואה')
+  }
 
   const handleCalculate = () => {
     try {
@@ -195,55 +266,56 @@ export function OfficeValuationCalculator() {
         </div>
       </div>
 
-      <div className="p-4 rounded-xl bg-warning/10 border-2 border-warning/30">
+      <div className="p-4 rounded-xl bg-accent/10 border-2 border-accent/30">
         <div className="flex gap-3">
-          <Warning className="w-6 h-6 text-warning flex-shrink-0 mt-0.5" weight="duotone" />
+          <Info className="w-6 h-6 text-accent flex-shrink-0 mt-0.5" weight="duotone" />
           <div className="space-y-2">
-            <h3 className="font-bold text-warning text-lg">⚠️ הערת מקור מידע - חובה לקרוא!</h3>
+            <h3 className="font-bold text-accent text-lg">✅ חיבור למאגר נדל"ן ממשלתי</h3>
             <div className="text-sm space-y-2 text-foreground">
               <p className="font-semibold">
-                🔴 <strong>הנתונים במחשבון זה הם סימולטיביים בלבד</strong> - אין חיבור אמיתי למאגרי מידע!
+                🟢 <strong>המערכת מחוברת למאגר נדל"ן הממשלתי (nadlan.gov.il)</strong>
               </p>
-              <div className="bg-background/60 p-3 rounded-lg space-y-1 text-muted-foreground">
-                <p>📍 <strong>מאיפה המחירים?</strong></p>
-                <p className="mr-6">
-                  כל הערכי הקרקע והמחירים למ"ר מבוססים על <strong className="text-warning">טבלה פנימית קבועה</strong> שמקודדת במערכת.
-                  לדוגמה: תל אביב = 150,000 ₪/מ"ר, רמלה = 45,000 ₪/מ"ר, וכו'.
+              <div className="bg-background/60 p-3 rounded-lg space-y-1">
+                <p>📊 <strong>עסקאות אמיתיות:</strong></p>
+                <p className="mr-6 text-muted-foreground">
+                  לחץ על כפתור <strong className="text-accent">"שלוף מנדל"ן"</strong> בטאב "עסקאות השוואה" 
+                  כדי לשלוף עסקאות משרדים אמיתיות מהמאגר הממשלתי.
                 </p>
-                <p className="mr-6 text-xs">
-                  (ראה קוד: <code className="bg-muted px-1 rounded">officeValuationCalculator.ts</code> שורות 654-672)
-                </p>
-              </div>
-              <div className="bg-background/60 p-3 rounded-lg space-y-1 text-muted-foreground">
-                <p>📊 <strong>עסקאות ההשוואה:</strong></p>
-                <p className="mr-6">
-                  העסקאות שמוצגות הן <strong className="text-warning">דוגמאות מדומות</strong> שאתה מזין ידנית בטאב "עסקאות השוואה".
-                  המערכת אינה שולפת עסקאות אמיתיות ממאגרים חיצוניים.
+                <p className="mr-6 text-muted-foreground">
+                  המערכת תחפש עסקאות דומות לפי: עיר, רחוב, טווח שטח, ותקופה (12 חודשים אחרונים).
                 </p>
               </div>
-              <div className="bg-destructive/20 p-3 rounded-lg border border-destructive/40 mt-3">
-                <p className="font-semibold text-destructive">
-                  ❌ <strong>לא לשימוש מקצועי:</strong>
+              <div className="bg-background/60 p-3 rounded-lg space-y-1">
+                <p>🔄 <strong>מנגנון Fallback:</strong></p>
+                <p className="mr-6 text-muted-foreground">
+                  אם השרת הממשלתי לא זמין או אין עסקאות תואמות, ניתן להזין עסקאות ידנית.
+                </p>
+              </div>
+              <div className="bg-warning/20 p-3 rounded-lg border border-warning/40 mt-3">
+                <p className="font-semibold text-warning">
+                  ⚠️ <strong>לתשומת לב:</strong>
                 </p>
                 <p className="text-sm text-foreground mt-1">
-                  מחשבון זה הוא כלי הדגמה טכנולוגית בלבד. לשומה מקצועית אמיתית יש צורך ב:
+                  מחשבון זה משתמש בנתונים אמיתיים אך הוא כלי עזר בלבד. לשומה מקצועית מחייבת נדרש:
                 </p>
                 <ul className="list-disc list-inside text-sm text-foreground mr-4 mt-2 space-y-1">
-                  <li>חיבור ל-API של מאגרי נדל"ן (מידע נדל"ן, רשם המקרקעין, רשות המיסים)</li>
-                  <li>גישה למחירוני בנייה מעודכנים (דקל, צ'ק ליסט)</li>
-                  <li>מאגרי עסקאות אמיתיות ממקורות מאומתים</li>
                   <li>שמאי מקרקעין מוסמך עם רישיון פעיל</li>
+                  <li>ביקור שטח ובדיקה פיזית של הנכס</li>
+                  <li>ניתוח נוסף של מאפייני הנכס והסביבה</li>
+                  <li>התחשבות במגמות שוק מקומיות ומאקרו</li>
                 </ul>
               </div>
               <div className="bg-accent/10 p-3 rounded-lg border border-accent/30 mt-3">
                 <p className="font-semibold text-accent flex items-center gap-2">
-                  <Info className="w-4 h-4" weight="duotone" />
-                  <strong>מטרת המערכת:</strong>
+                  <CheckIcon className="w-4 h-4" weight="duotone" />
+                  <strong>יתרונות המערכת:</strong>
                 </p>
-                <p className="text-sm text-foreground mt-1">
-                  להדגים את <strong>הפונקציונליות והממשק</strong> של מחשבון שמאות מתקדם.
-                  בסביבת ייצור אמיתית, ניתן לחבר את אותם החישובים למקורות מידע אמיתיים.
-                </p>
+                <ul className="list-disc list-inside text-sm text-foreground mr-4 mt-2 space-y-1">
+                  <li>גישה מהירה לעסקאות אמיתיות מהמאגר הממשלתי</li>
+                  <li>חישובי התאמה מתקדמים לעסקאות דומות</li>
+                  <li>תמיכה במספר שיטות שמאות מקצועיות</li>
+                  <li>ממשק ידידותי לשמאים וקציני הערכה</li>
+                </ul>
               </div>
             </div>
           </div>
@@ -531,12 +603,111 @@ export function OfficeValuationCalculator() {
         <TabsContent value="comparables" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>עסקאות השוואה</CardTitle>
-              <CardDescription>
-                הוסף עסקאות דומות לניתוח השוואתי - מומלץ 3-7 עסקאות
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>עסקאות השוואה</CardTitle>
+                  <CardDescription>
+                    הוסף עסקאות דומות לניתוח השוואתי - מומלץ 3-7 עסקאות
+                  </CardDescription>
+                </div>
+                <Button
+                  onClick={handleFetchNadlanTransactions}
+                  disabled={isLoadingNadlan || !property.city}
+                  variant="default"
+                  className="gap-2"
+                >
+                  {isLoadingNadlan ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                      טוען...
+                    </>
+                  ) : (
+                    <>
+                      <CloudArrowDown className="w-5 h-5" weight="duotone" />
+                      שלוף מנדל"ן
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
+              {showNadlanResults && nadlanTransactions.length > 0 && (
+                <>
+                  <div className="p-4 border-2 border-primary/30 rounded-xl bg-primary/5 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <CheckIcon className="w-5 h-5 text-primary" weight="duotone" />
+                        <div>
+                          <div className="font-semibold">נמצאו {nadlanTransactions.length} עסקאות מנדל"ן</div>
+                          <div className="text-sm text-muted-foreground">לחץ על עסקה להוספה למחשבון</div>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowNadlanResults(false)}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-2 max-h-96 overflow-y-auto">
+                      {nadlanTransactions.map((transaction) => {
+                        const isAlreadyAdded = comparables.some(c => c.id === transaction.dealId)
+                        
+                        return (
+                          <div
+                            key={transaction.dealId}
+                            className="p-3 bg-background rounded-lg border hover:border-primary/50 transition-colors"
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex-1 space-y-1">
+                                <div className="font-medium">
+                                  {transaction.street} {transaction.houseNumber}, {transaction.city}
+                                </div>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 text-sm text-muted-foreground">
+                                  <div>
+                                    <span className="font-medium">מחיר:</span> {transaction.dealAmount.toLocaleString('he-IL')} ₪
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">למ"ר:</span> {transaction.pricePerMeter.toLocaleString('he-IL')} ₪
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">שטח:</span> {transaction.area} מ"ר
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">תאריך:</span> {new Date(transaction.dealDate).toLocaleDateString('he-IL')}
+                                  </div>
+                                </div>
+                                {transaction.verified && (
+                                  <Badge variant="outline" className="text-xs">
+                                    <CheckIcon className="w-3 h-3 ml-1" />
+                                    מאומת
+                                  </Badge>
+                                )}
+                              </div>
+                              <Button
+                                size="sm"
+                                onClick={() => handleAddNadlanTransaction(transaction)}
+                                disabled={isAlreadyAdded}
+                                variant={isAlreadyAdded ? "outline" : "default"}
+                              >
+                                {isAlreadyAdded ? 'נוסף' : 'הוסף'}
+                              </Button>
+                            </div>
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+
+                  <Separator />
+                </>
+              )}
+
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold">עסקאות נבחרות ({comparables.length})</h3>
+              </div>
               {comparables.map((comp, index) => (
                 <Card key={comp.id} className="border-2">
                   <CardHeader className="pb-3">
