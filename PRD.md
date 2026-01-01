@@ -121,6 +121,72 @@ This is a professional tool requiring multiple sophisticated features: property 
 - Query parameters: city, propertyType, area range, rooms, neighborhood, timeframe
 - Response includes: monthlyRent, annualRent, rentPerSqm, confidence, marketStats, comparables
 
+### Rental Yield Analysis (NEW - Investment Decision Support) ✅ COMPLETED
+- **Functionality**: Comprehensive rental yield calculator integrated into all valuation calculators, analyzing rental income vs. property value with gross yield, net yield (NOI), expense breakdown, market comparison, and professional investment recommendations
+- **Purpose**: Enable property investors and appraisers to instantly assess investment potential by understanding return-on-investment from rental income, comparing to market benchmarks, and making data-driven decisions
+- **Trigger**: Automatically appears in Results tab of all valuation calculators after property value is calculated
+- **Progression**: Complete property valuation → View results → Rental yield analysis card appears → Enter monthly rent → Optionally configure advanced settings (vacancy rate, property tax, maintenance, management fees) → Auto-calculate or click "חשב תשואה" → View comprehensive results including gross/net yields, expense breakdown, market comparison, quality rating, and professional recommendations
+- **Success criteria**: ✅ FULLY IMPLEMENTED
+  - ✅ Automatic gross yield calculation: (Annual Rent / Property Value) × 100
+  - ✅ Net yield (NOI) calculation with comprehensive expense modeling
+  - ✅ Configurable operating expense rates:
+    * Vacancy rate (default 5%)
+    * Property tax/arnona (default 1% of value)
+    * Maintenance (default 1.5% of value)
+    * Management fees (default 8% of rent)
+  - ✅ Detailed expense breakdown showing all cost categories
+  - ✅ Market benchmark comparison by property type:
+    * Residential: 4.0% net yield
+    * Commercial: 6.0% net yield
+    * Office: 5.5% net yield
+    * Land: 3.0% net yield
+  - ✅ Quality rating system with 4 levels:
+    * Excellent (≥6.0% net) - Outstanding return
+    * Good (4.0-5.9%) - Above average
+    * Fair (2.5-3.9%) - Below market
+    * Poor (<2.5%) - Weak return
+  - ✅ Professional Hebrew recommendations based on yield quality
+  - ✅ Cap Rate and Cash-on-Cash Return calculations
+  - ✅ Above/below market indicators with percentage difference
+  - ✅ Color-coded visual presentation (green for excellent, yellow for fair, red for poor)
+  - ✅ Integrated into 6 calculators:
+    1. Residential Valuation Calculator
+    2. Commercial Valuation Calculator
+    3. Office Valuation Calculator
+    4. Land Valuation Calculator
+    5. Income Capitalization Calculator (with auto-calculate)
+    6. Quicker Calculator (planned)
+  - ✅ Advanced settings panel for expense customization
+  - ✅ Auto-populate property value from valuation results
+  - ✅ Optional auto-calculate mode for real-time updates
+  - ✅ Monthly and annual income display
+  - ✅ Gross vs. net monthly income comparison
+  
+**Technical Implementation:**
+- New `RentalYieldCalculator` class (`/lib/rentalYieldCalculator.ts`):
+  - `calculateYield(inputs)` - Main calculation engine
+  - `determineQuality(netYield)` - Quality rating algorithm
+  - `generateRecommendation()` - Professional advice generator
+  - `formatCurrency()` - Israeli shekel formatting
+  - `formatPercentage()` - Percentage display helper
+  - `estimateMarketRent()` - Reverse calculation from target yield
+  - `estimatePropertyValue()` - Value estimation from rent
+- Reusable `RentalYieldAnalysis` component for all calculators
+- TypeScript interfaces: `RentalYieldInputs`, `RentalYieldResults`
+- Complete expense breakdown model with category tracking
+- Market benchmark database by property type
+- Automatic quality assessment algorithm
+- Hebrew language recommendation engine
+- Integration points in all Results tabs
+
+**Integration Locations:**
+1. `/components/ResidentialValuationCalculator.tsx` - Results tab
+2. `/components/CommercialValuationCalculator.tsx` - Results tab
+3. `/components/OfficeValuationCalculator.tsx` - Results tab
+4. `/components/LandValuationCalculator.tsx` - Results tab
+5. `/components/IncomeCapitalizationCalculator.tsx` - After calculation results
+6. `/components/QuickerCalculator.tsx` - Planned integration
+
 ### Advanced Market Comparison Tool (NEW - Beyond Quicker & Simplex3D)
 - **Functionality**: Intelligent AI-powered search for comparable properties with advanced filtering, sorting, and automatic similarity scoring across multiple criteria
 - **Purpose**: Find the most relevant comparable sales to support professional valuation methodology with precision and transparency

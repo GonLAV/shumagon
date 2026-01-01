@@ -28,6 +28,7 @@ import {
   ResidentialValuationCalculator as ValuationEngine
 } from '@/lib/calculators/residentialValuationCalculator'
 import { NadlanGovAPI, type NadlanTransaction } from '@/lib/nadlanGovAPI'
+import { RentalYieldAnalysis } from '@/components/RentalYieldAnalysis'
 
 export function ResidentialValuationCalculator() {
   const [property, setProperty] = useState<Partial<ResidentialProperty>>({
@@ -564,6 +565,13 @@ export function ResidentialValuationCalculator() {
                   )}
                 </CardContent>
               </Card>
+
+              <RentalYieldAnalysis
+                propertyValue={result.adjustedValue}
+                propertyType="residential"
+                autoCalculate={false}
+                showAdvancedSettings={true}
+              />
             </>
           ) : (
             <Card>

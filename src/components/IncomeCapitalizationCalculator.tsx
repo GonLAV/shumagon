@@ -29,6 +29,7 @@ import {
   type IncomeCapitalizationResult
 } from '@/lib/calculators/incomeCapitalizationCalculator'
 import { RentalMarketAPI, type RentalIncomeEstimate } from '@/lib/rentalMarketAPI'
+import { RentalYieldAnalysis } from '@/components/RentalYieldAnalysis'
 
 export function IncomeCapitalizationCalculator() {
   const [grossAnnualIncome, setGrossAnnualIncome] = useState('600000')
@@ -569,14 +570,15 @@ export function IncomeCapitalizationCalculator() {
       </div>
 
       {result && (
-        <Card className="border-primary">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CalcIcon size={24} weight="duotone" className="text-primary" />
-              תוצאות חישוב
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
+        <>
+          <Card className="border-primary">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <CalcIcon size={24} weight="duotone" className="text-primary" />
+                תוצאות חישוב
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6">
             <div className="p-6 rounded-lg bg-gradient-to-br from-primary/10 to-accent/10 border-2 border-primary">
               <div className="text-center">
                 <div className="text-sm text-muted-foreground mb-2">שווי הנכס המחושב</div>
@@ -806,6 +808,16 @@ export function IncomeCapitalizationCalculator() {
             </div>
           </CardContent>
         </Card>
+
+        <RentalYieldAnalysis
+          propertyValue={result.propertyValue}
+          monthlyRent={result.grossIncome / 12}
+          annualRent={result.grossIncome}
+          propertyType="residential"
+          autoCalculate={true}
+          showAdvancedSettings={true}
+        />
+        </>
       )}
     </div>
   )

@@ -33,6 +33,7 @@ import {
   OfficeValuationCalculator as ValuationEngine 
 } from '@/lib/calculators/officeValuationCalculator'
 import { NadlanGovAPI, type NadlanTransaction } from '@/lib/nadlanGovAPI'
+import { RentalYieldAnalysis } from '@/components/RentalYieldAnalysis'
 
 export function OfficeValuationCalculator() {
   const [property, setProperty] = useState<Partial<OfficeProperty>>({
@@ -1112,6 +1113,14 @@ export function OfficeValuationCalculator() {
                   )}
                 </CardContent>
               </Card>
+
+              <RentalYieldAnalysis
+                propertyValue={result.adjustedValue}
+                propertyType="office"
+                monthlyRent={property.rentalIncome}
+                autoCalculate={false}
+                showAdvancedSettings={true}
+              />
             </>
           )}
         </TabsContent>

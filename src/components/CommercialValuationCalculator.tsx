@@ -27,6 +27,7 @@ import {
   CommercialValuationCalculator as ValuationEngine
 } from '@/lib/calculators/commercialValuationCalculator'
 import { NadlanGovAPI, type NadlanTransaction } from '@/lib/nadlanGovAPI'
+import { RentalYieldAnalysis } from '@/components/RentalYieldAnalysis'
 
 export function CommercialValuationCalculator() {
   const [property, setProperty] = useState<Partial<CommercialProperty>>({
@@ -269,31 +270,41 @@ export function CommercialValuationCalculator() {
 
         <TabsContent value="results">
           {result ? (
-            <Card className="border-2 border-primary">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <TrendUp className="text-primary" size={28} weight="duotone" />
-                  שווי משוער
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-center mb-6">
-                  <div className="text-5xl font-bold text-primary">₪{result.adjustedValue.toLocaleString()}</div>
-                  <div className="text-xl text-muted-foreground mt-2">₪{result.valuePerSqm.toLocaleString()} למ״ר</div>
-                </div>
-                <Separator className="my-4" />
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <div className="text-sm text-muted-foreground">טווח שווי</div>
-                    <div className="font-semibold">₪{result.valueRange.min.toLocaleString()} - ₪{result.valueRange.max.toLocaleString()}</div>
+            <>
+              <Card className="border-2 border-primary">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <TrendUp className="text-primary" size={28} weight="duotone" />
+                    שווי משוער
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="text-center mb-6">
+                    <div className="text-5xl font-bold text-primary">₪{result.adjustedValue.toLocaleString()}</div>
+                    <div className="text-xl text-muted-foreground mt-2">₪{result.valuePerSqm.toLocaleString()} למ״ר</div>
                   </div>
-                  <div>
-                    <div className="text-sm text-muted-foreground">רמת ביטחון</div>
-                    <Badge>{Math.round(result.confidence * 100)}%</Badge>
+                  <Separator className="my-4" />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="text-sm text-muted-foreground">טווח שווי</div>
+                      <div className="font-semibold">₪{result.valueRange.min.toLocaleString()} - ₪{result.valueRange.max.toLocaleString()}</div>
+                    </div>
+                    <div>
+                      <div className="text-sm text-muted-foreground">רמת ביטחון</div>
+                      <Badge>{Math.round(result.confidence * 100)}%</Badge>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+
+              <RentalYieldAnalysis
+                propertyValue={result.adjustedValue}
+                propertyType="commercial"
+                autoCalculate={false}
+                showAdvancedSettings={true}
+                className="mt-6"
+              />
+            </>
           ) : (
             <Card>
               <CardContent className="text-center py-12 text-muted-foreground">
