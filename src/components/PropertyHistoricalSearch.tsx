@@ -23,7 +23,12 @@ import {
   Eye,
   Scales,
   ClockCounterClockwise,
-  FunnelSimple
+  FunnelSimple,
+  Star,
+  BookmarkSimple,
+  Plus,
+  Trash,
+  FloppyDisk
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -100,9 +105,85 @@ interface FilterState {
   sortOrder: 'asc' | 'desc'
 }
 
+interface SearchPreset {
+  id: string
+  name: string
+  description: string
+  filters: FilterState
+  createdAt: string
+}
+
+const defaultPresets: SearchPreset[] = [
+  {
+    id: 'recent-high-value',
+    name: 'היטלים גבוהים אחרונים',
+    description: 'היטלים מעל מיליון ₪ מ-30 יום אחרונים',
+    filters: {
+      searchTerm: '',
+      dateFrom: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      dateTo: '',
+      planNumber: '',
+      calculationMethod: 'all',
+      levyRange: { min: '1000000', max: '' },
+      sortBy: 'levy',
+      sortOrder: 'desc'
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'this-year',
+    name: 'חישובים השנה',
+    description: 'כל החישובים מתחילת השנה',
+    filters: {
+      searchTerm: '',
+      dateFrom: new Date(new Date().getFullYear(), 0, 1).toISOString().split('T')[0],
+      dateTo: '',
+      planNumber: '',
+      calculationMethod: 'all',
+      levyRange: { min: '', max: '' },
+      sortBy: 'date',
+      sortOrder: 'desc'
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'weighted-method',
+    name: 'ממוצע משוקלל בלבד',
+    description: 'חישובים בשיטת ממוצע משוקלל',
+    filters: {
+      searchTerm: '',
+      dateFrom: '',
+      dateTo: '',
+      planNumber: '',
+      calculationMethod: 'weighted',
+      levyRange: { min: '', max: '' },
+      sortBy: 'date',
+      sortOrder: 'desc'
+    },
+    createdAt: new Date().toISOString()
+  },
+  {
+    id: 'last-quarter',
+    name: 'רבעון אחרון',
+    description: 'כל החישובים מ-90 יום אחרונים',
+    filters: {
+      searchTerm: '',
+      dateFrom: new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      dateTo: '',
+      planNumber: '',
+      calculationMethod: 'all',
+      levyRange: { min: '', max: '' },
+      sortBy: 'date',
+      sortOrder: 'desc'
+    },
+    createdAt: new Date().toISOString()
+  }
+]
+
 export function PropertyHistoricalSearch() {
   const [historicalRecords, setHistoricalRecords] = useKV<PropertyHistoricalRecord[]>('betterment-history', [])
   const [changeLogs] = useKV<ChangeLog[]>('change-logs', [])
+  const [searchPresets, setSearchPresets] = useKV<SearchPreset[]>('search-presets', defaultPresets)
   const [filters, setFilters] = useState<FilterState>({
     searchTerm: '',
     dateFrom: '',
@@ -116,6 +197,9 @@ export function PropertyHistoricalSearch() {
   const [showFilters, setShowFilters] = useState(false)
   const [selectedRecord, setSelectedRecord] = useState<PropertyHistoricalRecord | null>(null)
   const [activeView, setActiveView] = useState<'grid' | 'list'>('list')
+  const [showSavePreset, setShowSavePreset] = useState(false)
+  const [newPresetName, setNewPresetName] = useState('')
+  const [newPresetDescription, setNewPresetDescription] = useState('')
 
   const filteredAndSortedRecords = useMemo(() => {
     let filtered = historicalRecords || []
@@ -216,6 +300,38 @@ export function PropertyHistoricalSearch() {
     toast.success('הסננים נוקו')
   }
 
+  const applyPreset = (preset: SearchPreset) => {
+    setFilters(preset.filters)
+    setShowFilters(false)
+    toast.success(`החיפוש "${preset.name}" הופעל`)
+  }
+
+  const saveCurrentAsPreset = () => {
+    if (!newPresetName.trim()) {
+      toast.error('נא להזין שם לחיפוש השמור')
+      return
+    }
+
+    const newPreset: SearchPreset = {
+      id: Date.now().toString(),
+      name: newPresetName.trim(),
+      description: newPresetDescription.trim(),
+      filters: { ...filters },
+      createdAt: new Date().toISOString()
+    }
+
+    setSearchPresets((current) => [...(current || defaultPresets), newPreset])
+    setNewPresetName('')
+    setNewPresetDescription('')
+    setShowSavePreset(false)
+    toast.success('החיפוש נשמר בהצלחה')
+  }
+
+  const deletePreset = (presetId: string) => {
+    setSearchPresets((current) => (current || []).filter(p => p.id !== presetId))
+    toast.success('החיפוש השמור נמחק')
+  }
+
   const exportResults = () => {
     const csv = [
       ['כתובת', 'מזהה נכס', 'תכנית קודמת', 'תכנית חדשה', 'תאריך קובע', 'היטל ממוצע', 'השבחה', 'תאריך רישום'].join(','),
@@ -281,6 +397,43 @@ export function PropertyHistoricalSearch() {
         </div>
       </div>
 
+      {(searchPresets && searchPresets.length > 0) && (
+        <Card className="p-4 glass-effect border-border/50">
+          <div className="flex items-center gap-2 mb-3">
+            <BookmarkSimple className="w-5 h-5 text-primary" weight="duotone" />
+            <h3 className="font-semibold text-foreground">חיפושים שמורים</h3>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {searchPresets.map((preset) => (
+              <div key={preset.id} className="group relative">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => applyPreset(preset)}
+                  className="pr-8 hover:bg-primary/10 hover:border-primary transition-all"
+                >
+                  <Star className="ml-2 w-4 h-4" weight="duotone" />
+                  {preset.name}
+                </Button>
+                {!defaultPresets.find(p => p.id === preset.id) && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute -top-2 -left-2 h-5 w-5 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      deletePreset(preset.id)
+                    }}
+                  >
+                    <X className="w-3 h-3" />
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        </Card>
+      )}
+
       <Card className="p-6 glass-effect border-border/50">
         <div className="space-y-4">
           <div className="flex items-center gap-4">
@@ -307,10 +460,20 @@ export function PropertyHistoricalSearch() {
               )}
             </Button>
             {activeFilterCount > 0 && (
-              <Button variant="ghost" onClick={clearFilters}>
-                <X className="ml-2" />
-                נקה הכל
-              </Button>
+              <>
+                <Button variant="ghost" onClick={clearFilters}>
+                  <X className="ml-2" />
+                  נקה הכל
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowSavePreset(true)}
+                  className="gap-2"
+                >
+                  <FloppyDisk className="w-4 h-4" />
+                  שמור חיפוש
+                </Button>
+              </>
             )}
           </div>
 
@@ -540,6 +703,62 @@ export function PropertyHistoricalSearch() {
           )}
         </div>
       </ScrollArea>
+
+      <Dialog open={showSavePreset} onOpenChange={setShowSavePreset}>
+        <DialogContent className="max-w-md" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <FloppyDisk className="w-5 h-5 text-primary" weight="duotone" />
+              שמירת חיפוש
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="space-y-2">
+              <Label htmlFor="preset-name">שם החיפוש השמור</Label>
+              <Input
+                id="preset-name"
+                placeholder="לדוגמה: היטלים גבוהים החודש"
+                value={newPresetName}
+                onChange={(e) => setNewPresetName(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="preset-desc">תיאור (אופציונלי)</Label>
+              <Input
+                id="preset-desc"
+                placeholder="תיאור קצר של החיפוש"
+                value={newPresetDescription}
+                onChange={(e) => setNewPresetDescription(e.target.value)}
+              />
+            </div>
+            <div className="bg-muted/30 p-3 rounded-lg text-sm">
+              <div className="text-muted-foreground mb-2">קריטריוני חיפוש נוכחיים:</div>
+              <div className="space-y-1">
+                {filters.searchTerm && <div>• חיפוש טקסט: {filters.searchTerm}</div>}
+                {filters.dateFrom && <div>• מתאריך: {new Date(filters.dateFrom).toLocaleDateString('he-IL')}</div>}
+                {filters.dateTo && <div>• עד תאריך: {new Date(filters.dateTo).toLocaleDateString('he-IL')}</div>}
+                {filters.planNumber && <div>• מספר תכנית: {filters.planNumber}</div>}
+                {filters.calculationMethod !== 'all' && <div>• שיטת חישוב: {filters.calculationMethod}</div>}
+                {filters.levyRange.min && <div>• היטל מינימלי: {formatCurrency(parseFloat(filters.levyRange.min))}</div>}
+                {filters.levyRange.max && <div>• היטל מקסימלי: {formatCurrency(parseFloat(filters.levyRange.max))}</div>}
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => {
+                setShowSavePreset(false)
+                setNewPresetName('')
+                setNewPresetDescription('')
+              }}>
+                ביטול
+              </Button>
+              <Button onClick={saveCurrentAsPreset}>
+                <FloppyDisk className="ml-2" />
+                שמור
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={!!selectedRecord} onOpenChange={(open) => !open && setSelectedRecord(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
