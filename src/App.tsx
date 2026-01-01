@@ -216,7 +216,7 @@ function App() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-background flex w-full" dir="rtl">
+      <div className="min-h-screen bg-background flex w-full flex-row-reverse" dir="rtl">
         <div className="fixed inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5 pointer-events-none" />
 
         <AppSidebar activeView={activeTab} onNavigate={setActiveTab} />

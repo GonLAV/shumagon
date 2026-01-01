@@ -163,7 +163,7 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
   const hasFavorites = favoriteItems.length > 0
 
   return (
-    <Sidebar collapsible="icon" className="border-l border-border/40 bg-card/95 backdrop-blur-xl">
+    <Sidebar collapsible="icon" side="right" className="border-r border-border/40 bg-card/95 backdrop-blur-xl">
       <SidebarHeader className="border-b border-border/40 px-4 py-5 bg-gradient-to-b from-primary/5 to-transparent">
         <div className="flex items-center gap-3">
           <div className="h-10 w-10 rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-accent flex items-center justify-center glow-primary shrink-0 shadow-lg">

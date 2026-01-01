@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion'
 import { Plus, Lightning } from '@phosphor-icons/react'
 import { Button } from '@/components/ui/button'
+import { SidebarTrigger } from '@/components/ui/sidebar'
 
 export function AppHeader({ onCreateNew }: { onCreateNew: () => void }) {
   return (
@@ -22,10 +23,13 @@ export function AppHeader({ onCreateNew }: { onCreateNew: () => void }) {
             <p className="text-xs text-muted-foreground">מערכת שמאות נדל״ן מתקדמת</p>
           </div>
         </motion.div>
-        <Button onClick={onCreateNew} className="gap-2 bg-primary hover:bg-primary/90 glow-primary">
-          <Plus size={20} weight="bold" />
-          שומה חדשה
-        </Button>
+        <div className="flex items-center gap-3">
+          <SidebarTrigger className="h-9 w-9 hover:bg-secondary/80" />
+          <Button onClick={onCreateNew} className="gap-2 bg-primary hover:bg-primary/90 glow-primary">
+            <Plus size={20} weight="bold" />
+            שומה חדשה
+          </Button>
+        </div>
       </div>
     </header>
   )
