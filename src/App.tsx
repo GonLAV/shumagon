@@ -47,6 +47,7 @@ import { CommercialValuationCalculator } from '@/components/CommercialValuationC
 import { LandValuationCalculator } from '@/components/LandValuationCalculator'
 import { RealBuildingRightsViewer } from '@/components/RealBuildingRightsViewer'
 import { TransactionsMap } from '@/components/TransactionsMap'
+import { DataGovValuation } from '@/components/DataGovValuation'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -252,6 +253,23 @@ function App() {
         return <RealBuildingRightsViewer />
       case 'transactions-map':
         return <TransactionsMap />
+      case 'data-gov-valuation':
+        return (
+          <div className="space-y-6">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">🇮🇱 שמאות עם Data.gov.il</h1>
+              <p className="text-muted-foreground">
+                שמאות מקצועית מבוססת נתונים אמיתיים ממאגרי הממשלה הישראלית
+              </p>
+            </div>
+            <DataGovValuation
+              propertyId="demo-property"
+              initialCity=""
+              initialStreet=""
+              initialArea={0}
+            />
+          </div>
+        )
       default:
         return (
           <Dashboard

@@ -56,6 +56,7 @@ export function AppSidebar({ activeView, onNavigate }: AppSidebarProps) {
     {
       title: 'שומות',
       items: [
+        { id: 'data-gov-valuation', label: '🇮🇱 Data.gov.il - שמאות ממשלתית', icon: Calculator, keywords: ['ממשלה', 'data.gov.il', 'אמיתי', 'שקוף', 'API', 'מקצועי', 'לגיטימי'] },
         { id: 'quicker', label: 'QUICKER - שומה מהירה', icon: Lightning, keywords: ['מהיר', 'פשוט', 'בסיסי', 'חישוב', 'שטח', 'מחיר'] },
         { id: 'residential-valuation', label: 'שווי דירות מגורים', icon: House, keywords: ['דירות', 'מגורים', 'דיור', 'nadlan', 'נדלן'] },
         { id: 'commercial-valuation', label: 'שווי נכסי מסחר', icon: Briefcase, keywords: ['מסחר', 'חנויות', 'מסעדות', 'nadlan', 'נדלן', 'משרדים', 'מסחרי', 'NOI', 'היוון', 'חלל עבודה', 'אופיס'] },
