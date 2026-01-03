@@ -10,11 +10,9 @@ import { Label } from '@/components/ui/label'
 import { Slider } from '@/components/ui/slider'
 import { 
   Sparkle, 
-  MagnifyingGlass, 
   MapPin, 
   TrendUp, 
   CheckCircle,
-  XCircle,
   Lightning,
   ChartBar,
   ArrowsClockwise
@@ -48,7 +46,7 @@ Build Year: ${property.details.buildYear}
 Condition: ${property.details.condition}
 
 Generate exactly 5 comparable properties sold within the last 6 months in the same area. For each comparable:
-1. Create a realistic nearby address
+1. DO NOT invent street names or claim any address is real. Use the placeholder "לא מאומת (AI)" for the address field.
 2. Set a sale price that makes sense for the area
 3. Calculate appropriate adjustments for location, size, condition, floor, age, and features
 4. Calculate adjusted price and price per sqm
@@ -59,7 +57,7 @@ Return ONLY valid JSON with this exact structure, no additional text:
   "comparables": [
     {
       "id": "comp-{unique_id}",
-      "address": "Street name, City",
+          "address": "לא מאומת (AI)",
       "type": "${property.type}",
       "salePrice": 0,
       "saleDate": "2024-MM-DD",

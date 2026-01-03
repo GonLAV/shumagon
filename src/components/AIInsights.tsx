@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { ScrollArea } from '@/components/ui/scroll-area'
-import { Sparkle, Warning, Info, CheckCircle, X, Eye, Robot, TrendUp, Target } from '@phosphor-icons/react'
+import { Sparkle, Warning, CheckCircle, X, Eye, Robot, TrendUp, Target } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 
 const typeLabels = {
@@ -35,7 +35,7 @@ const typeIcons = {
 
 export function AIInsights() {
   const [insights, setInsights] = useKV<AIInsight[]>('ai-insights', [])
-  const [selectedInsight, setSelectedInsight] = useState<AIInsight | null>(null)
+  const [_selectedInsight, setSelectedInsight] = useState<AIInsight | null>(null)
 
   const generateSampleInsights = () => {
     const samples: AIInsight[] = [
@@ -176,7 +176,7 @@ export function AIInsights() {
 
   const activeInsights = (insights || []).filter(i => !i.dismissedAt && !i.acknowledgedAt)
   const acknowledgedInsights = (insights || []).filter(i => i.acknowledgedAt)
-  const dismissedInsights = (insights || []).filter(i => i.dismissedAt)
+  const _dismissedInsights = (insights || []).filter(i => i.dismissedAt)
 
   const stats = {
     total: insights?.length || 0,

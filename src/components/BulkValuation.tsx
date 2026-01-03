@@ -177,7 +177,7 @@ Property to value:
 
 Generate comparable properties as a JSON object with a "comparables" array. Each comparable should have:
 - id: unique ID
-- address: realistic Israeli street address in same city
+- address: MUST be the string "לא מאומת (AI)" (do not invent or claim real street names)
 - type: property type (same as subject)
 - salePrice: realistic price in ILS (between 1-5M based on area and city)
 - saleDate: recent date within last 12 months

@@ -700,25 +700,25 @@ export class ProfessionalAVM {
     statistics: any
   ) {
     // Comparables count (30 points max)
-    let comparablesScore = Math.min(comparables.length * 3, 30)
+    const comparablesScore = Math.min(comparables.length * 3, 30)
     
     // Recency (25 points max)
     const avgMonthsAgo = comparables.reduce(
       (sum, c) => sum + this.getMonthsSinceTransaction(c.date),
       0
     ) / comparables.length
-    let recencyScore = Math.max(0, 25 - avgMonthsAgo)
+    const recencyScore = Math.max(0, 25 - avgMonthsAgo)
     
     // Similarity (25 points max)
     const avgSimilarity = comparables.reduce(
       (sum, c) => sum + (c.similarityScore || 0),
       0
     ) / comparables.length
-    let similarityScore = (avgSimilarity / 100) * 25
+    const similarityScore = (avgSimilarity / 100) * 25
     
     // Low variance (20 points max)
     const cv = statistics.coefficientOfVariation
-    let varianceScore = Math.max(0, 20 - cv * 100)
+    const varianceScore = Math.max(0, 20 - cv * 100)
     
     return {
       comparablesCount: Math.round(comparablesScore),

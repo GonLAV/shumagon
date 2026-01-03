@@ -14,7 +14,7 @@ export interface RawTransaction {
   floor?: string | number
   dealNature?: string
   propertyStatus?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 export interface CleanTransaction {
@@ -181,7 +181,7 @@ export function calculateBasicValuation(
   }
 }
 
-function parseNumber(value: any): number {
+function parseNumber(value: unknown): number {
   if (typeof value === 'number') return value
   if (typeof value === 'string') {
     const parsed = parseFloat(value.replace(/[^\d.-]/g, ''))
@@ -303,6 +303,8 @@ export function generateAppraisalPrompt(params: {
 - אל תנחש מחירים או תעשה הנחות
 - הסבר כל שלב בצורה מפורטת ומקצועית
 - ציין את המגבלות והאי-ודאויות
+- אסור להזכיר שמות רחובות/כתובות של עסקאות (כדי להימנע מהזיות). התייחס לעסקאות רק לפי מספר (1-10).
+- המספרים בשווי ובמחיר למ"ר חייבים להיות בדיוק כפי שסופקו בניתוח הסטטיסטי הראשוני.
 
 **פרטי הנכס הנשום:**
 - כתובת: ${propertyDetails.street}, ${propertyDetails.city}
@@ -330,13 +332,24 @@ ${i + 1}. ${t.street} ${t.houseNumber}, ${t.city}
 - רמת ודאות: ${valuationResult.confidence === 'high' ? 'גבוהה' : valuationResult.confidence === 'medium' ? 'בינונית' : 'נמוכה'}
 
 **נדרש להחזיר:**
-1. **הערכת שווי סופית** - הסבר את הערכת השווי שלך והאם אתה מאמץ את החציון או מתאים אותו
-2. **מחיר למ"ר מומלץ** - מה המחיר למ"ר שאתה ממליץ עליו
-3. **נימוקים מקצועיים** - הסבר מפורט למה הגעת למסקנה זו, אילו עסקאות רלוונטיות יותר ולמה
-4. **התאמות** - אילו התאמות צריך לעשות (קומה, מצב, מיקום וכו')
-5. **רמת ודאות** - האם ההערכה בעלת ודאות נמוכה/בינונית/גבוהה ולמה
-6. **המלצות להמשך** - האם יש צורך בנתונים נוספים או בדיקות
+החזר JSON בלבד (ללא טקסט חופשי מחוץ ל-JSON) עם המבנה המדויק הבא:
 
-**פורמט התשובה:**
-השב בעברית בפורמט מקצועי וממוקד, כ-300-500 מילים.`
+{
+  "estimatedValue": ${valuationResult.estimatedValue},
+  "pricePerSqm": ${valuationResult.pricePerSqm},
+  "confidence": "${valuationResult.confidence}",
+  "comparablesUsed": [1,2],
+  "adjustments": [
+    {"type": "floor|rooms|condition|time|location", "direction": "up|down|none", "reason": "..."}
+  ],
+  "reasoning": ["...","..."],
+  "limitations": ["...","..."],
+  "nextSteps": ["...","..."]
+}
+
+הנחיות:
+- אל תכתוב כתובות/שמות רחובות בכלל. רק מספרי עסקאות ב-"comparablesUsed".
+- "estimatedValue" ו-"pricePerSqm" חייבים להיות בדיוק הערכים שסופקו (לא לשנות).
+- "comparablesUsed" חייב להכיל מספרים בין 1 ל-10 בלבד.
+`
 }

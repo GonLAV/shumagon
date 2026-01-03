@@ -9,22 +9,8 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Database, TrendUp, CheckCircle, Warning, Info, Sparkle } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import {
-  fetchTransactionsFromDataGov,
-  normalizeTransactions,
-  calculateBasicValuation,
-  performCompleteValuation,
-  generateAppraisalPrompt,
-  type CleanTransaction,
-  type ValuationResult
-} from '@/lib/dataGovAPI'
-import {
-  createAppraisalRecord,
-  addAIAnalysis,
-  generateAppraisalSummary,
-  exportAppraisalToCSV,
-  type AppraisalRecord
-} from '@/lib/appraisalSchema'
+import { performCompleteValuation, generateAppraisalPrompt, type CleanTransaction, type ValuationResult } from '@/lib/dataGovAPI'
+import { createAppraisalRecord, addAIAnalysis, exportAppraisalToCSV, type AppraisalRecord } from '@/lib/appraisalSchema'
 
 interface DataGovValuationProps {
   propertyId: string
@@ -157,11 +143,24 @@ export function DataGovValuation({
         valuationResult: valuation
       })
 
-      const analysis = await window.spark.llm(prompt, 'gpt-4o')
+      const raw = await window.spark.llm(prompt, 'gpt-4o', true)
 
-      setAiAnalysis(analysis)
+      const parsed: unknown = (() => {
+        if (raw && typeof raw === 'object') return raw as unknown
+        if (typeof raw === 'string') return JSON.parse(raw) as unknown
+        throw new Error('Invalid AI response type')
+      })()
+
+      const normalized = normalizeDataGovAIAnalysis(parsed, {
+        estimatedValue: valuation.estimatedValue,
+        pricePerSqm: valuation.pricePerSqm,
+        confidence: valuation.confidence,
+        maxComparables: Math.min(10, transactions.length)
+      })
+
+      setAiAnalysis(JSON.stringify(normalized, null, 2))
       
-      const updatedRecord = addAIAnalysis(appraisalRecord, analysis, 'מערכת')
+      const updatedRecord = addAIAnalysis(appraisalRecord, JSON.stringify(normalized), 'מערכת')
       setAppraisalRecord(updatedRecord)
       
       if (onValuationComplete) {
@@ -177,6 +176,58 @@ export function DataGovValuation({
     } finally {
       setIsLoading(false)
       setCurrentStep('')
+    }
+  }
+
+  const normalizeDataGovAIAnalysis = (
+    input: unknown,
+    constraints: {
+      estimatedValue: number
+      pricePerSqm: number
+      confidence: ValuationResult['confidence']
+      maxComparables: number
+    }
+  ) => {
+    const forbidden = /(\bרחוב\b|שדרות|דרך|סמטת|שכונת)/
+    const stringifyAll = JSON.stringify(input ?? {})
+    if (forbidden.test(stringifyAll)) {
+      toast.warning('ה-AI כלל כתובות/רחובות — הוסרו לשמירה על דיוק')
+    }
+
+    const asObj = (val: unknown) => (val && typeof val === 'object' ? (val as Record<string, unknown>) : {})
+    const safeArray = (value: unknown): unknown[] => (Array.isArray(value) ? value : [])
+    const clampInt = (n: unknown, min: number, max: number): number | null => {
+      const v = typeof n === 'number' ? n : parseInt(String(n), 10)
+      if (!Number.isFinite(v)) return null
+      const i = Math.trunc(v)
+      if (i < min || i > max) return null
+      return i
+    }
+
+    const comparablesUsed = Array.from(
+      new Set(
+        safeArray(asObj(input).comparablesUsed)
+          .map((x) => clampInt(x, 1, constraints.maxComparables))
+          .filter((x): x is number => x !== null)
+      )
+    )
+
+    return {
+      estimatedValue: constraints.estimatedValue,
+      pricePerSqm: constraints.pricePerSqm,
+      confidence: constraints.confidence,
+      comparablesUsed,
+      adjustments: safeArray(asObj(input).adjustments).map((a) => {
+        const rec = a as Record<string, unknown>
+        return {
+          type: String(rec?.type || ''),
+          direction: String(rec?.direction || ''),
+          reason: String(rec?.reason || '')
+        }
+      }),
+      reasoning: safeArray(asObj(input).reasoning).map((x) => String(x)),
+      limitations: safeArray(asObj(input).limitations).map((x) => String(x)),
+      nextSteps: safeArray(asObj(input).nextSteps).map((x) => String(x))
     }
   }
 

@@ -24,6 +24,14 @@ export interface ValuationResult {
   assumptions: string[]
   limitations: string[]
   qualityChecks?: ValuationQualityCheck[]
+  transactionDetails?: Array<{
+    id: string
+    address: string
+    basePrice: number
+    adjustedPrice: number
+    weight: number
+    adjustments: Record<string, number>
+  }>
 }
 
 export interface ValuationQualityCheck {
@@ -191,6 +199,155 @@ export class ValuationEngine {
       limitations: this.generateLimitations('comparable-sales', selectedComps.length),
       qualityChecks
     }
+  }
+
+  static calculateComparableSalesApproachProfessional(
+    property: Property,
+    comparables: Comparable[]
+  ): ValuationResult {
+    const valuationDate = new Date(property.updatedAt || new Date().toISOString())
+    const filtered = this.hardFilterComparables(property, comparables)
+    if (filtered.length === 0) {
+      throw new Error('לא נמצאו עסקאות מתאימות לאחר סינון איכותי')
+    }
+
+    const marketPpsqm = this.computeMarketPricePerSqm(filtered)
+    const floorCoeff = 10000
+    const conditionCoeff = 0.03
+    const planningFactor = 0.05
+
+    const adjusted = filtered.map(comp => {
+      const breakdown = this.adjustTransactionAbsolute(property, comp, marketPpsqm, floorCoeff, conditionCoeff, planningFactor)
+      const timeW = this.timeDecay(comp.saleDate, valuationDate)
+      const distW = this.distanceDecay(comp.distance)
+      const qualityW = this.dataQualityScore(comp, breakdown)
+      const weight = timeW * distW * qualityW
+      return { comparable: comp, breakdown, adjustedPrice: breakdown.adjustedPrice, weight }
+    })
+
+    const totalWeight = adjusted.reduce((s, a) => s + a.weight, 0)
+    const weightedSum = adjusted.reduce((s, a) => s + a.adjustedPrice * a.weight, 0)
+    const finalValueRaw = weightedSum / totalWeight
+    const finalValue = Math.round(finalValueRaw / 1000) * 1000
+
+    const prices = adjusted.map(a => a.adjustedPrice)
+    const std = this.calculateStandardDeviation(prices)
+    const valueRange = {
+      min: Math.round((finalValueRaw - std) / 1000) * 1000,
+      max: Math.round((finalValueRaw + std) / 1000) * 1000
+    }
+
+    const confidence = this.calculateConfidence(filtered, std, finalValueRaw)
+
+    const calculations: ValuationCalculation[] = [
+      {
+        step: 'שווי למ"ר בשוק',
+        description: 'ממוצע שווי למ"ר בעסקאות לאחר סינון איכותי',
+        formula: 'Σ(מחיר למ"ר) / מספר עסקאות',
+        inputs: { 'מספר עסקאות': filtered.length },
+        result: marketPpsqm
+      },
+      {
+        step: 'שקלול עסקאות',
+        description: 'שקלול מחירים מתוקנים לפי זמן, מרחק ואיכות נתונים',
+        formula: 'Σ(מחיר מתוקן × משקל) / Σ(משקלות)',
+        inputs: { 'Σ משקלות': totalWeight },
+        result: finalValue
+      }
+    ]
+
+    const qualityChecks = this.buildComparableQualityChecks(filtered, adjusted.map(a => ({ comparable: a.comparable, adjustments: { total: 0 }, adjustedPrice: a.adjustedPrice })), std, finalValueRaw)
+
+    const details = adjusted.map(a => ({
+      id: a.comparable.id,
+      address: a.comparable.address,
+      basePrice: a.comparable.salePrice,
+      adjustedPrice: a.adjustedPrice,
+      weight: a.weight,
+      adjustments: a.breakdown.adjustments
+    }))
+
+    return {
+      method: 'comparable-sales',
+      estimatedValue: finalValue,
+      valueRange,
+      confidence,
+      methodology: 'שיטת ההשוואה מקצועית עם סינון קשיח, התאמות אבסולוטיות ושקלול לפי זמן/מרחק/איכות נתונים.',
+      calculations,
+      reconciliation: `שווי סופי נקבע בשקלול ${filtered.length} עסקאות לאחר התאמות ושקלול לפי זמן ומרחק.`,
+      assumptions: this.generateAssumptions('comparable-sales'),
+      limitations: this.generateLimitations('comparable-sales', filtered.length),
+      qualityChecks,
+      transactionDetails: details
+    }
+  }
+
+  private static dynamicRadiusKm(city: string): number {
+    const dense = ['תל אביב', 'ירושלים', 'חיפה', 'רמת גן', 'גבעתיים']
+    return dense.includes(city) ? 1.0 : 3.0
+  }
+
+  private static hardFilterComparables(property: Property, comps: Comparable[]): Comparable[] {
+    const radius = this.dynamicRadiusKm(property.address.city)
+    const subjectArea = property.details.builtArea
+    return comps.filter(c => {
+      const areaOk = Math.abs(c.builtArea - subjectArea) / subjectArea <= 0.25
+      const priceOk = c.salePrice > 0
+      const distanceOk = typeof c.distance === 'number' ? c.distance <= radius : true
+      return areaOk && priceOk && distanceOk && c.selected
+    })
+  }
+
+  private static timeDecay(saleDate: string, valuationDate: Date): number {
+    const months = Math.max(0, (valuationDate.getTime() - new Date(saleDate).getTime()) / (1000 * 60 * 60 * 24 * 30))
+    const decay = Math.exp(-months / 24)
+    return Math.min(1, Math.max(0.5, decay))
+  }
+
+  private static distanceDecay(distanceKm: number): number {
+    if (!(distanceKm > 0)) return 1
+    const decay = Math.exp(-distanceKm / 2)
+    return Math.min(1, Math.max(0.5, decay))
+  }
+
+  private static dataQualityScore(comp: Comparable, breakdown: { adjustments: Record<string, number> }): number {
+    let score = 1
+    const keys = Object.keys(breakdown.adjustments)
+    if (keys.length < 3) score *= 0.9
+    return score
+  }
+
+  private static computeMarketPricePerSqm(comps: Comparable[]): number {
+    const values = comps.map(c => c.salePrice / Math.max(1, c.builtArea))
+    const avg = values.reduce((s, v) => s + v, 0) / values.length
+    return Math.round(avg)
+  }
+
+  private static adjustTransactionAbsolute(
+    property: Property,
+    comp: Comparable,
+    marketPricePerSqm: number,
+    floorCoefficient: number,
+    conditionCoefficient: number,
+    planningValueFactor: number
+  ): { adjustedPrice: number; adjustments: Record<string, number> } {
+    const base = comp.salePrice
+    const areaAdj = (property.details.builtArea - comp.builtArea) * marketPricePerSqm * 0.6
+    const floorAdj = (property.details.floor - comp.floor) * floorCoefficient
+    const condMap: Record<PropertyCondition, number> = {
+      new: 1.0,
+      excellent: 0.95,
+      good: 0.9,
+      fair: 0.85,
+      poor: 0.8,
+      'renovation-needed': 0.75
+    }
+    const subjectCond = condMap[property.details.condition]
+    const compCond = subjectCond
+    const conditionAdj = (subjectCond - compCond) * base * conditionCoefficient
+    const planningAdj = 0 * planningValueFactor
+    const adjustedPrice = base + areaAdj + floorAdj + conditionAdj + planningAdj
+    return { adjustedPrice, adjustments: { areaAdj, floorAdj, conditionAdj, planningAdj } }
   }
 
   static calculateCostApproach(property: Property, landValue: number, constructionCostPerSqm: number): ValuationResult {

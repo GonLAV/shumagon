@@ -18,7 +18,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 import {
   Select,
@@ -29,16 +28,12 @@ import {
 } from '@/components/ui/select'
 import {
   Gauge,
-  Timer,
   Warning,
-  CheckCircle,
   XCircle,
   ArrowsClockwise,
   Clock,
   ChartLine,
-  Pause,
   Play,
-  Prohibit,
   Shield,
   Info,
   Sliders,
@@ -51,8 +46,7 @@ import {
   Stack
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
-import { format, startOfMonth, startOfDay, differenceInSeconds } from 'date-fns'
-import { he } from 'date-fns/locale'
+import { startOfMonth, startOfDay, differenceInSeconds } from 'date-fns'
 
 interface QuotaLimit {
   requests: number
@@ -334,7 +328,7 @@ export function APIQuotaManager() {
     }, {} as Record<string, APIQuotaConfig>)
   )
 
-  const [usageSnapshots, setUsageSnapshots] = useKV<UsageSnapshot[]>('api-usage-snapshots', [])
+  const [_usageSnapshots, setUsageSnapshots] = useKV<UsageSnapshot[]>('api-usage-snapshots', [])
   const [selectedAPI, setSelectedAPI] = useState<string | null>(null)
   const [editDialogOpen, setEditDialogOpen] = useState(false)
   const [presetDialogOpen, setPresetDialogOpen] = useState(false)

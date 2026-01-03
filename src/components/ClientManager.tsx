@@ -1,8 +1,6 @@
 import type { Client, Property } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { User, Envelope, Phone, BuildingOffice, TrendUp, CheckCircle } from '@phosphor-icons/react'
+import { Envelope, Phone, BuildingOffice, TrendUp, CheckCircle } from '@phosphor-icons/react'
 import { motion } from 'framer-motion'
 
 interface ClientManagerProps {

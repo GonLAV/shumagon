@@ -13,7 +13,6 @@ import express, { Request, Response } from 'express'
 import cors from 'cors'
 import dotenv from 'dotenv'
 import { Pool } from 'pg'
-import { z } from 'zod'
 
 dotenv.config()
 
@@ -96,12 +95,13 @@ app.post('/api/valuations', async (req: Request, res: Response) => {
     }
 
     // Fetch selected comparables
-    const compsResult = await db.query(
+    const _compsResult = await db.query(
       `SELECT c.* FROM comparables c
        INNER JOIN property_comparables pc ON c.id = pc.comparable_id
        WHERE pc.property_id = $1 AND pc.selected = true`,
       [propertyId]
     )
+    void _compsResult
 
     // TODO: Call ValuationEngine.calculate* methods here
     // For now, return mock result
@@ -165,7 +165,7 @@ app.get('/api/valuations/:propertyId', async (req: Request, res: Response) => {
  */
 app.post('/api/reports', async (req: Request, res: Response) => {
   try {
-    const { propertyId, template } = req.body as { propertyId: string; template: string }
+    const { propertyId } = req.body as { propertyId: string; template: string }
 
     if (!propertyId) {
       return res.status(400).json({ error: 'propertyId required' })

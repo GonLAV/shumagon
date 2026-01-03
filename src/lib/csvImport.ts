@@ -25,10 +25,11 @@ export interface FieldMapping {
 const COMMON_FIELD_PATTERNS: Record<string, RegExp[]> = {
   address: [/^(address|כתובת|loc|location|주소)$/i],
   type: [/^(type|סוג|property_type|유형)$/i],
-  salePrice: [/^(price|מחיר|sale_price|sale|값)$/i],
-  saleDate: [/^(date|תאריך|sale_date|날짜)$/i],
-  builtArea: [/^(area|שטח|sqm|m2|面積)$/i],
-  rooms: [/^(rooms|חדרים|bedrooms|bed|رoomcount)$/i],
+  // Include common camelCase headers used in app/tests
+  salePrice: [/^(price|מחיר|sale_price|sale|salePrice)$/i],
+  saleDate: [/^(date|תאריך|sale_date|saleDate|날짜)$/i],
+  builtArea: [/^(area|שטח|sqm|m2|builtArea|面積)$/i],
+  rooms: [/^(rooms|חדרים|bedrooms|bed|רoomcount)$/i],
   floor: [/^(floor|קומה|level|층)$/i]
 }
 
@@ -83,7 +84,7 @@ function parseCSVLine(line: string): string[] {
   return result
 }
 
-export function parseCSV(csvText: string, delimiter: string = ','): CSVParseResult {
+export function parseCSV(csvText: string): CSVParseResult {
   const lines = csvText
     .split('\n')
     .map(l => l.trim())

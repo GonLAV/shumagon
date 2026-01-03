@@ -28,6 +28,15 @@
 
 ## 🚀 צעדים הבאים (MVP → Production)
 
+### Israel Market Productionization (Phase Next)
+- RTL + Hebrew: תמיכה מלאה ב-RTL והגדרות עברית כברירת מחדל; שמירה על תאימות Tailwind ו-@/components.
+- Data Integrity: הקשחת בחירת משאבי CKAN ב-data.gov.il עם fallback ו-guards; איסור הכנסת עובדות חיצוניות בזרימות "נתונים אמיתיים".
+- GISN/TABA Reliability: שימוש באטריביוטים יציבים של ArcGIS לאיתור מסמכים במקום Docs.aspx; אינדוקסה מקומית.
+- Backend Setup: יצירת שירות `backend/` (Express + Postgres) להערכות, עסקאות, מיתוג ודוחות לפי BACKEND_SETUP.md.
+- Compliance & Security: מדיניות פרטיות, שמירת לוגים, בקרות גישה; התאמה לנוהגי אחזור/שימוש בנתונים בישראל והימנעות מ-PII מיותר.
+- Testing & Quality: Vitest להרצת בדיקות; צמצום `any` וייבוא/משתנים לא בשימוש בספריות קריטיות.
+- Deployment: docker-compose לפרונט+בק; Health checks; קונפיגורציות סביבה ל-Staging/Production.
+
 ### שלב 1: Database + Persistence (זמן: 3-5 ימים)
 - [ ] Setup PostgreSQL (use schema from [DB_SCHEMA.md](DB_SCHEMA.md))
 - [ ] Create migrations (Alembic / Flyway)

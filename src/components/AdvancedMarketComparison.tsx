@@ -4,15 +4,13 @@ import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Slider } from '@/components/ui/slider'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { 
   MagnifyingGlass, 
   Sparkle, 
   MapPin, 
-  TrendUp, 
-  TrendDown,
+  
   CheckCircle,
   ArrowsOutCardinal,
   FunnelSimple,
@@ -22,7 +20,9 @@ import {
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
-import type { Property, Comparable } from '@/lib/types'
+import type { Property } from '@/lib/types'
+import type { AIComparable } from '@/services/aiService'
+import { generateComparablesForProperty } from '@/services/aiService'
 
 interface AdvancedMarketComparisonProps {
   property: Property
@@ -32,21 +32,21 @@ interface AdvancedMarketComparisonProps {
 export function AdvancedMarketComparison({ property, onSelectComparables }: AdvancedMarketComparisonProps) {
   const [searchRadius, setSearchRadius] = useState([1.5])
   const [maxResults, setMaxResults] = useState(10)
-  const [propertyTypes, setPropertyTypes] = useState<string[]>([property.type])
+  const [propertyTypes, _setPropertyTypes] = useState<string[]>([property.type])
   const [saleTimeframe, setSaleTimeframe] = useState('12')
   const [minSize, setMinSize] = useState(Math.floor(property.details.builtArea * 0.7))
   const [maxSize, setMaxSize] = useState(Math.ceil(property.details.builtArea * 1.3))
-  const [comparables, setComparables] = useState<Comparable[]>([])
+  const [comparables, setComparables] = useState<AIComparable[]>([])
   const [isSearching, setIsSearching] = useState(false)
   const [sortBy, setSortBy] = useState<'similarity' | 'distance' | 'price' | 'date'>('similarity')
-  const [viewMode, setViewMode] = useState<'grid' | 'map' | 'table'>('grid')
+  const [_viewMode, _setViewMode] = useState<'grid' | 'map' | 'table'>('grid')
 
   const handleAISearch = async () => {
     setIsSearching(true)
     toast.loading('מחפש נכסים דומים באמצעות AI...')
 
     try {
-      const promptText = `אתה מומחה שמאות נדל"ן. צור רשימה של ${maxResults} נכסי השוואה ריאליסטיים עבור הנכס הבא:
+      const _promptText = `אתה מומחה שמאות נדל"ן. צור רשימה של ${maxResults} נכסי השוואה ריאליסטיים עבור הנכס הבא:
 
 כתובת: ${property.address.street}, ${property.address.neighborhood}, ${property.address.city}
 סוג: ${property.type}
@@ -60,12 +60,12 @@ export function AdvancedMarketComparison({ property, onSelectComparables }: Adva
 - סוגי נכסים: ${propertyTypes.join(', ')}
 - טווח שטח: ${minSize}-${maxSize} מ"ר
 - מכירות ב-${saleTimeframe} חודשים אחרונים
-- רק כתובות אמיתיות באזור ${property.address.city}
+- אין לך גישה למאגר כתובות. אל תיצור שמות רחובות ואל תטען שכתובת היא אמיתית.
 
 החזר JSON עם מפתח "comparables" שמכיל מערך של נכסים. כל נכס חייב לכלול:
 {
   "id": "comp-{מספר}",
-  "address": "כתובת מלאה של נכס אמיתי באזור",
+  "address": "לא מאומת (AI)",
   "type": "${property.type}",
   "salePrice": מחיר_מכירה_ריאלי_בשקלים,
   "saleDate": "תאריך בפורמט YYYY-MM-DD (${saleTimeframe} חודשים אחרונים)",
@@ -90,18 +90,19 @@ export function AdvancedMarketComparison({ property, onSelectComparables }: Adva
 
 התאמות צריכות להיות הגיוניות (בדרך כלל -200,000 עד +200,000 לכל קטגוריה).
 מחירים צריכים להיות ריאליים לאזור ${property.address.city}.
-ודא שהכתובות קיימות באמת באזור.`
+אסור להמציא רחובות/כתובות. שדה address חייב להיות בדיוק "לא מאומת (AI)".`
 
-      const result = await window.spark.llm(promptText, 'gpt-4o', true)
-      const data = JSON.parse(result)
-      
-      const enrichedComparables = data.comparables.map((comp: any) => ({
-        ...comp,
-        selected: false
-      }))
+      const comps = await generateComparablesForProperty(property, {
+        radiusKm: searchRadius[0],
+        maxResults,
+        minSize,
+        maxSize,
+        saleTimeframeMonths: parseInt(saleTimeframe, 10),
+        propertyTypes,
+      })
 
-      setComparables(enrichedComparables)
-      toast.success(`נמצאו ${enrichedComparables.length} נכסים דומים`)
+      setComparables(comps)
+      toast.success(`נמצאו ${comps.length} נכסים דומים`)
     } catch (error) {
       console.error('Error searching comparables:', error)
       toast.error('שגיאה בחיפוש נכסים')
@@ -253,7 +254,7 @@ export function AdvancedMarketComparison({ property, onSelectComparables }: Adva
                 <ChartBar size={16} className="inline ml-2" />
                 מיון לפי
               </label>
-              <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as 'similarity' | 'distance' | 'price' | 'date')}>
                 <SelectTrigger dir="rtl">
                   <SelectValue />
                 </SelectTrigger>

@@ -3,7 +3,7 @@
  * Can work with mock data or real API endpoints.
  */
 
-import type { Property, Comparable, ValuationResult } from './types'
+import type { Comparable, ValuationResult } from './types'
 
 export interface APIClientConfig {
   baseURL: string
@@ -74,6 +74,7 @@ export class APIClient {
   }
 
   async importComparables(req: ImportComparablesRequest): Promise<Comparable[]> {
+    void req
     const result = (await this.fetch('POST', '/api/comparables/import', req)) as {
       comparables: Comparable[]
       errors: Array<{ row: number; message: string }>
@@ -122,14 +123,13 @@ export class APIClient {
  */
 export class MockAPIClient implements Omit<APIClient, 'fetch'> {
   async importComparables(req: ImportComparablesRequest): Promise<Comparable[]> {
+    void req
     // Already handled by csvImport + comparablesImport
     throw new Error('Use parseCSV/importComparablesFromJson directly')
   }
 
   async calculateValuation(req: CalculateValuationRequest): Promise<ValuationResult | ValuationResult[]> {
     // Delegate to local ValuationEngine
-    const { ValuationEngine } = await import('./valuationEngine')
-
     if (req.method === 'all') {
       // Return all three methods
       return []
@@ -139,7 +139,8 @@ export class MockAPIClient implements Omit<APIClient, 'fetch'> {
     return {} as ValuationResult
   }
 
-  async getValuations(propertyId: string): Promise<ValuationResult[]> {
+  async getValuations(_propertyId: string): Promise<ValuationResult[]> {
+    void _propertyId
     return []
   }
 

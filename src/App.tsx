@@ -48,6 +48,16 @@ import { LandValuationCalculator } from '@/components/LandValuationCalculator'
 import { RealBuildingRightsViewer } from '@/components/RealBuildingRightsViewer'
 import { TransactionsMap } from '@/components/TransactionsMap'
 import { DataGovValuation } from '@/components/DataGovValuation'
+import { GISNViewer } from '@/components/GISNViewer'
+import { GISNDiff } from '@/components/GISNDiff'
+import { GISNArcGIS } from '@/components/GISNArcGIS'
+import { TabaExtractor } from '@/components/TabaExtractor'
+import GISNDocScanner from '@/components/GISNDocScanner'
+import OCRHelper from '@/components/OCRHelper'
+import IngestionHelper from '@/components/IngestionHelper'
+import DataGovResourceCheck from '@/components/DataGovResourceCheck'
+import TasksDashboard from '@/components/TasksDashboard'
+import IncomeReport from '@/components/IncomeReport'
 
 function App() {
   const [properties, setProperties] = useKV<Property[]>('properties', generateMockProperties())
@@ -56,6 +66,7 @@ function App() {
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null)
   const [isCreatingProperty, setIsCreatingProperty] = useState(false)
   const [isClientPortalMode, setIsClientPortalMode] = useState(false)
+  const [rtl, setRtl] = useKV<boolean>('rtl', true)
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
@@ -200,6 +211,10 @@ function App() {
         return <DevelopmentRightsCalculator />
       case 'cases':
         return <CaseManagement properties={properties || []} clients={clients || []} />
+      case 'tasks':
+        return <TasksDashboard />
+      case 'income-report':
+        return <IncomeReport />
       case 'standardized':
         return <StandardizedReports properties={properties || []} clients={clients || []} />
       case 'multi-unit':
@@ -253,6 +268,22 @@ function App() {
         return <RealBuildingRightsViewer />
       case 'transactions-map':
         return <TransactionsMap />
+      case 'gisn-viewer':
+        return <GISNViewer />
+      case 'gisn-diff':
+        return <GISNDiff />
+      case 'gisn-arcgis':
+        return <GISNArcGIS />
+      case 'gisn-doc-scanner':
+        return <GISNDocScanner />
+      case 'ocr-helper':
+        return <OCRHelper />
+      case 'ingestion-helper':
+        return <IngestionHelper />
+      case 'data-gov-check':
+        return <DataGovResourceCheck />
+      case 'taba-extractor':
+        return <TabaExtractor />
       case 'data-gov-valuation':
         return (
           <div className="space-y-6">
@@ -284,13 +315,13 @@ function App() {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-background flex w-full flex-row-reverse" dir="rtl">
+      <div className="min-h-screen bg-background flex w-full flex-row-reverse" dir={rtl ? 'rtl' : 'ltr'}>
         <AppSidebar activeView={activeTab} onNavigate={setActiveTab} />
 
         <div className="flex-1 flex flex-col relative">
-          <AppHeader onCreateNew={handleCreateNew} />
+          <AppHeader onCreateNew={handleCreateNew} rtl={rtl || true} onToggleRTL={() => setRtl(prev => !prev)} />
 
-          <main className="flex-1 overflow-auto px-6 py-6">
+          <main className="flex-1 overflow-auto px-6 py-6 bg-secondary/10">
             <div className="container mx-auto max-w-7xl">
               {renderContent()}
             </div>

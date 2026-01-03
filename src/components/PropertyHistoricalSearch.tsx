@@ -8,17 +8,15 @@ import { Badge } from '@/components/ui/badge'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   MagnifyingGlass, 
-  Funnel, 
   X, 
   SortAscending, 
   Calendar,
   MapPin,
   FileText,
-  TrendUp,
   Download,
   Eye,
   Scales,
@@ -26,8 +24,6 @@ import {
   FunnelSimple,
   Star,
   BookmarkSimple,
-  Plus,
-  Trash,
   FloppyDisk
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'

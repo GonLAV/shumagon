@@ -2,7 +2,7 @@ import type { Property, Client } from '@/lib/types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { House, FileText, Clock, CheckCircle, TrendUp, Plus } from '@phosphor-icons/react'
+import { House, Clock, CheckCircle, TrendUp, Plus } from '@phosphor-icons/react'
 
 interface DashboardProps {
   properties: Property[]

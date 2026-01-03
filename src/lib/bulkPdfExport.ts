@@ -183,7 +183,6 @@ export function exportBulkValuationPDF(results: BulkValuationResult[], stats: Po
   doc.text('דוח זה נועד למטרות מידע בלבד ואינו מהווה חוות דעת שמאית רשמית.', pageWidth - margin - 5, yPos + 13, { align: 'right' })
   doc.text('השווים המוצגים הינם אומדנים בלבד ועשויים להשתנות בהתאם לתנאי השוק.', pageWidth - margin - 5, yPos + 19, { align: 'right' })
 
-  let currentPage = 1
   const totalPages = doc.getNumberOfPages()
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i)

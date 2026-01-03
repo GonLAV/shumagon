@@ -37,12 +37,10 @@ import {
   Users,
   ShareNetwork,
   Copy,
-  UserPlus,
   Chat,
-  ArrowBendUpLeft,
   CheckCircle
 } from '@phosphor-icons/react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { toast } from 'sonner'
 import { useKV } from '@github/spark/hooks'
 import type { Property, ARSession, ARMeasurement, ARAnnotation, ARParticipant, ARPhoto } from '@/lib/types'
@@ -100,8 +98,8 @@ export function ARWalkthrough({ property, onClose, sessionId }: ARWalkthroughPro
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; sender: string; timestamp: string; senderColor: string }>>([])
   const [chatInput, setChatInput] = useState('')
   const [currentUser, setCurrentUser] = useState<ARParticipant | null>(null)
-  const [cursorPositions, setCursorPositions] = useState<Map<string, { x: number; y: number }>>(new Map())
-  const [selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null)
+  const [cursorPositions, _setCursorPositions] = useState<Map<string, { x: number; y: number }>>(new Map())
+  const [_selectedAnnotation, setSelectedAnnotation] = useState<string | null>(null)
   const [showParticipants, setShowParticipants] = useState(false)
 
   useEffect(() => {
@@ -369,7 +367,7 @@ Return your response as a JSON object with a "suggestions" property containing a
     broadcastToParticipants('chat_message', newMessage)
   }
 
-  const addAnnotationReply = (annotationId: string, replyText: string) => {
+  const _addAnnotationReply = (annotationId: string, replyText: string) => {
     if (!currentUser) return
     
     setAnnotations(prev => prev.map(ann => {

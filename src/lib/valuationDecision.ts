@@ -48,7 +48,7 @@ export function recommendValuationMethod(property: Property, context: ValuationC
       requiredInputs.push('comparables')
       warnings.push('לא נבחרו עסקאות להשוואה; נדרש סט עסקאות לצורך הרצה')
     } else if (selectedCount < 3) {
-      warnings.push('פחות מ-3 עסקאות נבחרות; רמת הביטחון צפויה לרדת')
+      warnings.push('לא נבחרו עסקאות מספיקות (פחות מ-3); רמת הביטחון צפויה לרדת')
     }
 
     return {

@@ -229,8 +229,8 @@ class IsraeliGovernmentAPI {
 
   async fetchPlanningData(address: string): Promise<PlanningData> {
     await this.simulateNetworkDelay()
-    
-    return this.generateMockPlanningData(address)
+    void address
+    return this.generateMockPlanningData()
   }
 
   async fetchTaxAssessmentData(propertyId: string): Promise<TaxAssessmentData> {
@@ -241,8 +241,8 @@ class IsraeliGovernmentAPI {
 
   async fetchMunicipalData(address: string): Promise<MunicipalData> {
     await this.simulateNetworkDelay()
-    
-    return this.generateMockMunicipalData(address)
+    void address
+    return this.generateMockMunicipalData()
   }
 
   async fetchGISData(latitude: number, longitude: number): Promise<GISData> {
@@ -316,7 +316,7 @@ class IsraeliGovernmentAPI {
     }
   }
 
-  private generateMockPlanningData(address: string): PlanningData {
+  private generateMockPlanningData(): PlanningData {
     return {
       planNumber: 'תב״ע/מק/1234/ב',
       planName: 'Plan for Residential Development',
@@ -401,7 +401,7 @@ class IsraeliGovernmentAPI {
     }
   }
 
-  private generateMockMunicipalData(address: string): MunicipalData {
+  private generateMockMunicipalData(): MunicipalData {
     return {
       municipalityName: 'Tel Aviv-Yafo',
       municipalityCode: '5000',

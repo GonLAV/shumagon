@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+// Tabs not used
 import { Separator } from '@/components/ui/separator'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Label } from '@/components/ui/label'
@@ -15,21 +15,13 @@ import {
   FileDoc,
   Download,
   Sparkle,
-  CheckCircle,
-  Eye,
-  Printer,
-  ShareNetwork,
-  FileImage,
-  ChartBar,
-  Buildings,
-  MapPin,
-  Calendar,
-  EnvelopeSimple,
   PaperPlaneTilt
 } from '@phosphor-icons/react'
 import { toast } from 'sonner'
 import { motion } from 'framer-motion'
 import type { Property, Client, Comparable } from '@/lib/types'
+import type { Property, Client, Comparable } from '@/lib/types'
+import { generateReportContent, type ReportAIContent } from '@/services/aiService'
 import { EmailReportDialog, type EmailData } from '@/components/EmailReportDialog'
 
 interface ReportGeneratorProps {
@@ -87,7 +79,7 @@ export function ReportGenerator({ property, client, comparables = [] }: ReportGe
     toast.loading('יוצר תוכן דוח מקצועי עם AI...')
 
     try {
-      const promptText = `אתה שמאי נדל"ן מומחה. צור תוכן מקצועי לדוח שמאות עבור הנכס הבא:
+      const _promptText = `אתה שמאי נדל"ן מומחה. צור תוכן מקצועי לדוח שמאות עבור הנכס הבא:
 
 **פרטי הנכס:**
 כתובת: ${property.address.street}, ${property.address.neighborhood}, ${property.address.city}
@@ -123,8 +115,7 @@ ${comparables.map(c => `- ${c.address}: ₪${c.salePrice.toLocaleString()} (מו
 
 הטקסט צריך להיות פורמלי, מקצועי, ומבוסס על הנתונים שסופקו.`
 
-      const result = await window.spark.llm(promptText, 'gpt-4o', true)
-      const data = JSON.parse(result)
+      const data = await generateReportContent(property, client?.name, reportTemplate)
 
       setCustomNotes(data.conclusion || '')
       toast.success('תוכן הדוח נוצר בהצלחה')
@@ -160,7 +151,7 @@ ${comparables.map(c => `- ${c.address}: ₪${c.salePrice.toLocaleString()} (מו
     }, 2000)
   }
 
-  const generateReportHTML = (aiContent: any) => {
+  const generateReportHTML = (aiContent: ReportAIContent | null) => {
     const enabledSections = sections.filter(s => s.enabled)
     const selectedComps = comparables.filter(c => c.selected)
 
@@ -360,7 +351,7 @@ ${comparables.map(c => `- ${c.address}: ₪${c.salePrice.toLocaleString()} (מו
           <div className="grid gap-6 md:grid-cols-3">
             <div className="space-y-2">
               <Label className="text-right block">פורמט דוח</Label>
-              <Select value={reportFormat} onValueChange={(v: any) => setReportFormat(v)}>
+              <Select value={reportFormat} onValueChange={(v) => setReportFormat(v as 'pdf' | 'word' | 'html')}>
                 <SelectTrigger dir="rtl">
                   <SelectValue />
                 </SelectTrigger>
@@ -389,7 +380,7 @@ ${comparables.map(c => `- ${c.address}: ₪${c.salePrice.toLocaleString()} (מו
 
             <div className="space-y-2">
               <Label className="text-right block">תבנית דוח</Label>
-              <Select value={reportTemplate} onValueChange={(v: any) => setReportTemplate(v)}>
+              <Select value={reportTemplate} onValueChange={(v) => setReportTemplate(v as 'standard' | 'detailed' | 'summary' | 'bank')}>
                 <SelectTrigger dir="rtl">
                   <SelectValue />
                 </SelectTrigger>

@@ -20,14 +20,12 @@ import {
   Lock,
   Info,
   CheckCircle,
-  WarningCircle,
   EnvelopeSimple,
   User,
   FileDoc,
   FileXls,
   FileImage,
-  FileZip,
-  File as FileIcon
+  FileZip
 } from '@phosphor-icons/react'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'

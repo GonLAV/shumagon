@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
+import { Switch } from '@/components/ui/switch'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { ScrollArea } from '@/components/ui/scroll-area'
@@ -33,6 +34,7 @@ export function ProfessionalValuation({ property, comparables, onSaveValuation }
   const [activeMethod, setActiveMethod] = useState<'comparable' | 'cost' | 'income'>('comparable')
   const [valuationResult, setValuationResult] = useState<ValuationResult | null>(null)
   const [calculating, setCalculating] = useState(false)
+  const [proMode, setProMode] = useState(true)
 
   const [landValue, setLandValue] = useState(500000)
   const [constructionCost, setConstructionCost] = useState(6500)
@@ -51,7 +53,9 @@ export function ProfessionalValuation({ property, comparables, onSaveValuation }
 
       switch (activeMethod) {
         case 'comparable':
-          result = ValuationEngine.calculateComparableSalesApproach(property, comparables)
+          result = proMode
+            ? ValuationEngine.calculateComparableSalesApproachProfessional(property, comparables)
+            : ValuationEngine.calculateComparableSalesApproach(property, comparables)
           break
         case 'cost':
           result = ValuationEngine.calculateCostApproach(property, landValue, constructionCost)
@@ -126,6 +130,17 @@ export function ProfessionalValuation({ property, comparables, onSaveValuation }
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg">
+                <div className="text-sm">
+                  <p className="font-semibold">מצב חישוב</p>
+                  <p className="text-muted-foreground">סטנדרטי מול מקצועי (סינון קשיח + התאמות אבסולוטיות)</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="text-xs">Standard</span>
+                  <Switch checked={proMode} onCheckedChange={setProMode} />
+                  <span className="text-xs">Professional</span>
+                </div>
+              </div>
               <div className="p-4 bg-secondary/30 rounded-lg">
                 <div className="flex items-start gap-3">
                   <Info size={20} className="text-primary mt-1" weight="duotone" />
@@ -435,6 +450,40 @@ export function ProfessionalValuation({ property, comparables, onSaveValuation }
               </div>
 
               <Separator />
+
+              {valuationResult.transactionDetails && valuationResult.transactionDetails.length > 0 && (
+                <div className="space-y-4">
+                  <h4 className="font-semibold">פירוט עסקאות והשפעת התאמות</h4>
+                  <div className="overflow-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="text-muted-foreground">
+                          <th className="text-right p-2">כתובת</th>
+                          <th className="text-right p-2">מחיר עסקה</th>
+                          <th className="text-right p-2">שטח</th>
+                          <th className="text-right p-2">קומה</th>
+                          <th className="text-right p-2">מצב</th>
+                          <th className="text-right p-2">מחיר מתוקן</th>
+                          <th className="text-right p-2">משקל</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {valuationResult.transactionDetails.map((t) => (
+                          <tr key={t.id} className="border-t border-border">
+                            <td className="p-2">{t.address}</td>
+                            <td className="p-2 font-mono">₪{t.basePrice.toLocaleString()}</td>
+                            <td className="p-2 font-mono">₪{(t.adjustments.areaAdj || 0).toLocaleString()}</td>
+                            <td className="p-2 font-mono">₪{(t.adjustments.floorAdj || 0).toLocaleString()}</td>
+                            <td className="p-2 font-mono">₪{(t.adjustments.conditionAdj || 0).toLocaleString()}</td>
+                            <td className="p-2 font-mono font-semibold">₪{t.adjustedPrice.toLocaleString()}</td>
+                            <td className="p-2 font-mono">{t.weight.toFixed(2)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
 
               <div className="space-y-4">
                 <h4 className="font-semibold flex items-center gap-2">

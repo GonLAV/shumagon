@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Input } from '@/components/ui/input'
-import { Separator } from '@/components/ui/separator'
 import {
   Dialog,
   DialogContent,
@@ -20,9 +19,7 @@ import {
   Users,
   Clock,
   Calendar,
-  ShareNetwork,
   Copy,
-  Play,
   ArrowLeft,
   Trash,
   Eye,
@@ -40,7 +37,7 @@ interface ARSessionsViewerProps {
   onJoinSession: (sessionId: string) => void
 }
 
-export function ARSessionsViewer({ property, onBack, onStartSession, onJoinSession }: ARSessionsViewerProps) {
+export function ARSessionsViewer({ property, onBack: _onBack, onStartSession, onJoinSession }: ARSessionsViewerProps) {
   const [arSessions, setArSessions] = useKV<ARSession[]>('ar-sessions', [])
   const [selectedSession, setSelectedSession] = useState<ARSession | null>(null)
   const [showJoinDialog, setShowJoinDialog] = useState(false)
