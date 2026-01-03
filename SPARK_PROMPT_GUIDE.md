@@ -74,4 +74,3 @@ Use:
 
 Treat this like a real startup MVP.
 ```
-
