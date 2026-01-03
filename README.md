@@ -47,3 +47,6 @@ npm run dev
 Notes:
 - AI calls use Spark (`window.spark.llm`) with strict JSON for extraction. No external facts or hallucinations are allowed.
 - Styling follows existing theme tokens. Use `@/` imports and shared UI primitives under `src/components/ui/*`.
+
+## Spark Prompt Cheat Sheet
+- Use the battle-tested prompt in [SPARK_PROMPT_GUIDE.md](./SPARK_PROMPT_GUIDE.md) to brief Copilot/AI like a staff engineer and get “legit, magic” features.
