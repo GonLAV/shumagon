@@ -17,7 +17,8 @@
         "ingest:gisn": "node scripts/ingest-gisn.mjs",
         "arcgis:export": "node scripts/tlv-arcgis-export.mjs",
         "gisn:docs": "node scripts/gisn-docs-scan.mjs",
-        "gisn:download": "node scripts/gisn-docs-download.mjs"
+        "gisn:download": "node scripts/gisn-docs-download.mjs",
+        "gisn:lookup": "node scripts/tlv-gisn-lookup.mjs"
     },
     "dependencies": {
         "@github/spark": ">=0.43.1 <1",
