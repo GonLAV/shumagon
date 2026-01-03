@@ -74,3 +74,49 @@ Use:
 
 Treat this like a real startup MVP.
 ```
+
+### Ready-to-use: Delivery Tracking “Feels Alive”
+Copy-paste this for a concrete, production-grade brief:
+```
+You are a principal engineer + product architect with 15+ years experience.
+
+Design and build a next-gen delivery tracking app that feels alive — like Uber + Notion + an AI assistant.
+
+GOAL:
+Give customers and ops real-time visibility and proactive updates that inspire trust at scale.
+
+CORE WOW FACTOR:
+- Live courier movement on the map
+- ETA confidence score with reasons
+- Smart rerouting when delays happen
+- AI-generated delivery updates in a human tone
+
+TECH CONSTRAINTS:
+- Frontend: Next.js
+- Backend: Node.js
+- DB: Postgres
+- Realtime: WebSockets
+- Map integration required
+- Auth: JWT (adjust as needed)
+- Infra: AWS (adjust as needed)
+
+REQUIREMENTS:
+- Clean, modular architecture
+- Handles flaky networks and partial failures
+- Strong security and input validation
+- Performance tuned for 100k users
+
+DELIVERABLES (STEP BY STEP):
+1) High-level architecture (text diagram)
+2) Data models (couriers, orders, routes, events, messages)
+3) API contracts (tracking, updates, rerouting)
+4) Folder structure
+5) Core logic (ETA calc + confidence, reroute engine)
+6) Killer feature fully built: AI-generated human-tone updates
+7) Next steps for production hardening
+
+IMPORTANT:
+- Make strong engineering decisions without asking back
+- No placeholders, no TODOs
+- Explain WHY each decision is made
+```
